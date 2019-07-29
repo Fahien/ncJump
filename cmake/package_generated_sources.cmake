@@ -1,0 +1,73 @@
+# Has to be included after package_get_version.cmake
+
+set(GENERATED_SOURCE_DIR "${CMAKE_BINARY_DIR}/generated")
+set(GENERATED_INCLUDE_DIR "${GENERATED_SOURCE_DIR}/include")
+
+# Version strings
+if(GIT_EXECUTABLE)
+	message(STATUS "Exporting git version information to C strings")
+endif()
+
+set(VERSION_H_FILE "${GENERATED_INCLUDE_DIR}/version.h")
+set(VERSION_CPP_FILE "${GENERATED_SOURCE_DIR}/version.cpp")
+if(EXISTS ${VERSION_H_FILE})
+	file(REMOVE ${VERSION_H_FILE})
+endif()
+if(EXISTS ${VERSION_CPP_FILE})
+	file(REMOVE ${VERSION_CPP_FILE})
+endif()
+
+set(VERSION_STRUCT_NAME "VersionStrings")
+set(VERSION_STRING_NAME "Version")
+set(REVCOUNT_STRING_NAME "GitRevCount")
+set(SHORTHASH_STRING_NAME "GitShortHash")
+set(LASTCOMMITDATE_STRING_NAME "GitLastCommitDate")
+set(BRANCH_STRING_NAME "GitBranch")
+set(TAG_STRING_NAME "GitTag")
+set(COMPILATION_DATE_STRING_NAME "CompilationDate")
+set(COMPILATION_TIME_STRING_NAME "CompilationTime")
+
+get_filename_component(VERSION_H_FILENAME ${VERSION_H_FILE} NAME)
+file(APPEND ${VERSION_H_FILE} "#ifndef PACKAGE_VERSION\n")
+file(APPEND ${VERSION_H_FILE} "#define PACKAGE_VERSION\n\n")
+file(APPEND ${VERSION_H_FILE} "struct ${VERSION_STRUCT_NAME}\n{\n")
+file(APPEND ${VERSION_CPP_FILE} "#include \"${VERSION_H_FILENAME}\"\n\n")
+
+if(GIT_EXECUTABLE)
+	target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "WITH_GIT_VERSION")
+	list(APPEND ANDROID_GENERATED_FLAGS WITH_GIT_VERSION)
+
+	file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${VERSION_STRING_NAME};\n")
+	file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${VERSION_STRING_NAME} = \"${PACKAGE_VERSION}\";\n")
+	file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${REVCOUNT_STRING_NAME};\n")
+	file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${REVCOUNT_STRING_NAME} = \"${GIT_REV_COUNT}\";\n")
+	file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${SHORTHASH_STRING_NAME};\n")
+	file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${SHORTHASH_STRING_NAME} = \"${GIT_SHORT_HASH}\";\n")
+	file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${LASTCOMMITDATE_STRING_NAME};\n")
+	file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${LASTCOMMITDATE_STRING_NAME} = \"${GIT_LAST_COMMIT_DATE}\";\n")
+	file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${BRANCH_STRING_NAME};\n")
+	file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${BRANCH_STRING_NAME} = \"${GIT_BRANCH_NAME}\";\n")
+	if(NOT GIT_NO_TAG)
+		file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${TAG_STRING_NAME};\n")
+		file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${TAG_STRING_NAME} = \"${GIT_TAG_NAME}\";\n")
+	endif()
+endif()
+file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${COMPILATION_DATE_STRING_NAME};\n")
+file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${COMPILATION_DATE_STRING_NAME} = __DATE__;\n")
+file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${COMPILATION_TIME_STRING_NAME};\n")
+file(APPEND ${VERSION_CPP_FILE} "char const * const ${VERSION_STRUCT_NAME}::${COMPILATION_TIME_STRING_NAME} = __TIME__;\n")
+
+file(APPEND ${VERSION_H_FILE} "};\n\n")
+file(APPEND ${VERSION_H_FILE} "#endif")
+
+list(APPEND HEADERS ${VERSION_H_FILE})
+list(APPEND GENERATED_SOURCES ${VERSION_CPP_FILE})
+
+if(MSVC AND EXISTS ${PACKAGE_DATA_DIR}/icons/icon.ico)
+	message(STATUS "Writing a resource file for executable icon")
+
+	set(RESOURCE_RC_FILE "${GENERATED_SOURCE_DIR}/resource.rc")
+	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"icon.ico\"")
+	file(COPY ${PACKAGE_DATA_DIR}/icons/icon.ico DESTINATION ${GENERATED_INCLUDE_DIR})
+	target_sources(${PACKAGE_EXE_NAME} PRIVATE ${RESOURCE_RC_FILE})
+endif()
