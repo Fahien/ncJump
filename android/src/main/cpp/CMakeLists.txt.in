@@ -33,10 +33,7 @@ target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_ap
 string(REPLACE " " ";" GENERATED_SOURCES "${GENERATED_SOURCES}")
 string(REPLACE " " ";" ANDROID_GENERATED_FLAGS "${ANDROID_GENERATED_FLAGS}")
 
-if(IS_DIRECTORY "@ANDROID_INCLUDE_DIR@")
-	target_include_directories(game PRIVATE "@ANDROID_INCLUDE_DIR@")
-endif()
-
+target_include_directories(game PRIVATE @ANDROID_INCLUDE_DIRS@)
 target_sources(game PRIVATE ${GENERATED_SOURCES})
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(game PRIVATE ${GENERATED_INCLUDE_DIR})

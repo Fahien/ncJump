@@ -20,12 +20,12 @@ It exposes a number of different variables that will be used by the rest of the 
 - **PACKAGE_HOMEPAGE**: The URL of your project homepage (used by installers).
 - **PACKAGE_REVERSE_DNS**: The name of your project expressed in reverse domain name notation.  
   It is used for the XDG Desktop file on Linux, the Bundle Identifier on macOS and for the java package namespace on Android.
-- **PACKAGE_INCLUDE_DIR**: If your project uses a separate include directory for headers you can specify it with this variable.  
-  The path to the this directory should to be relative to `${CMAKE_SOURCE_DIR}.`
+- **PACKAGE_INCLUDE_DIRS**: If your project uses one or more separate include directories for headers you can specify them with this variable.
+  The paths to the include directories can be absolute or relative to `${CMAKE_SOURCE_DIR}.`
 - **PACKAGE_SOURCES**: The list of source files that will be compiled.  
-  The paths to those files should be relative to `${CMAKE_SOURCE_DIR}.`
+  The paths to the source files can be absolute or relative to `${CMAKE_SOURCE_DIR}.`
 - **PACKAGE_ANDROID_ASSETS**: A list of files that will become Android assets and part of your project APK archive.  
-  The paths to those files should be relative to `${PACKAGE_DATA_DIR}`.
+  The paths to the asset files can be absolute or relative to `${PACKAGE_DATA_DIR}`.
 
 This file also supports the declaration of some callback functions that will be called in the main `CMakeLists.txt` script:
 - **callback_start()**: This function will be called at the very beginning, when the CMake `project()` command has not yet been called.

@@ -40,9 +40,7 @@ if(NOT DEFAULT_DATA_DIR_DIST) # Don't set the startup project if it wouldn't fin
 	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PACKAGE_EXE_NAME})
 endif()
 
-if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${PACKAGE_INCLUDE_DIR})
-	target_include_directories(${PACKAGE_EXE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/${PACKAGE_INCLUDE_DIR})
-endif()
+target_include_directories(${PACKAGE_EXE_NAME} PRIVATE ${PACKAGE_INCLUDE_DIRS})
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(${PACKAGE_EXE_NAME} PRIVATE ${GENERATED_INCLUDE_DIR})
 endif()
