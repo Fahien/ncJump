@@ -23,6 +23,10 @@ if(PACKAGE_BUILD_ANDROID)
 	endif()
 endif()
 
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/LICENSE")
+	message(WARNING "Consider adding a \"LICENSE\" file in the root of the project")
+endif()
+
 string(TOLOWER ${PACKAGE_NAME} PACKAGE_LOWER_NAME)
 string(TOUPPER ${PACKAGE_NAME} PACKAGE_UPPER_NAME)
 
