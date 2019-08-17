@@ -113,7 +113,7 @@ jobs:
       if [ "$(Agent.OS)" == "Linux" ]; then
         NCINE_FILE=$(ls -t | head -n 1)
         tar xpzf $NCINE_FILE
-        mv nCine-*-Linux ../nCine
+        mv "${NCINE_FILE/.tar.gz/}" ../nCine
       elif [ "$(Agent.OS)" == "Darwin" ]; then
         NCINE_FILE=$(ls -t | head -n 1)
         hdiutil convert *.dmg -format UDTO -o nCine
@@ -281,7 +281,7 @@ jobs:
 
       NCINE_FILE=$(ls -t | head -n 1)
       tar xpzf $NCINE_FILE
-      mv nCine-*-Linux ../nCine
+      mv "${NCINE_FILE/.tar.gz/}" ../nCine
 
       cd ..
       rm -rf nCine-artifacts
@@ -607,6 +607,7 @@ jobs:
         git checkout $env:NCINE_BRANCH
         $env:NCINE_FILE = Get-ChildItem -Path $(pwd) -Filter *.zip -Name -File | Select-Object -First 1
         7z x $env:NCINE_FILE
+        $env:NCINE_DIR = $env:NCINE_FILE -replace ".zip",""
       }
       else
       {
@@ -616,9 +617,10 @@ jobs:
         7z x $env:NCINE_FILE
         $env:NCINE_FILE = $env:NCINE_FILE -replace ".gz",""
         7z x $env:NCINE_FILE -aos
+        $env:NCINE_DIR = $env:NCINE_FILE -replace ".tar",""
       }
 
-      Move-Item -Path nCine-*-win64 -Destination ../nCine
+      Move-Item -Path $env:NCINE_DIR -Destination ../nCine
 
       cd ..
       Remove-Item nCine-artifacts -Recurse -Force
