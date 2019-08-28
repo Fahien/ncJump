@@ -56,7 +56,7 @@ if(EMSCRIPTEN)
 endif()
 
 find_package(Threads)
-if(NOT MSVC AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android") # GCC and LLVM
+if(NOT MSVC AND NOT ANDROID) # GCC and LLVM
 	if(APPLE)
 		set(CMAKE_FRAMEWORK_PATH ${FRAMEWORKS_DIR})
 		set(CMAKE_MACOSX_RPATH ON)
@@ -77,7 +77,7 @@ if(NOT MSVC AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android") # GCC and LLVM
 	find_package(Lua)
 endif()
 
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+if(ANDROID)
 	find_library(ANDROID_LIBRARY android)
 	find_library(EGL_LIBRARY EGL)
 	find_library(GLES3_LIBRARY GLESv3)
