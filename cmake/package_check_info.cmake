@@ -44,3 +44,5 @@ endif()
 
 message("${PACKAGE_NAME} by ${PACKAGE_VENDOR}")
 message("${PACKAGE_DESCRIPTION}")
+message("${PACKAGE_HOMEPAGE}")
+message("${PACKAGE_COPYRIGHT}\n")

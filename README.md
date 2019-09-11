@@ -16,6 +16,7 @@ It exposes a number of different variables that will be used by the rest of the 
 - **PACKAGE_EXE_NAME**: The name of the executable file for your project (without any extension).  
   If you don't set it the default will be a lower case version of `${PACKAGE_NAME}`.
 - **PACKAGE_VENDOR**: You can set it to your company name or your personal name (used by installers).
+- **PACKAGE_COPYRIGHT**: The copyright dates and notes for the project.
 - **PACKAGE_DESCRIPTION**: A short description of your project (used by installers).
 - **PACKAGE_HOMEPAGE**: The URL of your project homepage (used by installers).
 - **PACKAGE_REVERSE_DNS**: The name of your project expressed in reverse domain name notation.  
