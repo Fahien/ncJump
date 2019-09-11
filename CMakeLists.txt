@@ -32,7 +32,7 @@ if(COMMAND callback_before_target)
 	callback_before_target()
 endif()
 
-add_executable(${PACKAGE_EXE_NAME} ${PACKAGE_SOURCES})
+add_executable(${PACKAGE_EXE_NAME} WIN32 ${PACKAGE_SOURCES})
 include(package_generated_sources)
 target_sources(${PACKAGE_EXE_NAME} PRIVATE ${GENERATED_SOURCES})
 

@@ -33,8 +33,11 @@ if(MSVC)
 	set(CPACK_NSIS_CREATE_ICONS_EXTRA
 		"SetOutPath '$INSTDIR\\\\bin'
 		CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${PACKAGE_NAME}.lnk' '$INSTDIR\\\\bin\\\\${PACKAGE_EXE_NAME}.exe'
+		CreateShortCut '$DESKTOP\\\\${PACKAGE_NAME}.lnk' '$INSTDIR\\\\bin\\\\${PACKAGE_EXE_NAME}.exe'
 		SetOutPath '$INSTDIR'")
-	set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\${PACKAGE_NAME}.lnk'")
+	set(CPACK_NSIS_DELETE_ICONS_EXTRA
+		"Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\${PACKAGE_NAME}.lnk'
+		Delete '$DESKTOP\\\\${PACKAGE_NAME}.lnk'")
 
 	include(InstallRequiredSystemLibraries)
 
