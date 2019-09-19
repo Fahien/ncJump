@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.7)
 
 get_filename_component(PACKAGE_SOURCE_DIR ${CMAKE_MODULE_PATH} DIRECTORY)
 include(package_info)
-include(package_check_info)
 if(COMMAND callback_start)
 	callback_start()
 endif()

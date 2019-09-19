@@ -75,10 +75,31 @@ if(PACKAGE_BUILD_ANDROID)
 		set(GRADLE_LIBCPP_SHARED "true")
 	endif()
 
+	find_path(NCINE_ANDROID_NCINE_LIB_DIR
+		NAMES libncine.so libncine.a
+		PATHS ${NCINE_ANDROID_DIR}/src/main/cpp/ncine ${NCINE_ANDROID_DIR}/build/ncine/
+		PATH_SUFFIXES armeabi-v7a arm64-v8a x86_64
+	)
+	get_filename_component(NCINE_ANDROID_NCINE_LIB_DIR ${NCINE_ANDROID_NCINE_LIB_DIR} DIRECTORY)
+
+	find_path(NCINE_ANDROID_OPENAL_LIB_DIR
+		NAMES libopenal.so
+		PATHS ${NCINE_ANDROID_DIR}/src/main/cpp/openal
+		PATH_SUFFIXES armeabi-v7a arm64-v8a x86_64
+	)
+	set(NCINE_ANDROID_WITH_AUDIO FALSE)
+	if(IS_DIRECTORY ${NCINE_ANDROID_OPENAL_LIB_DIR})
+		get_filename_component(NCINE_ANDROID_OPENAL_LIB_DIR ${NCINE_ANDROID_OPENAL_LIB_DIR} DIRECTORY)
+		set(NCINE_ANDROID_WITH_AUDIO TRUE)
+	endif()
+
 	file(COPY android/src/main/cpp/CMakeLists.txt DESTINATION android/src/main/cpp)
 	set(BUILD_GRADLE_IN ${CMAKE_SOURCE_DIR}/android/build.gradle.in)
 	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
-	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine', 'src/main/cpp/openal'")
+	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine'")
+	if(NCINE_ANDROID_WITH_AUDIO)
+		set(GRADLE_JNILIBS_DIRS "${GRADLE_JNILIBS_DIRS}, 'src/main/cpp/openal'")
+	endif()
 	configure_file(${BUILD_GRADLE_IN} ${BUILD_GRADLE} @ONLY)
 	set(GRADLE_PROPERTIES_IN ${CMAKE_SOURCE_DIR}/android/gradle.properties.in)
 	set(GRADLE_PROPERTIES ${CMAKE_BINARY_DIR}/android/gradle.properties)
@@ -111,27 +132,15 @@ if(PACKAGE_BUILD_ANDROID)
 		endforeach()
 	endif()
 
-	find_path(NCINE_ANDROID_NCINE_LIB_DIR
-		NAMES libncine.so libncine.a
-		PATHS ${NCINE_ANDROID_DIR}/src/main/cpp/ncine ${NCINE_ANDROID_DIR}/build/ncine/
-		PATH_SUFFIXES armeabi-v7a arm64-v8a x86_64
-	)
-	get_filename_component(NCINE_ANDROID_NCINE_LIB_DIR ${NCINE_ANDROID_NCINE_LIB_DIR} DIRECTORY)
-
 	set(NCINE_ANDROID_LIBNAME libncine.so)
 	if(NOT NCINE_DYNAMIC_LIBRARY)
 		set(NCINE_ANDROID_LIBNAME libncine.a)
 	endif()
 
-	find_path(NCINE_ANDROID_OPENAL_LIB_DIR
-		NAMES libopenal.so
-		PATHS ${NCINE_ANDROID_DIR}/src/main/cpp/openal ${NCINE_EXTERNAL_ANDROID_DIR}/openal/
-		PATH_SUFFIXES armeabi-v7a arm64-v8a x86_64
-	)
-	get_filename_component(NCINE_ANDROID_OPENAL_LIB_DIR ${NCINE_ANDROID_OPENAL_LIB_DIR} DIRECTORY)
-
 	foreach(ARCHITECTURE ${PACKAGE_NDK_ARCHITECTURES})
-		file(COPY ${NCINE_ANDROID_OPENAL_LIB_DIR}/${ARCHITECTURE}/libopenal.so DESTINATION android/src/main/cpp/openal/${ARCHITECTURE})
+		if(NCINE_ANDROID_WITH_AUDIO)
+			file(COPY ${NCINE_ANDROID_OPENAL_LIB_DIR}/${ARCHITECTURE}/libopenal.so DESTINATION android/src/main/cpp/openal/${ARCHITECTURE})
+		endif()
 		file(COPY ${NCINE_ANDROID_NCINE_LIB_DIR}/${ARCHITECTURE}/${NCINE_ANDROID_LIBNAME} DESTINATION android/src/main/cpp/ncine/${ARCHITECTURE})
 		file(COPY ${NCINE_ANDROID_NCINE_LIB_DIR}/${ARCHITECTURE}/libncine_main.a DESTINATION android/src/main/cpp/ncine/${ARCHITECTURE})
 	endforeach()
