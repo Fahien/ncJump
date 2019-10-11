@@ -81,24 +81,32 @@ if(MSVC)
 	find_path(MSVC_BINDIR
 		NAMES glfw3.dll SDL2.dll
 		PATHS ${NCINE_LOCATION_DIR} ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
-		PATH_SUFFIXES bin/${MSVC_ARCH_SUFFIX}
+		PATH_SUFFIXES bin bin/${MSVC_ARCH_SUFFIX}
 		DOC "Path to the nCine external MSVC DLL libraries directory"
 		NO_DEFAULT_PATH) # To avoid finding MSYS/MinGW libraries
 
-	find_path(MSVC_LIBDIR
-		NAMES glfw3.lib SDL2.lib
-		PATHS ${NCINE_LOCATION_DIR} ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
-		PATH_SUFFIXES lib/${MSVC_ARCH_SUFFIX}
-		DOC "Path to the nCine external MSVC import libraries directory"
-		NO_DEFAULT_PATH) # To avoid finding MSYS/MinGW libraries
+	if(NOT NCINE_DYNAMIC_LIBRARY)
+		find_path(MSVC_LIBDIR
+			NAMES glfw3.lib SDL2.lib
+			PATHS ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
+			PATH_SUFFIXES lib/${MSVC_ARCH_SUFFIX}
+			DOC "Path to the nCine external MSVC import libraries directory"
+			NO_DEFAULT_PATH) # To avoid finding MSYS/MinGW libraries
 
-	get_filename_component(EXTERNAL_MSVC_DIR ${MSVC_LIBDIR} DIRECTORY)
-	get_filename_component(EXTERNAL_MSVC_DIR ${EXTERNAL_MSVC_DIR} DIRECTORY)
+		get_filename_component(EXTERNAL_MSVC_DIR ${MSVC_LIBDIR} DIRECTORY)
+		get_filename_component(EXTERNAL_MSVC_DIR ${EXTERNAL_MSVC_DIR} DIRECTORY)
 
-	if(IS_DIRECTORY ${MSVC_BINDIR} AND IS_DIRECTORY ${MSVC_LIBDIR} AND IS_DIRECTORY ${EXTERNAL_MSVC_DIR})
-		message(STATUS "nCine external MSVC directory: ${EXTERNAL_MSVC_DIR}")
+		if(IS_DIRECTORY ${MSVC_BINDIR} AND IS_DIRECTORY ${MSVC_LIBDIR} AND IS_DIRECTORY ${EXTERNAL_MSVC_DIR})
+			message(STATUS "nCine external MSVC directory: ${EXTERNAL_MSVC_DIR}")
+		else()
+			message(FATAL_ERROR "nCine external MSVC directory not found at: ${EXTERNAL_MSVC_DIR}")
+		endif()
 	else()
-		message(FATAL_ERROR "nCine external MSVC directory not found at: ${EXTERNAL_MSVC_DIR}")
+		if(IS_DIRECTORY ${MSVC_BINDIR})
+			message(STATUS "nCine MSVC binaries directory: ${MSVC_BINDIR}")
+		else()
+			message(FATAL_ERROR "nCine MSVC binaries directory not found at: ${MSVC_BINDIR}")
+		endif()
 	endif()
 elseif(APPLE)
 	find_path(FRAMEWORKS_DIR
