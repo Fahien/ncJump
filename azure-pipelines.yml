@@ -399,8 +399,7 @@ jobs:
       cd ..
       rm -rf nCine-libraries-artifacts
 
-      # Only the nCine `develop` branch has Emscripten support at the moment
-      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"develop"'/'`
+      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"master"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
       git clone https://github.com/nCine/nCine-artifacts.git
