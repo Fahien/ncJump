@@ -2,6 +2,7 @@ variables:
   package_name: ncTemplate
   libraries_branch: libraries-OS-COMPILER
   ncine_branch: nCine-BRANCHNAME-OS-COMPILER
+  ncine_source_branch: $(Build.SourceBranchName)
   deploy_message:
     "Push artifact from Azure Pipelines build $(Build.BuildNumber) with id $(Build.BuildId)
 
@@ -103,7 +104,7 @@ jobs:
       cd ..
       rm -rf nCine-libraries-artifacts
 
-      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"master"'/'`
+      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"$NCINE_SOURCE_BRANCH"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
       git clone https://github.com/nCine/nCine-artifacts.git
@@ -272,7 +273,7 @@ jobs:
       cd ..
       rm -rf nCine-libraries-artifacts
 
-      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"master"'/'`
+      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"$NCINE_SOURCE_BRANCH"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
       git clone https://github.com/nCine/nCine-artifacts.git
@@ -399,7 +400,7 @@ jobs:
       cd ..
       rm -rf nCine-libraries-artifacts
 
-      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"master"'/'`
+      export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCHNAME/'"$NCINE_SOURCE_BRANCH"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
       export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
       git clone https://github.com/nCine/nCine-artifacts.git
@@ -602,7 +603,7 @@ jobs:
 
       if ($env:Compiler -ne "mingw64")
       {
-        $env:NCINE_BRANCH = $env:NCINE_BRANCH -replace "BRANCHNAME","master" -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        $env:NCINE_BRANCH = $env:NCINE_BRANCH -replace "BRANCHNAME","$env:NCINE_SOURCE_BRANCH" -replace "OS","windows" -replace "COMPILER",$env:vsversion
         git checkout $env:NCINE_BRANCH
         $env:NCINE_FILE = Get-ChildItem -Path $(pwd) -Filter *.zip -Name -File | Select-Object -First 1
         7z x $env:NCINE_FILE
@@ -610,7 +611,7 @@ jobs:
       }
       else
       {
-        $env:NCINE_BRANCH = $env:NCINE_BRANCH -replace "BRANCHNAME","master" -replace "OS","mingw64" -replace "COMPILER",$env:CC
+        $env:NCINE_BRANCH = $env:NCINE_BRANCH -replace "BRANCHNAME","$env:NCINE_SOURCE_BRANCH" -replace "OS","mingw64" -replace "COMPILER",$env:CC
         git checkout $env:NCINE_BRANCH
         $env:NCINE_FILE = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
         7z x $env:NCINE_FILE
