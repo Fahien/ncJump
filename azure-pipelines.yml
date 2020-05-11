@@ -8,7 +8,7 @@ variables:
 
      - $(package_name) artifact from branch '$(Build.SourceBranchName)' with commit id $(Build.SourceVersion)"
   deploy_branch: $(package_name)-BRANCHNAME-OS-COMPILER
-  ndk_version: r20b
+  ndk_version: r21b
 
 jobs:
 - job: Linux_macOS

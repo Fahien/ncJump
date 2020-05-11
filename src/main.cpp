@@ -2,7 +2,6 @@
 
 #include <ncine/Application.h>
 #include <ncine/AppConfiguration.h>
-#include <ncine/IFile.h> // for dataPath()
 
 nc::IAppEventHandler *createAppEventHandler()
 {
