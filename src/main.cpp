@@ -3,9 +3,9 @@
 #include <ncine/Application.h>
 #include <ncine/AppConfiguration.h>
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
