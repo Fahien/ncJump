@@ -8,7 +8,7 @@ variables:
 
      - $(package_name) artifact from branch '$(Build.SourceBranchName)' with commit id $(Build.SourceVersion)"
   deploy_branch: $(package_name)-BRANCHNAME-OS-COMPILER
-  ndk_version: r21b
+  ndk_version: r21d
 
 jobs:
 - job: Linux_macOS
@@ -17,37 +17,37 @@ jobs:
   strategy:
     matrix:
       Linux GCC Debug:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Debug
 
       Linux GCC Release:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Release
 
       Linux GCC BinDist:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: BinDist
 
       Linux Clang Debug:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: clang
         CXX: clang++
         BuildType: Debug
 
       Linux Clang Release:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: clang
         CXX: clang++
         BuildType: Release
 
       Linux Clang BinDist:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: clang
         CXX: clang++
         BuildType: BinDist
@@ -69,7 +69,7 @@ jobs:
 
   steps:
   - script: |
-      curl -fsSL https://cmake.org/files/v3.16/cmake-3.16.2-Linux-x86_64.sh -o cmakeinstall.sh && \
+      curl -fsSL https://cmake.org/files/v3.16/cmake-3.16.9-Linux-x86_64.sh -o cmakeinstall.sh && \
       chmod +x cmakeinstall.sh && \
       sudo ./cmakeinstall.sh --prefix=/usr/local --exclude-subdir && \
       rm cmakeinstall.sh
@@ -199,42 +199,42 @@ jobs:
   strategy:
     matrix:
       Debug armeabi-v7a:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Debug
         Arch: armeabi-v7a
 
       Debug arm64-v8a:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Debug
         Arch: arm64-v8a
 
       Debug x86_64:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Debug
         Arch: x86_64
 
       Release armeabi-v7a:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Release
         Arch: armeabi-v7a
 
       Release arm64-v8a:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Release
         Arch: arm64-v8a
 
       Release x86_64:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         CC: gcc
         CXX: g++
         BuildType: Release
@@ -245,7 +245,7 @@ jobs:
 
   steps:
   - script: |
-      curl -sL https://cmake.org/files/v3.14/cmake-3.14.5-Linux-x86_64.sh -o cmakeinstall.sh \
+      curl -sL https://cmake.org/files/v3.16/cmake-3.16.9-Linux-x86_64.sh -o cmakeinstall.sh \
       && chmod +x cmakeinstall.sh \
       && sudo ./cmakeinstall.sh --prefix=/usr/local --exclude-subdir \
       && rm cmakeinstall.sh
@@ -341,19 +341,19 @@ jobs:
   strategy:
     matrix:
       Emscripten Debug:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         OS: emscripten
         CC: emcc
         BuildType: Debug
 
       Emscripten Release:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         OS: emscripten
         CC: emcc
         BuildType: Release
 
       Emscripten BinDist:
-        imageName: 'ubuntu-16.04'
+        imageName: 'ubuntu-18.04'
         OS: emscripten
         CC: emcc
         BuildType: BinDist
@@ -372,6 +372,8 @@ jobs:
     condition: eq( variables['Agent.OS'], 'Linux' )
 
   - script: |
+      sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+
       cd ..
       git clone https://github.com/emscripten-core/emsdk.git
       cd emsdk
@@ -556,7 +558,7 @@ jobs:
     condition: eq( variables['Compiler'], 'mingw64' )
 
   - powershell: |
-      C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua mingw-w64-x86_64-cmake make
+      C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua cmake
 
       if ($env:CC -eq "gcc") { C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-gcc }
       else { C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-clang }
