@@ -1,0 +1,128 @@
+name: 'macOS'
+
+env:
+  LIBRARIES_BRANCH: libraries-OS-COMPILER
+  NCINE_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NCINE_SOURCE_BRANCH: BRANCH_NAME
+  DEPLOY_MESSAGE:
+    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+
+     - PACKAGE_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  DEPLOY_BRANCH: PACKAGE_NAME-BRANCH_NAME-OS-COMPILER
+  NDK_VERSION: r21d
+
+on: [push, workflow_dispatch]
+
+jobs:
+  macOS:
+    strategy:
+      fail-fast: false
+      matrix:
+        BuildType: [Debug, Release, BinDist]
+
+    runs-on: 'macOS-10.15'
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v2
+
+    - name: 'Unshallow Git Repository for Versioning'
+      if: matrix.BuildType == 'BinDist'
+      run: |
+        git fetch --unshallow || true
+
+    - name: 'Download nCine-libraries, nCine Artifacts, and package data'
+      run: |
+        export OS=darwin
+        export CC=appleclang
+        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+
+        cd ..
+        git clone https://github.com/nCine/nCine-libraries-artifacts.git
+        cd nCine-libraries-artifacts
+        git checkout $LIBRARIES_BRANCH
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        mv nCine-external ..
+
+        cd ..
+        rm -rf nCine-libraries-artifacts
+
+        export NCINE_SOURCE_BRANCH=`echo $NCINE_SOURCE_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
+        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCH_NAME/'"$NCINE_SOURCE_BRANCH"'/'`
+        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
+        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        git clone https://github.com/nCine/nCine-artifacts.git
+        cd nCine-artifacts
+        git checkout $NCINE_BRANCH
+
+        NCINE_FILE=$(ls -t | head -n 1)
+        hdiutil convert *.dmg -format UDTO -o nCine
+        hdiutil attach -readonly nCine.cdr
+        cp -Rp /Volumes/nCine-*-Darwin/nCine.app ..
+        hdiutil detach /Volumes/nCine-*-Darwin;
+
+        cd ..
+        rm -rf nCine-artifacts
+
+        git clone https://github.com/$GITHUB_REPOSITORY-data.git
+
+    - name: 'CMake Configuration'
+      run: |
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+
+        export NCINE_DIRECTORY=$(pwd)/../nCine.app/Contents/Resources/cmake
+
+        if [[ "${{ matrix.BuildType }}" == "BinDist" ]]; then
+          cmake -B ../$PACKAGE_NAME-build-${{ matrix.BuildType }} -D PACKAGE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D nCine_DIR=$NCINE_DIRECTORY
+        else
+          cmake -B ../$PACKAGE_NAME-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D nCine_DIR=$NCINE_DIRECTORY
+        fi
+
+    - name: 'Make'
+      run: |
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        make -j2 -C ../$PACKAGE_NAME-build-${{ matrix.BuildType }}
+
+    - name: 'Package'
+      if: matrix.BuildType == 'BinDist'
+      run: |
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        make package -C ../$PACKAGE_NAME-build-${{ matrix.BuildType }}
+
+    - name: 'Push Artifacts'
+      if: matrix.BuildType == 'BinDist'
+      env:
+        PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+        export BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        export DEPLOY_MESSAGE=`sed 's/PACKAGE_NAME/'"$PACKAGE_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+        export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+
+        export OS=darwin
+        export CC=appleclang
+        export PACKAGE_EXT=dmg
+
+        cd ..
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/PACKAGE_NAME/'"$PACKAGE_NAME"'/'`
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        git clone https://$PUBLIC_REPO_TOKEN@github.com/$GITHUB_REPOSITORY-artifacts.git >/dev/null 2>&1
+        cd $PACKAGE_NAME-artifacts
+
+        git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
+        git reset
+        git clean -f
+        git rm * || true
+        mv -f ../$PACKAGE_NAME-build-${{ matrix.BuildType }}/*.$PACKAGE_EXT .
+        git add *.$PACKAGE_EXT
+        git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
+        git push --force || git push --set-upstream origin $DEPLOY_BRANCH

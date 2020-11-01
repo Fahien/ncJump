@@ -1,0 +1,114 @@
+name: 'Android'
+
+env:
+  LIBRARIES_BRANCH: libraries-OS-COMPILER
+  NCINE_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NCINE_SOURCE_BRANCH: BRANCH_NAME
+  DEPLOY_MESSAGE:
+    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+
+     - PACKAGE_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  NDK_VERSION: r21d
+
+on: [push, workflow_dispatch]
+
+jobs:
+  Android:
+    strategy:
+      fail-fast: false
+      matrix:
+        ARCH: [armeabi-v7a, arm64-v8a, x86_64]
+        BuildType: [Debug, Release]
+
+    runs-on: 'ubuntu-18.04'
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v2
+
+    - name: 'Unshallow Git Repository for Versioning'
+      run: |
+        git fetch --unshallow || true
+
+    - name: 'Download nCine-libraries, nCine Artifacts, and package data'
+      run: |
+        export OS=linux
+        export CC=gcc
+        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+
+        cd ..
+        git clone https://github.com/nCine/nCine-libraries-artifacts.git
+        cd nCine-libraries-artifacts
+        git checkout $LIBRARIES_BRANCH
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        mv nCine-external ..
+
+        cd ..
+        rm -rf nCine-libraries-artifacts
+
+        export NCINE_SOURCE_BRANCH=`echo $NCINE_SOURCE_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
+        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCH_NAME/'"$NCINE_SOURCE_BRANCH"'/'`
+        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
+        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        git clone https://github.com/nCine/nCine-artifacts.git
+        cd nCine-artifacts
+        git checkout $NCINE_BRANCH
+
+        NCINE_FILE=$(ls -t | head -n 1)
+        tar xpzf $NCINE_FILE
+        mv "${NCINE_FILE/.tar.gz/}" ../nCine
+
+        cd ..
+        rm -rf nCine-artifacts
+
+        git clone https://github.com/$GITHUB_REPOSITORY-data.git
+
+    - name: 'Download Android NDK'
+      run: |
+        export NDK_URL=https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip
+
+        cd ..
+        curl -fsSL $NDK_URL -o ndk.zip
+        unzip -q ndk.zip && rm -f ndk.zip
+
+    - name: 'CMake Configuration'
+      run: |
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        export ANDROID_NDK_HOME=$(pwd)/../android-ndk-$NDK_VERSION
+
+        cmake -B ../$PACKAGE_NAME-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D PACKAGE_NDK_ARCHITECTURES=${{ matrix.ARCH }} -D PACKAGE_BUILD_ANDROID=ON -D PACKAGE_ASSEMBLE_APK=ON -D nCine_DIR=$(pwd)/../nCine/lib/cmake/nCine
+
+    - name: 'Gradle Assemble'
+      run: |
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        cd ../$PACKAGE_NAME-build-${{ matrix.BuildType }}/android
+        gradle assemble${{ matrix.BuildType }}
+
+    - name: 'Push Artifacts'
+      env:
+        PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+        export DEPLOY_MESSAGE=`sed 's/PACKAGE_NAME/'"$PACKAGE_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+        export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+
+        cd ..
+        export DEPLOY_BRANCH=$PACKAGE_NAME-$BRANCH_NAME-android-${{ matrix.ARCH }}-${{ matrix.BuildType }}
+        git clone https://$PUBLIC_REPO_TOKEN@github.com/$GITHUB_REPOSITORY-artifacts.git >/dev/null 2>&1
+        cd $PACKAGE_NAME-artifacts
+
+        git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
+        git reset
+        git clean -f
+        git rm * || true
+        mv -f ../$PACKAGE_NAME-build-${{ matrix.BuildType }}/android/build/outputs/apk/*/*.apk .
+        git add *.apk
+        git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
+        git push --force || git push --set-upstream origin $DEPLOY_BRANCH

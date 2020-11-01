@@ -1,3 +1,11 @@
+[![Linux](https://github.com/nCine/ncTemplate/workflows/Linux/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=Linux)
+[![macOS](https://github.com/nCine/ncTemplate/workflows/macOS/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=macOS)
+[![Windows](https://github.com/nCine/ncTemplate/workflows/Windows/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=Windows)
+[![MinGW](https://github.com/nCine/ncTemplate/workflows/MinGW/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=MinGW)
+[![Emscripten](https://github.com/nCine/ncTemplate/workflows/Emscripten/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=Emscripten)
+[![Android](https://github.com/nCine/ncTemplate/workflows/Android/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=Android)
+[![CodeQL](https://github.com/nCine/ncTemplate/workflows/CodeQL/badge.svg)](https://github.com/nCine/ncTemplate/actions?workflow=CodeQL)
+
 # ncTemplate
 A template project for applications and games made with the nCine.
 
