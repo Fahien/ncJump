@@ -1,8 +1,7 @@
 #pragma once
 
+#include "entity.h"
 #include <ncine/SceneNode.h>
-#include <ncine/Sprite.h>
-#include <ncine/Texture.h>
 
 namespace jmp
 {
@@ -11,10 +10,11 @@ class Game
 public:
     Game();
 
+    void update(float dt);
+
 private:
-    ncine::SceneNode root;
-    ncine::Texture texture;
-    ncine::Sprite sprite;
+    ncine::SceneNode *root;
+    Entity entity;
 };
 
 } // namespace jmp
