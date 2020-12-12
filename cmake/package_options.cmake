@@ -1,7 +1,7 @@
 option(PACKAGE_BUILD_ANDROID "Build the Android version of the game" OFF)
 option(PACKAGE_STRIP_BINARIES "Enable symbols stripping from libraries and executables when in release" OFF)
 
-set(PACKAGE_DATA_DIR "${PARENT_SOURCE_DIR}/${PACKAGE_NAME}-data" CACHE PATH "Set the path to the game data directory")
+set(PACKAGE_DATA_DIR "${PACKAGE_SOURCE_DIR}/data" CACHE PATH "Set the path to the game data directory")
 
 if(MSVC OR APPLE)
 	set(NCINE_EXTERNAL_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the nCine MSVC libraries or macOS frameworks directory")
