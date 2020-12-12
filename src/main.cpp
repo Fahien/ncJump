@@ -27,6 +27,8 @@ void JumpHandler::onPreInit(nc::AppConfiguration &config)
 
     config.windowTitle = "ncJump";
     config.windowIconFilename = "jump48.png";
+    config.resolution.x = 1600;
+    config.resolution.y = 800;
 }
 
 void JumpHandler::onInit()
@@ -36,6 +38,7 @@ void JumpHandler::onInit()
 
 void JumpHandler::onFrameStart()
 {
+    game->update(nc::theApplication().interval());
 }
 
 void JumpHandler::onKeyReleased(const nc::KeyboardEvent &event)

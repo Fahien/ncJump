@@ -11,6 +11,8 @@ set(PACKAGE_INCLUDE_DIRS include)
 set(PACKAGE_SOURCES
 	include/main.h
 	include/game.h
+	include/entity.h
 	src/main.cpp
 	src/game.cpp
+	src/entity.cpp
 )
