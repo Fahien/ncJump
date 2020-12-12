@@ -73,7 +73,7 @@ jobs:
         cd ..
         Remove-Item nCine-artifacts -Recurse -Force
 
-        git clone https://github.com/$env:GITHUB_REPOSITORY-data.git
+        #git clone https://github.com/$env:GITHUB_REPOSITORY-data.git
 
     - name: 'CMake Configuration'
       run: |
