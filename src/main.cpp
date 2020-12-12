@@ -2,13 +2,14 @@
 
 #include <ncine/AppConfiguration.h>
 #include <ncine/Application.h>
+#include <ncine/FileSystem.h>
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-    return nctl::makeUnique<MyEventHandler>();
+    return nctl::makeUnique<JumpHandler>();
 }
 
-void MyEventHandler::onPreInit(nc::AppConfiguration &config)
+void JumpHandler::onPreInit(nc::AppConfiguration &config)
 {
 #if defined(__ANDROID__)
     config.dataPath() = "asset::";
@@ -22,12 +23,25 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 #endif
 #endif
 
-    config.windowTitle = "ncTemplate";
-    config.windowIconFilename = "icon48.png";
+    config.consoleLogLevel = nc::ILogger::LogLevel::INFO;
+
+    config.windowTitle = "ncJump";
+    config.windowIconFilename = "jump48.png";
 }
 
-void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
+void JumpHandler::onInit()
 {
-    if (event.sym == nc::KeySym::ESCAPE)
+    game = nctl::makeUnique<jmp::Game>();
+}
+
+void JumpHandler::onFrameStart()
+{
+}
+
+void JumpHandler::onKeyReleased(const nc::KeyboardEvent &event)
+{
+    if (event.sym == nc::KeySym::ESCAPE) {
+        LOGI("Bye");
         nc::theApplication().quit();
+    }
 }
