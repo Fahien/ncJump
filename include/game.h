@@ -1,10 +1,15 @@
 #pragma once
 
-#include "entity.h"
 #include <ncine/SceneNode.h>
+
+#include "entity.h"
 
 namespace jmp
 {
+struct Input {
+    Vec2f move = {0.0, 0.0};
+};
+
 class Game
 {
 public:
@@ -12,8 +17,9 @@ public:
 
     void update(f32 dt);
 
-private:
-    nc::SceneNode &root;
+    Input input;
+
+    nc::SceneNode& root;
     Entity entity;
 };
 

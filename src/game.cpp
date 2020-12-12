@@ -19,8 +19,17 @@ Game::Game()
 
 void Game::update(const f32 dt)
 {
+    // Update game state
+    entity.move(input.move);
+
+    // Gui here
     ImGui::Begin("Player", nullptr);
     ImGui::Text("state: %s", to_string(entity.getState()));
+    ImGui::End();
+
+    ImGui::Begin("Input", nullptr);
+    ImGui::Text("  x: %f", input.move.x);
+    ImGui::Text("  y: %f", input.move.y);
     ImGui::End();
 }
 
