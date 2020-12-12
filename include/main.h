@@ -19,13 +19,15 @@ namespace nc = ncine;
 class JumpHandler : public nc::IAppEventHandler, public nc::IInputEventHandler
 {
 public:
-    void onPreInit(nc::AppConfiguration &config) override;
+    void onPreInit(nc::AppConfiguration& config) override;
 
     void onInit() override;
 
     void onFrameStart() override;
 
-    void onKeyReleased(const nc::KeyboardEvent &event) override;
+    void onKeyReleased(const nc::KeyboardEvent& event) override;
+
+    void onJoyAxisMoved(const nc::JoyAxisEvent& event) override;
 
     UNIQUE<jmp::Game> game;
 };

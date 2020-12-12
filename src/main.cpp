@@ -3,6 +3,7 @@
 #include <ncine/AppConfiguration.h>
 #include <ncine/Application.h>
 #include <ncine/FileSystem.h>
+#include <nctl/algorithms.h>
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
@@ -46,5 +47,30 @@ void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
     if (event.sym == nc::KeySym::ESCAPE) {
         LOGI("Bye");
         nc::theApplication().quit();
+    }
+}
+
+void JumpHandler::onJoyAxisMoved(const nc::JoyAxisEvent& event)
+{
+    constexpr int X_AXIS = 0;
+    constexpr int Y_AXIS = 1;
+
+    if (event.axisId == X_AXIS) {
+        game->input.move.x = event.normValue;
+    } else if (event.axisId == Y_AXIS) {
+        game->input.move.y = -event.normValue;
+    }
+
+    // Process input
+    if (game->input.move.x != 0 || game->input.move.y != 0) {
+        constexpr float TRESHOLD = 0.05f;
+
+        auto length = game->input.move.length();
+        if (length > 1.0f) {
+            game->input.move.normalize();
+        } else if (length < TRESHOLD) {
+            game->input.move.x = 0.0;
+            game->input.move.y = 0.0;
+        }
     }
 }
