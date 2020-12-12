@@ -9,7 +9,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
     return nctl::makeUnique<JumpHandler>();
 }
 
-void JumpHandler::onPreInit(nc::AppConfiguration &config)
+void JumpHandler::onPreInit(nc::AppConfiguration& config)
 {
 #if defined(__ANDROID__)
     config.dataPath() = "asset::";
@@ -41,7 +41,7 @@ void JumpHandler::onFrameStart()
     game->update(nc::theApplication().interval());
 }
 
-void JumpHandler::onKeyReleased(const nc::KeyboardEvent &event)
+void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
 {
     if (event.sym == nc::KeySym::ESCAPE) {
         LOGI("Bye");
