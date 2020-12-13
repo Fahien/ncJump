@@ -3,6 +3,7 @@
 #include <ncine/SceneNode.h>
 
 #include "entity.h"
+#include "tileset.h"
 
 namespace jmp
 {
@@ -20,7 +21,15 @@ public:
     Input input;
 
     nc::SceneNode& root;
+
+    /// Root node of the game scene
+    nc::SceneNode scene;
+
     Entity entity;
+
+    nc::Texture resource;
+
+    Tileset tileset;
 };
 
 } // namespace jmp

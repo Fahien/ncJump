@@ -21,9 +21,8 @@ const char* to_string(Entity::State state)
     }
 }
 
-
-Entity::Entity()
-    : node {&nc::theApplication().rootNode()}
+Entity::Entity(nc::SceneNode& scene)
+    : node {&scene}
     , idle_texture {PATH("img/hero/herochar_idle_anim_strip_4.png")}
     , idle {&node, &idle_texture}
     , movement_texture {PATH("img/hero/herochar_run_anim_strip_6.png")}

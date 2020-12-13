@@ -13,7 +13,9 @@ set(PACKAGE_SOURCES
 	include/main.h
 	include/game.h
 	include/entity.h
+	include/tileset.h
 	src/main.cpp
 	src/game.cpp
 	src/entity.cpp
+	src/tileset.cpp
 )

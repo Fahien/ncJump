@@ -14,7 +14,7 @@ public:
         IDLE = 0,
         MOVE,
     };
-    Entity();
+    Entity(nc::SceneNode& scene);
 
     State getState() const noexcept
     {
