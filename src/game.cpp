@@ -8,8 +8,14 @@ namespace jmp
 {
 Game::Game()
     : root {nc::theApplication().rootNode()}
+    , scene {&root}
+    , entity {scene}
+    , resource {PATH("img/tile/tileset.png")}
+    , tileset {resource, 16}
 {
     root.setScale({4.0f, 4.0f});
+    scene.setScale({2.0f, 2.0f});
+
     auto& style = ImGui::GetStyle();
     style.WindowRounding = 0.0f;
     style.ScaleAllSizes(2.0f);
@@ -30,6 +36,31 @@ void Game::update(const f32 dt)
     ImGui::Begin("Input", nullptr);
     ImGui::Text("  x: %f", input.move.x);
     ImGui::Text("  y: %f", input.move.y);
+    ImGui::End();
+
+    ImGui::Begin("Tileset");
+
+    auto tile_size = ImVec2(tileset.tile_size * 2.0f, tileset.tile_size * 2.0f);
+    for (usize i = 0; i < tileset.tiles.size(); ++i) {
+        auto& tile = tileset.tiles[i];
+
+        float width = resource.width();
+        float height = resource.height();
+
+        ImVec2 uvs[2] = {};
+        uvs[0] = {tile->texRect().x / width, tile->texRect().y / height};
+        uvs[1] = {uvs[0].x + tile->texRect().w / width, uvs[0].y + tile->texRect().h / height};
+
+        ImGui::PushID(i);
+        if (ImGui::ImageButton(resource.guiTexId(), tile_size, uvs[0], uvs[1])) {
+            LOGI_X("Selecting tile %lu", i);
+        }
+        ImGui::PopID();
+        if ((i + 1) % tileset.width) {
+            ImGui::SameLine();
+        }
+    }
+
     ImGui::End();
 }
 
