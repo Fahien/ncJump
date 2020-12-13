@@ -33,7 +33,7 @@ void JumpHandler::onPreInit(nc::AppConfiguration& config)
 
 void JumpHandler::onInit()
 {
-    game = nctl::makeUnique<jmp::Game>();
+    game = MK<jmp::Game>();
 }
 
 void JumpHandler::onFrameStart()

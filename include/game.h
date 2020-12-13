@@ -13,7 +13,7 @@ public:
     void update(f32 dt);
 
 private:
-    ncine::SceneNode *root;
+    nc::SceneNode &root;
     Entity entity;
 };
 

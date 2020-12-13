@@ -9,6 +9,7 @@ set(PACKAGE_REVERSE_DNS "eu.antoniocaggiano.ncjump")
 set(PACKAGE_INCLUDE_DIRS include)
 
 set(PACKAGE_SOURCES
+	include/types.h
 	include/main.h
 	include/game.h
 	include/entity.h
