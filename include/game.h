@@ -4,6 +4,7 @@
 
 #include "entity.h"
 #include "tileset.h"
+#include "tilemap.h"
 
 namespace jmp
 {
@@ -38,6 +39,8 @@ public:
     Tileset tileset;
 
     i32 selected_tile = -1;
+
+    Tilemap tilemap;
 };
 
 } // namespace jmp

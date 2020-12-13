@@ -12,6 +12,7 @@ Game::Game()
     , entity {scene}
     , resource {PATH("img/tile/tileset.png")}
     , tileset {resource, 16}
+    , tilemap {scene, tileset}
 {
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
     root.setScale({4.0f, 4.0f});
@@ -77,8 +78,16 @@ void Game::update(const f32 dt)
         auto x = input.left.pos.x / int(tile_size.x) / 4;
         auto y = input.left.pos.y / int(tile_size.y) / 4;
         LOGI_X("Tile %d %d", x, y);
+        if (x < tilemap.width && y < tilemap.height) {
+            tilemap.set(x, y, tileset.create_tile(selected_tile));
+        }
     }
 
+    ImGui::End();
+
+    // Tilemap
+    ImGui::Begin("Tilemap");
+    ImGui::Text("width: %u\nheight: %u", tilemap.width, tilemap.height);
     ImGui::End();
 }
 

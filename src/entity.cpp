@@ -46,6 +46,7 @@ Entity::Entity(nc::SceneNode& scene)
 
         idle.addAnimation(nctl::makeUnique<nc::RectAnimation>(anim));
         idle.setPaused(false);
+        idle.setLayer(1);
     }
 
     // Movement animation
@@ -63,6 +64,7 @@ Entity::Entity(nc::SceneNode& scene)
 
         movement.addAnimation(nctl::makeUnique<nc::RectAnimation>(anim));
         movement.setPaused(false);
+        movement.setLayer(1);
     }
 }
 
