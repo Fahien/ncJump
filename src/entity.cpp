@@ -3,6 +3,8 @@
 #include <ncine/Application.h>
 #include <ncine/FileSystem.h>
 
+#include "types.h"
+
 namespace nc = ncine;
 
 namespace jmp
@@ -17,7 +19,6 @@ const char* to_string(Entity::State state)
     }
 }
 
-#define PATH(path) nc::fs::joinPath(nc::fs::dataPath(), path).data()
 
 Entity::Entity()
     : texture {PATH("img/hero/herochar_idle_anim_strip_4.png")}
@@ -31,7 +32,7 @@ Entity::Entity()
     auto anim = nc::RectAnimation(
         0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
 
-    auto sprite_size = nc::Vector2f(texture.width() / 4.0f, texture.height());
+    auto sprite_size = Vec2f(texture.width() / 4.0f, texture.height());
 
     for (int i = 0; i < 4; ++i) {
         anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));

@@ -2,9 +2,11 @@
 
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
+#include <nctl/UniquePtr.h>
 
 #include "game.h"
-#include <nctl/UniquePtr.h>
+#include "types.h"
+
 
 namespace ncine
 {
@@ -25,5 +27,5 @@ public:
 
     void onKeyReleased(const nc::KeyboardEvent &event) override;
 
-    nctl::UniquePtr<jmp::Game> game;
+    UNIQUE<jmp::Game> game;
 };

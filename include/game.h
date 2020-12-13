@@ -13,7 +13,7 @@ public:
     void update(float dt);
 
 private:
-    ncine::SceneNode *root;
+    nc::SceneNode &root;
     Entity entity;
 };
 
