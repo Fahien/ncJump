@@ -15,6 +15,11 @@ class Tileset
 public:
     Tileset(nc::Texture& texture, u32 tile_size = 16);
 
+    UNIQUE<nc::Sprite> create_tile(u32 index) const;
+
+    // @todo Do not use references
+    nc::Texture& texture;
+
     u32 tile_size = 16;
 
     u32 width = 0;

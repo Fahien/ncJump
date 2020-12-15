@@ -13,6 +13,7 @@ Game::Game()
     , resource {PATH("img/tile/tileset.png")}
     , tileset {resource, 16}
 {
+    resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
     root.setScale({4.0f, 4.0f});
     scene.setScale({2.0f, 2.0f});
 
@@ -55,13 +56,27 @@ void Game::update(const f32 dt)
         uvs[1] = {uvs[0].x + tile->texRect().w / width, uvs[0].y + tile->texRect().h / height};
 
         ImGui::PushID(i);
+        bool focused = selected_tile == i;
+        if (focused) {
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
+        }
         if (ImGui::ImageButton(resource.guiTexId(), tile_size, uvs[0], uvs[1])) {
             LOGI_X("Selecting tile %lu", i);
+            selected_tile = i;
+        }
+        if (focused) {
+            ImGui::PopStyleColor();
         }
         ImGui::PopID();
         if ((i + 1) % tileset.width) {
             ImGui::SameLine();
         }
+    }
+
+    if (selected_tile >= 0 && input.left.down) {
+        auto x = input.left.pos.x / int(tile_size.x) / 4;
+        auto y = input.left.pos.y / int(tile_size.y) / 4;
+        LOGI_X("Tile %d %d", x, y);
     }
 
     ImGui::End();
