@@ -42,6 +42,22 @@ void JumpHandler::onFrameStart()
     game->update(nc::theApplication().interval());
 }
 
+void JumpHandler::onMouseButtonPressed(const nc::MouseEvent& event)
+{
+    if (event.isLeftButton()) {
+        game->input.left.down = true;
+        game->input.left.pos.x = event.x;
+        game->input.left.pos.y = event.y;
+    }
+}
+
+void JumpHandler::onMouseButtonReleased(const nc::MouseEvent& event)
+{
+    if (event.isLeftButton()) {
+        game->input.left.down = false;
+    }
+}
+
 void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
 {
     if (event.sym == nc::KeySym::ESCAPE) {

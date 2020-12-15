@@ -7,7 +7,13 @@
 
 namespace jmp
 {
+struct Button {
+    bool down = false;
+    Vec2i pos = {0, 0};
+};
+
 struct Input {
+    Button left = {};
     Vec2f move = {0.0, 0.0};
 };
 
