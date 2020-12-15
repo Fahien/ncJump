@@ -25,6 +25,9 @@ public:
 
     void onFrameStart() override;
 
+    void onMouseButtonPressed(const nc::MouseEvent& event) override;
+    void onMouseButtonReleased(const nc::MouseEvent& event) override;
+
     void onKeyReleased(const nc::KeyboardEvent& event) override;
 
     void onJoyAxisMoved(const nc::JoyAxisEvent& event) override;

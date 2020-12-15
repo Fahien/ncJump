@@ -33,9 +33,12 @@ void Game::update(const float dt)
     ImGui::Text("state: %s", to_string(entity.getState()));
     ImGui::End();
 
-    ImGui::Begin("Input", nullptr);
-    ImGui::Text("  x: %f", input.move.x);
-    ImGui::Text("  y: %f", input.move.y);
+    ImGui::Begin("Input");
+    ImGui::Text("left: {\n\tdown: %s,\n\tpos: { x: %d, y: %d }\n}",
+        input.left.down ? "T" : "F",
+        input.left.pos.x,
+        input.left.pos.y);
+    ImGui::Text("move: { x: %f, y: %f }", input.move.x, input.move.y);
     ImGui::End();
 
     ImGui::Begin("Tileset");
