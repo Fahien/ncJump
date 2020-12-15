@@ -15,9 +15,11 @@ set(PACKAGE_SOURCES
 	include/entity.h
 	include/tileset.h
 	include/tilemap.h
+	include/editor.h
 	src/main.cpp
 	src/game.cpp
 	src/entity.cpp
 	src/tileset.cpp
 	src/tilemap.cpp
+	src/editor.cpp
 )
