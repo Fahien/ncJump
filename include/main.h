@@ -7,7 +7,6 @@
 #include "game.h"
 #include "types.h"
 
-
 namespace ncine
 {
 class AppConfiguration;

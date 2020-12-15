@@ -36,6 +36,8 @@ public:
     nc::Texture resource;
 
     Tileset tileset;
+
+    i32 selected_tile = -1;
 };
 
 } // namespace jmp
