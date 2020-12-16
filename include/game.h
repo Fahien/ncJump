@@ -2,6 +2,7 @@
 
 #include <ncine/SceneNode.h>
 
+#include "physics.h"
 #include "config.h"
 #include "editor.h"
 #include "entity.h"
@@ -43,6 +44,8 @@ public:
     Tileset tileset;
 
     Tilemap tilemap;
+
+    Physics physics;
 
     Editor editor;
 };

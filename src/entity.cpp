@@ -28,8 +28,8 @@ Entity::Entity(nc::SceneNode& scene)
     , movement_texture {PATH("img/hero/herochar_run_anim_strip_6.png")}
     , movement {nullptr, &movement_texture}
 {
-    node.x += 100;
-    node.y += 50;
+    node.x += 4;
+    node.y += 2;
 
     // Idle animation
     {

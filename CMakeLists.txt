@@ -22,6 +22,8 @@ if(NOT ANDROID AND NOT EMSCRIPTEN AND NCINE_WITH_QT5)
 	find_package(Qt5 COMPONENTS Widgets)
 endif()
 
+find_package(Box2D REQUIRED)
+
 if(NOT IS_DIRECTORY ${PACKAGE_DATA_DIR})
 	if(IS_DIRECTORY ${CMAKE_SOURCE_DIR})
 		set(PACKAGE_DATA_DIR ${CMAKE_SOURCE_DIR})
@@ -58,7 +60,7 @@ elseif(MINGW)
 	# Should be linked before `ncine_main`
 	target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE mingw32)
 endif()
-target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE ncine::ncine_main ncine::ncine)
+target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE ncine::ncine_main ncine::ncine Box2D)
 
 target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:${PACKAGE_UPPER_NAME}_DEBUG>")
 target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCINE_ASSERT_BREAK>")
