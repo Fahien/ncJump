@@ -24,7 +24,6 @@ public:
 
     void move(const Vec2f& mv);
 
-private:
     State state = State::IDLE;
 
     // Node of this character
