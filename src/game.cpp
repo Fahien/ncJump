@@ -18,12 +18,15 @@ Game::Game(Config& config)
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
     root.setScale(config.scale.global);
     scene.setScale(config.scale.scene);
+
+    // @todo Refactor that
+    entity.body = physics.hero_body;
 }
 
 void Game::update(const f32 dt)
 {
     // Update game state
-    entity.move(input.joystick.move);
+    entity.update(input);
     editor.update(*this);
     physics.update(dt);
 
