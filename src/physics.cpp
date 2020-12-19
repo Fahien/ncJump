@@ -15,12 +15,18 @@ Physics::Physics(f32 x, f32 y)
     auto ground_box = b2PolygonShape();
     ground_box.SetAsBox(32.0f, 0.5f);
 
-    ground_body->CreateFixture(&ground_box, 0.0f);
+    auto ground_fixture_def = b2FixtureDef();
+    ground_fixture_def.shape = &ground_box;
+    ground_fixture_def.density = 0.0f;
+    ground_fixture_def.friction = 3.0f;
+    ground_fixture_def.restitution = 0.0f;
+    ground_body->CreateFixture(&ground_fixture_def);
 
     // Dynamic body
     auto hero_def = b2BodyDef();
     hero_def.type = b2_dynamicBody;
     hero_def.position.Set(x, y);
+    hero_def.fixedRotation = true;
 
     hero_body = world.CreateBody(&hero_def);
 
@@ -29,8 +35,9 @@ Physics::Physics(f32 x, f32 y)
 
     auto hero_fixture_def = b2FixtureDef();
     hero_fixture_def.shape = &hero_box;
-    hero_fixture_def.density = 16.0f;
-    hero_fixture_def.friction = 1.4f;
+    hero_fixture_def.density = 2.0f;
+    hero_fixture_def.friction = 3.0f;
+    hero_fixture_def.restitution = 0.0f;
 
     hero_body->CreateFixture(&hero_fixture_def);
 }
