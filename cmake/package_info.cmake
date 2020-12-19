@@ -12,6 +12,7 @@ set(PACKAGE_SOURCES
 	include/types.h
 	include/main.h
 	include/config.h
+	include/input.h
 	include/game.h
 	include/entity.h
 	include/tileset.h
@@ -19,6 +20,7 @@ set(PACKAGE_SOURCES
 	include/editor.h
 	include/physics.h
 	src/main.cpp
+	src/input.cpp
 	src/game.cpp
 	src/entity.cpp
 	src/tileset.cpp

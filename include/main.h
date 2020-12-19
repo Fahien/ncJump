@@ -31,5 +31,8 @@ public:
 
     void onJoyAxisMoved(const nc::JoyAxisEvent& event) override;
 
+    void onJoyMappedButtonPressed(const nc::JoyMappedButtonEvent& event) override;
+    void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent& event) override;
+
     UNIQUE<jmp::Game> game;
 };

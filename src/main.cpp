@@ -46,16 +46,17 @@ void JumpHandler::onFrameStart()
 void JumpHandler::onMouseButtonPressed(const nc::MouseEvent& event)
 {
     if (event.isLeftButton()) {
-        game->input.left.down = true;
-        game->input.left.pos.x = event.x;
-        game->input.left.pos.y = event.y;
+        game->input.mouse.left.down = true;
+        game->input.mouse.left.just_down = true;
+        game->input.mouse.pos.x = event.x;
+        game->input.mouse.pos.y = event.y;
     }
 }
 
 void JumpHandler::onMouseButtonReleased(const nc::MouseEvent& event)
 {
     if (event.isLeftButton()) {
-        game->input.left.down = false;
+        game->input.mouse.left.down = false;
     }
 }
 
@@ -73,21 +74,36 @@ void JumpHandler::onJoyAxisMoved(const nc::JoyAxisEvent& event)
     constexpr int Y_AXIS = 1;
 
     if (event.axisId == X_AXIS) {
-        game->input.move.x = event.normValue;
+        game->input.joystick.move.x = event.normValue;
     } else if (event.axisId == Y_AXIS) {
-        game->input.move.y = -event.normValue;
+        game->input.joystick.move.y = -event.normValue;
     }
 
     // Process input
-    if (game->input.move.x != 0 || game->input.move.y != 0) {
+    if (game->input.joystick.move.x != 0 || game->input.joystick.move.y != 0) {
         constexpr f32 TRESHOLD = 0.05f;
 
-        auto length = game->input.move.length();
+        auto length = game->input.joystick.move.length();
         if (length > 1.0f) {
-            game->input.move.normalize();
+            game->input.joystick.move.normalize();
         } else if (length < TRESHOLD) {
-            game->input.move.x = 0.0;
-            game->input.move.y = 0.0;
+            game->input.joystick.move.x = 0.0;
+            game->input.joystick.move.y = 0.0;
         }
+    }
+}
+
+void JumpHandler::onJoyMappedButtonPressed(const nc::JoyMappedButtonEvent& event)
+{
+    if (event.buttonName == nc::ButtonName::A) {
+        game->input.joystick.a.down = true;
+        game->input.joystick.a.just_down = true;
+    }
+}
+
+void JumpHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent& event)
+{
+    if (event.buttonName == nc::ButtonName::A) {
+        game->input.joystick.a.down = false;
     }
 }
