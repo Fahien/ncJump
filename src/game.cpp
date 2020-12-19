@@ -23,7 +23,7 @@ Game::Game(Config& config)
 void Game::update(const f32 dt)
 {
     // Update game state
-    entity.move(input.move);
+    entity.move(input.joystick.move);
     editor.update(*this);
     physics.update(dt);
 
@@ -32,6 +32,8 @@ void Game::update(const f32 dt)
     auto& pos = physics.hero_body->GetPosition();
     entity.node.x = config.size.tile * pos.x + config.size.tile / 2.0f;
     entity.node.y = config.size.tile * pos.y + config.size.tile / 2.0f;
+
+    input.reset();
 }
 
 } // namespace jmp

@@ -23,11 +23,15 @@ void Editor::update_entity(Entity& entity)
 void Editor::update_input(Input& input)
 {
     ImGui::Begin("Input");
-    ImGui::Text("left: {\n\tdown: %s,\n\tpos: { x: %d, y: %d }\n}",
-        input.left.down ? "T" : "F",
-        input.left.pos.x,
-        input.left.pos.y);
-    ImGui::Text("move: { x: %f, y: %f }", input.move.x, input.move.y);
+    ImGui::Text("mouse.left: {\n\tdown: %s,\n\tpos: { x: %d, y: %d }\n}",
+        input.mouse.left.down ? "T" : "F",
+        input.mouse.pos.x,
+        input.mouse.pos.y);
+    ImGui::Text("joystick: {");
+    ImGui::Text("\tmove: { x: %f, y: %f },", input.joystick.move.x, input.joystick.move.y);
+    ImGui::Text("\ta: { down: %s, just_down: %s }\n}",
+        input.joystick.a.down ? "T" : "F",
+        input.joystick.a.just_down ? "T" : "F");
     ImGui::End();
 }
 
@@ -75,11 +79,11 @@ void Editor::update_tilemap(Input& input, Tileset& tileset, Tilemap& tilemap)
     ImGui::End();
 
     // Place selected tile on the map at clicked position
-    if (selected_tile >= 0 && input.left.down) {
+    if (selected_tile >= 0 && input.mouse.left.down) {
         auto tile_size = ImVec2(tileset.tile_size * 2.0f, tileset.tile_size * 2.0f);
 
-        auto x = input.left.pos.x / int(tile_size.x) / 4;
-        auto y = input.left.pos.y / int(tile_size.y) / 4;
+        auto x = input.mouse.pos.x / int(tile_size.x) / 4;
+        auto y = input.mouse.pos.y / int(tile_size.y) / 4;
 
         if (x < tilemap.width && y < tilemap.height) {
             tilemap.set(x, y, tileset.create_tile(selected_tile));
