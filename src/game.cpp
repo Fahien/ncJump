@@ -26,7 +26,7 @@ Game::Game(Config& config)
 void Game::update(const float dt)
 {
     // Update game state
-    entity.update(input);
+    entity.update(dt, input);
     editor.update(*this);
     physics.update(dt);
 
