@@ -16,7 +16,7 @@ Editor::Editor()
 void Editor::update_entity(Entity& entity)
 {
     ImGui::Begin("Player");
-    ImGui::Text("state: %s", to_string(entity.state));
+    ImGui::Text("state: %s", to_str(*entity.state));
     auto vel = entity.body->GetLinearVelocity();
     ImGui::Text("vel: { x: %f, y: %f }", vel.x, vel.y);
     ImGui::DragFloat("Air factor", &entity.air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
