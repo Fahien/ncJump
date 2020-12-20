@@ -9,20 +9,150 @@ namespace nc = ncine;
 
 namespace jmp
 {
-const char* to_string(Entity::State state)
+State* State::get_state(State::Value state)
 {
-    switch (state) {
-    case Entity::State::IDLE:
-        return "IDLE";
-    case Entity::State::MOVE:
-        return "MOVE";
-    case Entity::State::JUMP_UP:
-        return "JUMP_UP";
-    case Entity::State::JUMP_DOWN:
-        return "JUMP_DOWN";
-    default:
-        FATAL_ASSERT_MSG(false, "Failed to get string for character state");
+    static UNIQUE<State> states[] = {
+        MK<IdleState>(),
+        MK<MoveState>(),
+        MK<JumpUpState>(),
+        MK<JumpDownState>(),
+    };
+
+    return states[state].get();
+}
+
+IdleState::IdleState()
+{
+    name = "IDLE";
+}
+
+void IdleState::enter(const Input& input, Entity& entity)
+{
+    entity.node.addChildNode(&entity.idle);
+}
+
+void IdleState::handle(const Input& input, Entity& entity)
+{
+    // Can move
+    if (input.joystick.move.x != 0.0) {
+        entity.set_state(input, State::MOVE);
     }
+
+    // Can jump
+    if (input.joystick.a.just_down) {
+        entity.set_state(input, State::JUMP_UP);
+    }
+}
+
+void IdleState::update(const f32 dt, const Input& input, Entity& entity)
+{
+    // Nothing
+}
+
+void IdleState::exit(Entity& entity)
+{
+    entity.node.removeChildNode(&entity.idle);
+}
+
+MoveState::MoveState()
+{
+    name = "MOVE";
+}
+
+void MoveState::enter(const Input& input, Entity& entity)
+{
+    entity.node.addChildNode(&entity.movement);
+}
+
+void MoveState::handle(const Input& input, Entity& entity)
+{
+    // Can go quiet
+    if (input.joystick.move.x == 0.0) {
+        entity.set_state(input, State::IDLE);
+    }
+
+    // Can jump
+    if (input.joystick.a.just_down) {
+        entity.set_state(input, State::JUMP_UP);
+    }
+}
+
+void MoveState::update(const f32 dt, const Input& input, Entity& entity)
+{
+    auto force = b2Vec2(entity.velocity_factor * input.joystick.move.x, 0.0f);
+    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+}
+
+void MoveState::exit(Entity& entity)
+{
+    entity.node.removeChildNode(&entity.movement);
+}
+
+JumpUpState::JumpUpState()
+{
+    name = "JUMP_UP";
+}
+
+void JumpUpState::handle(const Input& input, Entity& entity)
+{
+    // @todo Double jump?
+    if (entity.body->GetLinearVelocity().y <= 0.0f) {
+        entity.set_state(input, State::JUMP_DOWN);
+    }
+}
+
+void JumpUpState::enter(const Input& input, Entity& entity)
+{
+    entity.node.addChildNode(&entity.jump_up);
+
+    auto force = b2Vec2(entity.velocity_factor * input.joystick.move.x, entity.jump_y_factor);
+    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+}
+
+void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
+{
+    // Can move a bit
+    auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
+    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+}
+
+void JumpUpState::exit(Entity& entity)
+{
+    entity.node.removeChildNode(&entity.jump_up);
+}
+
+JumpDownState::JumpDownState()
+{
+    name = "JUMP_DOWN";
+}
+
+void JumpDownState::enter(const Input& input, Entity& entity)
+{
+    entity.node.addChildNode(&entity.jump_down);
+}
+
+void JumpDownState::handle(const Input& input, Entity& entity)
+{
+    if (entity.body->GetLinearVelocity().y == 0.0f) {
+        entity.set_state(input, State::MOVE);
+    }
+}
+
+void JumpDownState::update(const f32, const Input& input, Entity& entity)
+{
+    // Can move a bit
+    auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
+    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+}
+
+void JumpDownState::exit(Entity& entity)
+{
+    entity.node.removeChildNode(&entity.jump_down);
+}
+
+const char* to_str(State& state)
+{
+    return state.name.data();
 }
 
 Entity::Entity(nc::SceneNode& scene)
@@ -108,107 +238,40 @@ Entity::Entity(nc::SceneNode& scene)
     }
 }
 
-void Entity::setState(State state)
+void Entity::set_state(const Input& input, State::Value value)
 {
-    if (state == this->state) {
+    auto new_state = State::get_state(value);
+    if (state == new_state) {
         return;
     }
 
-    // Remove old sprite
-    switch (this->state) {
-    case State::IDLE:
-        node.removeChildNode(&idle);
-        break;
-    case State::MOVE:
-        node.removeChildNode(&movement);
-        break;
-    case State::JUMP_UP:
-        node.removeChildNode(&jump_up);
-        break;
-    case State::JUMP_DOWN:
-        node.removeChildNode(&jump_down);
-        break;
-    default:
-        FATAL_ASSERT_MSG(false, "Failed to set state for a character");
-    }
+    state->exit(*this);
+    new_state->enter(input, *this);
 
-    // Add new sprite
-    switch (state) {
-    case State::IDLE:
-        node.addChildNode(&idle);
-        break;
-    case State::MOVE:
-        node.addChildNode(&movement);
-        break;
-    case State::JUMP_UP:
-        node.addChildNode(&jump_up);
-        break;
-    case State::JUMP_DOWN:
-        node.addChildNode(&jump_down);
-        break;
-    default:
-        FATAL_ASSERT_MSG(false, "Failed to set state for a character");
-    }
-
-    this->state = state;
+    state = new_state;
 }
 
-void Entity::move(const Vec2f& mv)
+void Entity::update(const f32 dt, const Input& input)
 {
-    // States that allow moving
-    if (state == State::IDLE || state == State::MOVE || state == State::JUMP_UP ||
-        state == State::JUMP_DOWN) {
-        float force_factor = velocity_factor;
-        if (state == State::JUMP_UP || state == State::JUMP_DOWN) {
-            force_factor /= 32.0f;
-        }
-        auto force = b2Vec2(force_factor * mv.x, 0.0f * mv.y);
-        bool wake = true; // @todo Learn more
-        body->ApplyLinearImpulse(force, body->GetWorldCenter(), wake);
-
-        if (state == State::IDLE && (mv.x != 0.0 || mv.y != 0.0)) {
-            setState(State::MOVE);
-        }
-
-        if (state == State::MOVE || state == State::JUMP_UP || state == State::JUMP_DOWN) {
-            if (state == State::MOVE && mv.x == 0.0 && mv.y == 0.0) {
-                setState(State::IDLE);
-            } else {
-                // Set direction of sprite
-                bool flipped_x = mv.x < 0.0;
-                movement.setFlippedX(flipped_x);
-                idle.setFlippedX(flipped_x);
-                jump_up.setFlippedX(flipped_x);
-                jump_down.setFlippedX(flipped_x);
-            }
-        }
+    // Set direction of sprite
+    float movement_x = body->GetLinearVelocity().x;
+    if (movement_x) {
+        bool flipped_x = movement_x < 0.0;
+        movement.setFlippedX(flipped_x);
+        idle.setFlippedX(flipped_x);
+        jump_up.setFlippedX(flipped_x);
+        jump_down.setFlippedX(flipped_x);
     }
+
+    state->handle(input, *this);
+    state->update(dt, input, *this);
+
+    // Apply air resistance
+    auto vel = -body->GetLinearVelocity();
+    auto vel_len = vel.LengthSquared();
+    vel.x *= air_factor * vel_len;
+    vel.y *= air_factor * vel_len;
+    body->ApplyForceToCenter(vel, false);
 }
 
-void Entity::jump(const Button& button)
-{
-    auto vel = body->GetLinearVelocity();
-    if (state == State::JUMP_UP) {
-        if (vel.y <= 0.0f) {
-            setState(State::JUMP_DOWN);
-        }
-    } else if (state == State::JUMP_DOWN) {
-        if (vel.y == 0.0f) {
-            setState(State::MOVE);
-        }
-    } else if (button.just_down) {
-        auto impulse = b2Vec2(jump_x_factor, jump_y_factor);
-        body->ApplyLinearImpulse(impulse, body->GetWorldCenter(), true);
-        setState(State::JUMP_UP);
-    }
-}
-
-void Entity::update(const Input& input)
-{
-    if (input.joystick.a.just_down) {
-        jump(input.joystick.a);
-    } else {
-        move(input.joystick.move);
-    }
-}
 } // namespace jmp
