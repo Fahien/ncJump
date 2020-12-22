@@ -43,6 +43,12 @@ void JumpHandler::onFrameStart()
     game->update(nc::theApplication().interval());
 }
 
+void JumpHandler::onMouseMoved(const nc::MouseState& state)
+{
+    game->input.mouse.pos.x = state.x;
+    game->input.mouse.pos.y = state.y;
+}
+
 void JumpHandler::onMouseButtonPressed(const nc::MouseEvent& event)
 {
     if (event.isLeftButton()) {
