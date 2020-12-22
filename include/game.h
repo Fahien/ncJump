@@ -2,10 +2,11 @@
 
 #include <ncine/SceneNode.h>
 
-#include "entity.h"
-#include "tileset.h"
-#include "tilemap.h"
+#include "config.h"
 #include "editor.h"
+#include "entity.h"
+#include "tilemap.h"
+#include "tileset.h"
 
 namespace jmp
 {
@@ -22,9 +23,11 @@ struct Input {
 class Game
 {
 public:
-    Game();
+    Game(Config& config);
 
     void update(f32 dt);
+
+    Config config;
 
     Input input;
 

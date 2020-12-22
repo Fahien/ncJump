@@ -11,6 +11,7 @@ set(PACKAGE_INCLUDE_DIRS include)
 set(PACKAGE_SOURCES
 	include/types.h
 	include/main.h
+	include/config.h
 	include/game.h
 	include/entity.h
 	include/tileset.h
