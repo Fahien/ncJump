@@ -21,7 +21,7 @@ private:
     void update_entity(Entity& entity);
     void update_input(Input& input);
     void update_tileset(Tileset& tileset);
-    void update_tilemap(Input& input, Tileset& tileset, Tilemap& tilemap);
+    void update_tilemap(Game& game);
 
     /// Negative means no tile selected
     i32 selected_tile = -1;
