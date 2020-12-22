@@ -34,7 +34,8 @@ void JumpHandler::onPreInit(nc::AppConfiguration& config)
 
 void JumpHandler::onInit()
 {
-    game = MK<jmp::Game>();
+    auto config = jmp::Config();
+    game = MK<jmp::Game>(config);
 }
 
 void JumpHandler::onFrameStart()

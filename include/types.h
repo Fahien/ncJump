@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <ncine/common_macros.h>
+#include <ncine/Vector2.h>
 
 namespace nc = ncine;
 
