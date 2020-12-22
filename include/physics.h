@@ -12,7 +12,8 @@ class Physics
 public:
     /// @todo remove x and y parameters
     Physics(f32 x, f32 y);
-    Collisions(f32 x, f32 y);
+
+    void add_solid_tile(u32 x, u32 y);
 
     void update(const f32 delta);
 

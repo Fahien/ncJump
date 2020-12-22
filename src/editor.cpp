@@ -78,21 +78,25 @@ void Editor::update_tileset(Tileset& tileset)
     ImGui::End();
 }
 
-void Editor::update_tilemap(Input& input, Tileset& tileset, Tilemap& tilemap)
+void Editor::update_tilemap(Game& game)
 {
     ImGui::Begin("Tilemap");
-    ImGui::Text("width: %u\nheight: %u", tilemap.width, tilemap.height);
+    ImGui::Text("width: %u\nheight: %u", game.tilemap.width, game.tilemap.height);
     ImGui::End();
 
+    // Do not place any tile if mouse is hovering ImGui
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered()) {
+        return;
+    }
     // Place selected tile on the map at clicked position
-    if (selected_tile >= 0 && input.mouse.left.down) {
-        auto tile_size = ImVec2(tileset.tile_size * 2.0f, tileset.tile_size * 2.0f);
+    if (selected_tile >= 0 && game.input.mouse.left.down) {
+        i32 tile_size = game.config.size.tile * game.config.scale.scene * game.config.scale.global;
 
-        auto x = input.mouse.pos.x / int(tile_size.x) / 4;
-        auto y = input.mouse.pos.y / int(tile_size.y) / 4;
+        auto x = game.input.mouse.pos.x / tile_size;
+        auto y = game.input.mouse.pos.y / tile_size;
 
-        if (x < tilemap.width && y < tilemap.height) {
-            tilemap.set(x, y, tileset.create_tile(selected_tile));
+        if (x < game.tilemap.width && y < game.tilemap.height) {
+            game.tilemap.set(x, y, game.tileset.create_tile(selected_tile));
         }
     }
 }
@@ -102,7 +106,7 @@ void Editor::update(Game& game)
     update_entity(game.entity);
     update_input(game.input);
     update_tileset(game.tileset);
-    update_tilemap(game.input, game.tileset, game.tilemap);
+    update_tilemap(game);
 }
 
 } // namespace jmp
