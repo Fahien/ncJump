@@ -31,6 +31,27 @@ void IdleState::enter(const Input& input, Entity& entity)
     entity.node.addChildNode(&entity.idle);
 }
 
+void can_fall(const Input& input, Entity& entity)
+{
+    // Can fall if there is no platform below
+    bool should_fall = true;
+
+    for (auto edge = entity.body->GetContactList(); edge; edge = edge->next) {
+        auto normal = edge->contact->GetManifold()->localNormal;
+        if (edge->contact->GetFixtureA() == entity.body->GetFixtureList()) {
+            normal = -normal;
+        }
+        if (normal.y > 0.5f) {
+            should_fall = false;
+            break;
+        }
+    }
+
+    if (should_fall) {
+        entity.set_state(input, State::JUMP_DOWN);
+    }
+}
+
 void IdleState::handle(const Input& input, Entity& entity)
 {
     // Can move
@@ -42,6 +63,8 @@ void IdleState::handle(const Input& input, Entity& entity)
     if (input.joystick.a.just_down) {
         entity.set_state(input, State::JUMP_UP);
     }
+
+    can_fall(input, entity);
 }
 
 void IdleState::update(const f32 dt, const Input& input, Entity& entity)
@@ -75,12 +98,16 @@ void MoveState::handle(const Input& input, Entity& entity)
     if (input.joystick.a.just_down) {
         entity.set_state(input, State::JUMP_UP);
     }
+
+    can_fall(input, entity);
 }
 
 void MoveState::update(const f32 dt, const Input& input, Entity& entity)
 {
-    auto force = b2Vec2(entity.velocity_factor * input.joystick.move.x, 0.0f);
-    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+    if (fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed) {
+        auto force = b2Vec2(entity.velocity_factor * input.joystick.move.x, 0.0f);
+        entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+    }
 }
 
 void MoveState::exit(Entity& entity)
@@ -112,8 +139,10 @@ void JumpUpState::enter(const Input& input, Entity& entity)
 void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 {
     // Can move a bit
-    auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
-    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+    if (fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed) {
+        auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
+        entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+    }
 }
 
 void JumpUpState::exit(Entity& entity)
@@ -133,16 +162,23 @@ void JumpDownState::enter(const Input& input, Entity& entity)
 
 void JumpDownState::handle(const Input& input, Entity& entity)
 {
-    if (entity.body->GetLinearVelocity().y == 0.0f) {
-        entity.set_state(input, State::MOVE);
+    for (auto edge = entity.body->GetContactList(); edge; edge = edge->next) {
+        auto& normal = edge->contact->GetManifold()->localNormal;
+        if (normal.y != 0.0) {
+            LOGI_X("Normal (%f, %f)", normal.x, normal.y);
+            entity.set_state(input, State::MOVE);
+            break;
+        }
     }
 }
 
 void JumpDownState::update(const f32, const Input& input, Entity& entity)
 {
     // Can move a bit
-    auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
-    entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+    if (fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed) {
+        auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
+        entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
+    }
 }
 
 void JumpDownState::exit(Entity& entity)

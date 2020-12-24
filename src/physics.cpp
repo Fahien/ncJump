@@ -19,7 +19,6 @@ Physics::Physics(f32 x, f32 y)
     ground_fixture_def.shape = &ground_box;
     ground_fixture_def.density = 0.0f;
     ground_fixture_def.friction = 3.0f;
-    ground_fixture_def.restitution = 0.0f;
     ground_body->CreateFixture(&ground_fixture_def);
 
     // Dynamic body
@@ -35,9 +34,8 @@ Physics::Physics(f32 x, f32 y)
 
     auto hero_fixture_def = b2FixtureDef();
     hero_fixture_def.shape = &hero_box;
-    hero_fixture_def.density = 2.0f;
+    hero_fixture_def.density = 32.0f;
     hero_fixture_def.friction = 3.0f;
-    hero_fixture_def.restitution = 0.0f;
 
     hero_body->CreateFixture(&hero_fixture_def);
 }
@@ -47,7 +45,8 @@ void Physics::update(const float delta)
     world.Step(delta, velocity_iterations, position_iterations);
 }
 
-void Physics::add_solid_tile(u32 x, u32 y) {
+void Physics::add_solid_tile(u32 x, u32 y)
+{
     // Tile body
     auto ground_def = b2BodyDef();
     ground_def.position.Set(x, y);
@@ -61,7 +60,6 @@ void Physics::add_solid_tile(u32 x, u32 y) {
     ground_fixture_def.shape = &ground_box;
     ground_fixture_def.density = 0.0f;
     ground_fixture_def.friction = 3.0f;
-    ground_fixture_def.restitution = 0.0f;
     ground_body->CreateFixture(&ground_fixture_def);
 }
 
