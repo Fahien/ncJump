@@ -14,6 +14,7 @@ Game::Game(Config& config)
     , tileset {resource, config.size.tile}
     , tilemap {scene, tileset}
     , physics {entity.node.x, entity.node.y}
+    , editor {*this}
 {
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
     root.setScale({config.scale.global});
@@ -27,7 +28,7 @@ void Game::update(const float dt)
 {
     // Update game state
     entity.update(dt, input);
-    editor.update(*this);
+    editor.update();
     physics.update(dt);
 
     // @todo Move this somewhere else?
