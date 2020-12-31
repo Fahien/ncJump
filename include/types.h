@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <ncine/common_macros.h>
 #include <ncine/Vector2.h>
+#include <nctl/StaticArray.h>
 
 namespace nc = ncine;
 
@@ -14,6 +15,7 @@ using f32 = float;
 using Vec2i = nc::Vector2<i32>;
 using Vec2f = nc::Vector2<f32>;
 
+#define ARRAY nctl::StaticArray
 #define UNIQUE nctl::UniquePtr
 #define MK nctl::makeUnique
 #define MV nctl::move

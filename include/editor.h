@@ -13,15 +13,18 @@ class Tilemap;
 class Editor
 {
 public:
-    Editor();
+    Editor(Game& g);
 
-    void update(Game& g);
+    void update();
 
 private:
     void update_entity(Entity& entity);
     void update_input(Input& input);
     void update_tileset(Tileset& tileset);
-    void update_tilemap(Game& game);
+    void update_selected_tile(Tileset& tileset);
+    void update_tilemap();
+
+    Game& game;
 
     /// Negative means no tile selected
     i32 selected_tile = -1;
