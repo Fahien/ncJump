@@ -4,13 +4,14 @@
 
 namespace jmp
 {
-Editor::Editor()
+Editor::Editor(Game& g)
+    : game {g}
 {
     auto& style = ImGui::GetStyle();
     style.WindowRounding = 0.0f;
-    style.ScaleAllSizes(2.0f);
+    style.ScaleAllSizes(game.config.scale.scene);
     auto& io = ImGui::GetIO();
-    io.FontGlobalScale = 2.0f;
+    io.FontGlobalScale = game.config.scale.scene;
 }
 
 void Editor::update_entity(Entity& entity)
@@ -60,22 +61,34 @@ void Editor::update_input(Input& input)
     ImGui::End();
 }
 
+ImVec2 get_tile_size(Config& config)
+{
+    f32 size = config.size.tile * config.scale.scene;
+    return {size, size};
+}
+
+ARRAY<ImVec2, 2> get_tile_uvs(Tileset& tileset, u32 index)
+{
+    auto& tile = tileset.tiles[index];
+    f32 width = tileset.texture.width();
+    f32 height = tileset.texture.height();
+
+    auto uvs = ARRAY<ImVec2, 2>(nctl::StaticArrayMode::EXTEND_SIZE);
+    uvs[0] = {tile->texRect().x / width, tile->texRect().y / height};
+    uvs[1] = {uvs[0].x + tile->texRect().w / width, uvs[0].y + tile->texRect().h / height};
+
+    return uvs;
+}
+
 void Editor::update_tileset(Tileset& tileset)
 {
     ImGui::Begin("Tileset");
 
-    auto tile_size = ImVec2(tileset.tile_size * 2.0f, tileset.tile_size * 2.0f);
+    auto tile_size = get_tile_size(game.config);
 
     // Draw selectable tiles using image buttons
     for (usize i = 0; i < tileset.tiles.size(); ++i) {
-        auto& tile = tileset.tiles[i];
-
-        float width = tileset.texture.width();
-        float height = tileset.texture.height();
-
-        ImVec2 uvs[2] = {};
-        uvs[0] = {tile->texRect().x / width, tile->texRect().y / height};
-        uvs[1] = {uvs[0].x + tile->texRect().w / width, uvs[0].y + tile->texRect().h / height};
+        auto uvs = get_tile_uvs(tileset, i);
 
         ImGui::PushID(i);
         bool selected = selected_tile == i;
@@ -97,7 +110,23 @@ void Editor::update_tileset(Tileset& tileset)
     ImGui::End();
 }
 
-void Editor::update_tilemap(Game& game)
+void Editor::update_selected_tile(Tileset& tileset)
+{
+    if (selected_tile < 0) {
+        return;
+    }
+
+    ImGui::Begin("Tile");
+
+    auto tile_size = get_tile_size(game.config);
+    auto uvs = get_tile_uvs(tileset, selected_tile);
+
+    ImGui::Image(tileset.texture.guiTexId(), tile_size, uvs[0], uvs[1]);
+
+    ImGui::End();
+}
+
+void Editor::update_tilemap()
 {
     ImGui::Begin("Tilemap");
     ImGui::Text("width: %u\nheight: %u", game.tilemap.width, game.tilemap.height);
@@ -120,12 +149,13 @@ void Editor::update_tilemap(Game& game)
     }
 }
 
-void Editor::update(Game& game)
+void Editor::update()
 {
     update_entity(game.entity);
     update_input(game.input);
     update_tileset(game.tileset);
-    update_tilemap(game);
+    update_selected_tile(game.tileset);
+    update_tilemap();
 }
 
 } // namespace jmp
