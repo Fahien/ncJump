@@ -102,12 +102,23 @@ void MoveState::handle(const Input& input, Entity& entity)
     can_fall(input, entity);
 }
 
-void MoveState::update(const f32 dt, const Input& input, Entity& entity)
+void can_move_on_x(const Input& input, Entity& entity, f32 x_factor)
 {
-    if (fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed) {
-        auto force = b2Vec2(entity.velocity_factor * input.joystick.move.x, 0.0f);
+    f32 x_velocity = entity.body->GetLinearVelocity().x;
+
+    bool opposite_move = (input.joystick.move.x < 0 && x_velocity >= 0) ||
+        (input.joystick.move.x >= 0 && x_velocity < 0);
+    bool within_limit = fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed;
+
+    if (opposite_move || within_limit) {
+        auto force = b2Vec2(x_factor * input.joystick.move.x, 0.0f);
         entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
     }
+}
+
+void MoveState::update(const f32 dt, const Input& input, Entity& entity)
+{
+    can_move_on_x(input, entity, entity.velocity_factor);
 }
 
 void MoveState::exit(Entity& entity)
@@ -132,17 +143,14 @@ void JumpUpState::enter(const Input& input, Entity& entity)
 {
     entity.node.addChildNode(&entity.jump_up);
 
-    auto force = b2Vec2(entity.velocity_factor * input.joystick.move.x, entity.jump_y_factor);
+    auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, entity.jump_y_factor);
     entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
 }
 
 void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 {
     // Can move a bit
-    if (fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed) {
-        auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
-        entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
-    }
+    can_move_on_x(input, entity, entity.jump_x_factor);
 }
 
 void JumpUpState::exit(Entity& entity)
@@ -175,10 +183,7 @@ void JumpDownState::handle(const Input& input, Entity& entity)
 void JumpDownState::update(const f32, const Input& input, Entity& entity)
 {
     // Can move a bit
-    if (fabs(entity.body->GetLinearVelocity().x) < entity.max_x_speed) {
-        auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, 0.0);
-        entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
-    }
+    can_move_on_x(input, entity, entity.jump_x_factor);
 }
 
 void JumpDownState::exit(Entity& entity)
@@ -290,7 +295,7 @@ void Entity::set_state(const Input& input, State::Value value)
 void Entity::update(const f32 dt, const Input& input)
 {
     // Set direction of sprite
-    float movement_x = body->GetLinearVelocity().x;
+    float movement_x = input.joystick.move.x;
     if (movement_x) {
         bool flipped_x = movement_x < 0.0;
         movement.setFlippedX(flipped_x);
