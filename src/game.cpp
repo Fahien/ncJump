@@ -21,7 +21,8 @@ Game::Game(Config& config)
     scene.setScale({config.scale.scene});
 
     // @todo Refactor that
-    entity.body = physics.hero_body;
+    entity.physics = PhysicsComponent();
+    entity.physics->body = physics.hero_body;
 }
 
 void Game::update(const float dt)

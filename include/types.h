@@ -1,8 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <ncine/common_macros.h>
+#include <optional>
+
 #include <ncine/Vector2.h>
+#include <ncine/common_macros.h>
 
 namespace nc = ncine;
 
@@ -14,6 +16,8 @@ using f32 = float;
 using Vec2i = nc::Vector2<i32>;
 using Vec2f = nc::Vector2<f32>;
 
+#define OPTION std::optional
+#define NONE std::nullopt
 #define UNIQUE nctl::UniquePtr
 #define MK nctl::makeUnique
 #define MV nctl::move
