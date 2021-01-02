@@ -7,10 +7,12 @@
 namespace jmp
 {
 struct TransformComponent {
+    TransformComponent() = default;
+
     TransformComponent(nc::SceneNode& parent);
 
-    // Node representing this transform
-    nc::SceneNode node;
+    // nCine relies on pointers therefore this must live on the heap for the moment
+    UNIQUE<nc::SceneNode> node = MK<nc::SceneNode>();
 };
 
 } // namespace jmp

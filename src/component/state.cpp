@@ -68,7 +68,7 @@ IdleState::IdleState()
 
 void IdleState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&CHAR_GFX(entity).idle);
+    entity.transform.node->addChildNode(&CHAR_GFX(entity).idle);
 }
 
 void can_fall(const Input& input, Entity& entity)
@@ -114,7 +114,7 @@ void IdleState::update(const f32 dt, const Input& input, Entity& entity)
 
 void IdleState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&CHAR_GFX(entity).idle);
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).idle);
 }
 
 MoveState::MoveState()
@@ -125,7 +125,7 @@ MoveState::MoveState()
 
 void MoveState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&CHAR_GFX(entity).movement);
+    entity.transform.node->addChildNode(&CHAR_GFX(entity).movement);
 }
 
 void MoveState::handle(const Input& input, Entity& entity)
@@ -166,7 +166,7 @@ void MoveState::update(const f32 dt, const Input& input, Entity& entity)
 
 void MoveState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&CHAR_GFX(entity).movement);
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).movement);
 }
 
 JumpUpState::JumpUpState()
@@ -185,7 +185,7 @@ void JumpUpState::handle(const Input& input, Entity& entity)
 
 void JumpUpState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&CHAR_GFX(entity).jump_up);
+    entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_up);
 
     auto force = b2Vec2(
         entity.physics->jump_x_factor * input.joystick.move.x, entity.physics->jump_y_factor);
@@ -200,7 +200,7 @@ void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 
 void JumpUpState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&CHAR_GFX(entity).jump_up);
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).jump_up);
 }
 
 JumpDownState::JumpDownState()
@@ -211,7 +211,7 @@ JumpDownState::JumpDownState()
 
 void JumpDownState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&CHAR_GFX(entity).jump_down);
+    entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_down);
 }
 
 void JumpDownState::handle(const Input& input, Entity& entity)
@@ -234,7 +234,7 @@ void JumpDownState::update(const f32, const Input& input, Entity& entity)
 
 void JumpDownState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&CHAR_GFX(entity).jump_down);
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).jump_down);
 }
 
 const char* to_str(State& state)
@@ -257,7 +257,6 @@ void CharacterStateComponent::update(const f32 dt, const Input& input, Entity& e
     state->handle(input, entity);
     state->update(dt, input, entity);
 }
-
 
 void CharacterStateComponent::set_state(State::Value value, const Input& input, Entity& entity)
 {
