@@ -17,7 +17,7 @@ Editor::Editor(Game& g)
 void Editor::update_entity(Entity& entity)
 {
     ImGui::Begin("Player");
-    ImGui::Text("state: %s", to_str(*entity.state));
+    ImGui::Text("state: %s", to_str(*CharacterStateComponent::into(**entity.state).state));
     auto vel = entity.physics->body->GetLinearVelocity();
     ImGui::Text("vel: { x: %.2f, y: %.2f }", vel.x, vel.y);
 
