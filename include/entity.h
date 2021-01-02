@@ -5,7 +5,7 @@
 #include <ncine/Texture.h>
 #include <nctl/String.h>
 
-#include "types.h"
+#include "component/transform.h"
 
 namespace jmp
 {
@@ -79,9 +79,7 @@ public:
 
     State* state = State::get_state(State::IDLE);
 
-    // Node of this character
-    // Animations are children of this node
-    nc::SceneNode node;
+    TransformComponent transform;
 
     // Graphics resources
     nc::Texture idle_texture;

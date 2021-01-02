@@ -19,6 +19,10 @@ set(PACKAGE_SOURCES
 	include/tilemap.h
 	include/editor.h
 	include/physics.h
+	include/component/transform.h
+	include/component/graphics.h
+	include/component/physics.h
+	include/component/state.h
 	src/main.cpp
 	src/input.cpp
 	src/game.cpp
@@ -27,4 +31,8 @@ set(PACKAGE_SOURCES
 	src/tilemap.cpp
 	src/editor.cpp
 	src/physics.cpp
+	src/component/transform.cpp
+	src/component/graphics.cpp
+	src/component/physics.cpp
+	src/component/state.cpp
 )
