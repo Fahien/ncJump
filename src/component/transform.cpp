@@ -3,10 +3,10 @@
 namespace jmp
 {
 TransformComponent::TransformComponent(nc::SceneNode& parent)
-    : node {&parent}
+    : node {MK<nc::SceneNode>(&parent)}
 {
-    node.x += 4;
-    node.y += 2;
+    node->x += 4;
+    node->y += 2;
 }
 
 } // namespace jmp

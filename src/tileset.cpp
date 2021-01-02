@@ -16,15 +16,15 @@ Tileset::Tileset(nc::Texture& texture, u32 tile_size)
     }
 }
 
-UNIQUE<nc::Sprite> Tileset::create_tile(u32 i) const
+Entity Tileset::create_tile(u32 i) const
 {
-    auto tile = MK<nc::Sprite>(&texture);
+    auto tile = Entity();
 
     usize row = i / width;
     usize col = i % width;
 
-    tile->x = col * tile_size;
-    tile->y = row * tile_size;
+    tile.transform.node->x = col * tile_size;
+    tile.transform.node->y = row * tile_size;
 
     nc::Recti tex_rect;
     tex_rect.x = col * tile_size;
@@ -32,7 +32,10 @@ UNIQUE<nc::Sprite> Tileset::create_tile(u32 i) const
     tex_rect.w = tile_size;
     tex_rect.h = tile_size;
 
-    tile->setTexRect(MV(tex_rect));
+    auto graphics = SingleGraphicsComponent(tile.transform, texture);
+    graphics.sprite->setTexture(&texture);
+    graphics.sprite->setTexRect(MV(tex_rect));
+    tile.graphics = MK<SingleGraphicsComponent>(MV(graphics));
 
     return tile;
 }
