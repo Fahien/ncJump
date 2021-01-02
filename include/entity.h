@@ -16,80 +16,20 @@ class Input;
 class Button;
 class Entity;
 
-class State
-{
-public:
-    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN };
-
-    static State* get_state(State::Value state);
-
-    nctl::String name;
-
-    virtual void enter(const Input& input, Entity& entity) = 0;
-    virtual void handle(const Input& input, Entity& entity) = 0;
-    virtual void update(const f32 dt, const Input& input, Entity& entity) = 0;
-    virtual void exit(Entity& entity) = 0;
-};
-
-class IdleState : public State
-{
-public:
-    IdleState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
-
-class MoveState : public State
-{
-public:
-    MoveState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
-
-class JumpUpState : public State
-{
-public:
-    JumpUpState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
-
-class JumpDownState : public State
-{
-public:
-    JumpDownState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
-
 class Entity
 {
 public:
     Entity(nc::SceneNode& scene);
 
-    void set_state(const Input& input, State::Value state);
-
     void update(f32 dt, const Input& input);
-
-    State* state = State::get_state(State::IDLE);
 
     TransformComponent transform;
 
     OPTION<UNIQUE<GraphicsComponent>> graphics;
 
     OPTION<PhysicsComponent> physics = std::nullopt;
-    // OPTION<StateComponent> state;
-};
 
-const char* to_str(State& state);
+    OPTION<UNIQUE<StateComponent>> state;
+};
 
 } // namespace jmp
