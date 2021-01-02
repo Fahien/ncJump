@@ -84,21 +84,10 @@ public:
 
     TransformComponent transform;
 
-    // OPTION<GraphicsComponent> graphics;
-    OPTION<PhysicsComponent> physics = NONE;
+    OPTION<UNIQUE<GraphicsComponent>> graphics;
+
+    OPTION<PhysicsComponent> physics = std::nullopt;
     // OPTION<StateComponent> state;
-
-    // Graphics resources
-    nc::Texture idle_texture;
-    nc::AnimatedSprite idle;
-
-    nc::Texture movement_texture;
-    nc::AnimatedSprite movement;
-
-    nc::Texture jump_up_texture;
-    nc::Texture jump_down_texture;
-    nc::AnimatedSprite jump_up;
-    nc::AnimatedSprite jump_down;
 };
 
 const char* to_str(State& state);
