@@ -5,6 +5,9 @@
 #include <ncine/Texture.h>
 #include <nctl/String.h>
 
+#include "component/graphics.h"
+#include "component/physics.h"
+#include "component/state.h"
 #include "component/transform.h"
 
 namespace jmp
@@ -81,6 +84,10 @@ public:
 
     TransformComponent transform;
 
+    // OPTION<GraphicsComponent> graphics;
+    OPTION<PhysicsComponent> physics;
+    // OPTION<StateComponent> state;
+
     // Graphics resources
     nc::Texture idle_texture;
     nc::AnimatedSprite idle;
@@ -92,15 +99,6 @@ public:
     nc::Texture jump_down_texture;
     nc::AnimatedSprite jump_up;
     nc::AnimatedSprite jump_down;
-
-    // Physics body
-    b2Body* body = nullptr;
-
-    f32 air_factor = 1.0f / 16.0f;
-    f32 velocity_factor = 64.0f;
-    f32 jump_y_factor = 360.0f;
-    f32 jump_x_factor = 3.0f;
-    f32 max_x_speed = 8.0f;
 };
 
 const char* to_str(State& state);

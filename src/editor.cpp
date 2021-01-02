@@ -18,13 +18,13 @@ void Editor::update_entity(Entity& entity)
 {
     ImGui::Begin("Player");
     ImGui::Text("state: %s", to_str(*entity.state));
-    auto vel = entity.body->GetLinearVelocity();
+    auto vel = entity.physics->body->GetLinearVelocity();
     ImGui::Text("vel: { x: %.2f, y: %.2f }", vel.x, vel.y);
 
     if (ImGui::TreeNode("Contacts")) {
-        for (auto edge = entity.body->GetContactList(); edge; edge = edge->next) {
+        for (auto edge = entity.physics->body->GetContactList(); edge; edge = edge->next) {
             auto normal = edge->contact->GetManifold()->localNormal;
-            if (edge->contact->GetFixtureA() == entity.body->GetFixtureList()) {
+            if (edge->contact->GetFixtureA() == entity.physics->body->GetFixtureList()) {
                 normal = -normal;
             }
             ImGui::Text("normal: { %.2f, %.2f }", normal.x, normal.y);
@@ -33,16 +33,16 @@ void Editor::update_entity(Entity& entity)
     }
 
     b2MassData mass;
-    entity.body->GetMassData(&mass);
+    entity.physics->body->GetMassData(&mass);
     if (ImGui::DragFloat("Mass", &mass.mass, 0.125f)) {
-        entity.body->SetMassData(&mass);
+        entity.physics->body->SetMassData(&mass);
     }
 
-    ImGui::DragFloat("Air factor", &entity.air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
-    ImGui::DragFloat("Velocity factor", &entity.velocity_factor, 0.125f);
-    ImGui::DragFloat("Jump Y factor", &entity.jump_y_factor);
-    ImGui::DragFloat("Jump X factor", &entity.jump_x_factor, 0.125f);
-    ImGui::DragFloat("Max X speed", &entity.max_x_speed, 0.125f);
+    ImGui::DragFloat("Air factor", &entity.physics->air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
+    ImGui::DragFloat("Velocity factor", &entity.physics->velocity_factor, 0.125f);
+    ImGui::DragFloat("Jump Y factor", &entity.physics->jump_y_factor);
+    ImGui::DragFloat("Jump X factor", &entity.physics->jump_x_factor, 0.125f);
+    ImGui::DragFloat("Max X speed", &entity.physics->max_x_speed, 0.125f);
     ImGui::End();
 }
 
