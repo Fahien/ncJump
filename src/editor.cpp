@@ -14,17 +14,20 @@ Editor::Editor(Game& g)
     io.FontGlobalScale = game.config.scale.scene;
 }
 
-void Editor::update_entity(Entity& entity)
+void Editor::update_state(StateComponent& state)
 {
-    ImGui::Begin("Player");
-    ImGui::Text("state: %s", to_str(*CharacterStateComponent::into(**entity.state).state));
-    auto vel = entity.physics->body->GetLinearVelocity();
+    ImGui::Text("state: %s", to_str(*CharacterStateComponent::into(state).state));
+}
+
+void Editor::update_physics(PhysicsComponent& physics)
+{
+    auto vel = physics.body->GetLinearVelocity();
     ImGui::Text("vel: { x: %.2f, y: %.2f }", vel.x, vel.y);
 
     if (ImGui::TreeNode("Contacts")) {
-        for (auto edge = entity.physics->body->GetContactList(); edge; edge = edge->next) {
+        for (auto edge = physics.body->GetContactList(); edge; edge = edge->next) {
             auto normal = edge->contact->GetManifold()->localNormal;
-            if (edge->contact->GetFixtureA() == entity.physics->body->GetFixtureList()) {
+            if (edge->contact->GetFixtureA() == physics.body->GetFixtureList()) {
                 normal = -normal;
             }
             ImGui::Text("normal: { %.2f, %.2f }", normal.x, normal.y);
@@ -33,16 +36,30 @@ void Editor::update_entity(Entity& entity)
     }
 
     b2MassData mass;
-    entity.physics->body->GetMassData(&mass);
+    physics.body->GetMassData(&mass);
     if (ImGui::DragFloat("Mass", &mass.mass, 0.125f)) {
-        entity.physics->body->SetMassData(&mass);
+        physics.body->SetMassData(&mass);
     }
 
-    ImGui::DragFloat("Air factor", &entity.physics->air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
-    ImGui::DragFloat("Velocity factor", &entity.physics->velocity_factor, 0.125f);
-    ImGui::DragFloat("Jump Y factor", &entity.physics->jump_y_factor);
-    ImGui::DragFloat("Jump X factor", &entity.physics->jump_x_factor, 0.125f);
-    ImGui::DragFloat("Max X speed", &entity.physics->max_x_speed, 0.125f);
+    ImGui::DragFloat("Air factor", &physics.air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
+    ImGui::DragFloat("Velocity factor", &physics.velocity_factor, 0.125f);
+    ImGui::DragFloat("Jump Y factor", &physics.jump_y_factor);
+    ImGui::DragFloat("Jump X factor", &physics.jump_x_factor, 0.125f);
+    ImGui::DragFloat("Max X speed", &physics.max_x_speed, 0.125f);
+}
+
+void Editor::update_entity(Entity& entity)
+{
+    ImGui::Begin("Player");
+
+    if (entity.state) {
+        update_state(**entity.state);
+    }
+
+    if (entity.physics) {
+        update_physics(*entity.physics);
+    }
+
     ImGui::End();
 }
 
