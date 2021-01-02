@@ -9,6 +9,8 @@ class Entity;
 class Input;
 class Tileset;
 class Tilemap;
+class StateComponent;
+class PhysicsComponent;
 
 class Editor
 {
@@ -18,6 +20,8 @@ public:
     void update();
 
 private:
+    void update_state(StateComponent& state);
+    void update_physics(PhysicsComponent& physics);
     void update_entity(Entity& entity);
     void update_input(Input& input);
     void update_tileset(Tileset& tileset);
