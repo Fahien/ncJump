@@ -23,6 +23,8 @@ Game::Game(Config& config)
     // @todo Refactor that
     entity.physics = PhysicsComponent();
     entity.physics->body = physics.hero_body;
+    entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
+    entity.state = MK<CharacterStateComponent>();
 }
 
 void Game::update(const f32 dt)

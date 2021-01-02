@@ -9,11 +9,8 @@ namespace nc = ncine;
 
 namespace jmp
 {
-
 Entity::Entity(nc::SceneNode& scene)
     : transform {scene}
-    , graphics {MK<CharacterGraphicsComponent>(transform)}
-    , state {MK<CharacterStateComponent>()}
 {
 }
 
@@ -26,8 +23,10 @@ void Entity::update(const f32 dt, const Input& input)
     if (state) {
         (*state)->update(dt, input, *this);
     }
-    
-    physics->update();
+
+    if (physics) {
+        physics->update();
+    }
 }
 
 } // namespace jmp
