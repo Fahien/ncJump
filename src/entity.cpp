@@ -28,7 +28,7 @@ IdleState::IdleState()
 
 void IdleState::enter(const Input& input, Entity& entity)
 {
-    entity.node.addChildNode(&entity.idle);
+    entity.transform.node.addChildNode(&entity.idle);
 }
 
 void can_fall(const Input& input, Entity& entity)
@@ -74,7 +74,7 @@ void IdleState::update(const f32 dt, const Input& input, Entity& entity)
 
 void IdleState::exit(Entity& entity)
 {
-    entity.node.removeChildNode(&entity.idle);
+    entity.transform.node.removeChildNode(&entity.idle);
 }
 
 MoveState::MoveState()
@@ -84,7 +84,7 @@ MoveState::MoveState()
 
 void MoveState::enter(const Input& input, Entity& entity)
 {
-    entity.node.addChildNode(&entity.movement);
+    entity.transform.node.addChildNode(&entity.movement);
 }
 
 void MoveState::handle(const Input& input, Entity& entity)
@@ -123,7 +123,7 @@ void MoveState::update(const f32 dt, const Input& input, Entity& entity)
 
 void MoveState::exit(Entity& entity)
 {
-    entity.node.removeChildNode(&entity.movement);
+    entity.transform.node.removeChildNode(&entity.movement);
 }
 
 JumpUpState::JumpUpState()
@@ -141,7 +141,7 @@ void JumpUpState::handle(const Input& input, Entity& entity)
 
 void JumpUpState::enter(const Input& input, Entity& entity)
 {
-    entity.node.addChildNode(&entity.jump_up);
+    entity.transform.node.addChildNode(&entity.jump_up);
 
     auto force = b2Vec2(entity.jump_x_factor * input.joystick.move.x, entity.jump_y_factor);
     entity.body->ApplyLinearImpulse(force, entity.body->GetWorldCenter(), true);
@@ -155,7 +155,7 @@ void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 
 void JumpUpState::exit(Entity& entity)
 {
-    entity.node.removeChildNode(&entity.jump_up);
+    entity.transform.node.removeChildNode(&entity.jump_up);
 }
 
 JumpDownState::JumpDownState()
@@ -165,7 +165,7 @@ JumpDownState::JumpDownState()
 
 void JumpDownState::enter(const Input& input, Entity& entity)
 {
-    entity.node.addChildNode(&entity.jump_down);
+    entity.transform.node.addChildNode(&entity.jump_down);
 }
 
 void JumpDownState::handle(const Input& input, Entity& entity)
@@ -188,7 +188,7 @@ void JumpDownState::update(const f32, const Input& input, Entity& entity)
 
 void JumpDownState::exit(Entity& entity)
 {
-    entity.node.removeChildNode(&entity.jump_down);
+    entity.transform.node.removeChildNode(&entity.jump_down);
 }
 
 const char* to_str(State& state)
@@ -197,9 +197,9 @@ const char* to_str(State& state)
 }
 
 Entity::Entity(nc::SceneNode& scene)
-    : node {&scene}
+    : transform {scene}
     , idle_texture {PATH("img/hero/herochar_idle_anim_strip_4.png")}
-    , idle {&node, &idle_texture}
+    , idle {&transform.node, &idle_texture}
     , movement_texture {PATH("img/hero/herochar_run_anim_strip_6.png")}
     , movement {nullptr, &movement_texture}
     , jump_up_texture {PATH("img/hero/herochar_jump_up_anim_strip_3.png")}
@@ -207,9 +207,6 @@ Entity::Entity(nc::SceneNode& scene)
     , jump_up {nullptr, &jump_up_texture}
     , jump_down {nullptr, &jump_down_texture}
 {
-    node.x += 4;
-    node.y += 2;
-
     // Idle animation
     {
         idle_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
