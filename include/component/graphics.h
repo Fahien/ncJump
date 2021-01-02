@@ -18,10 +18,14 @@ public:
 // Graphics component with a single static image which never changes
 class SingleGraphicsComponent : public GraphicsComponent {
 public:
+    static SingleGraphicsComponent& into(GraphicsComponent& g);
+
+    SingleGraphicsComponent(TransformComponent& t, nc::Texture& texture);
+
     void update(const Input& input) override;
 
-    nc::Texture idle_texture;
-    nc::Sprite idle;
+    // nCine works with pointers
+    UNIQUE<nc::Sprite> sprite;
 };
 
 class CharacterGraphicsComponent : public GraphicsComponent {

@@ -19,6 +19,8 @@ class Entity;
 class Entity
 {
 public:
+    Entity() = default;
+
     Entity(nc::SceneNode& scene);
 
     void update(f32 dt, const Input& input);
@@ -27,7 +29,7 @@ public:
 
     OPTION<UNIQUE<GraphicsComponent>> graphics;
 
-    OPTION<PhysicsComponent> physics = std::nullopt;
+    OPTION<PhysicsComponent> physics;
 
     OPTION<UNIQUE<StateComponent>> state;
 };

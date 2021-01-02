@@ -91,8 +91,10 @@ ARRAY<ImVec2, 2> get_tile_uvs(Tileset& tileset, u32 index)
     f32 height = tileset.texture.height();
 
     auto uvs = ARRAY<ImVec2, 2>(nctl::StaticArrayMode::EXTEND_SIZE);
-    uvs[0] = {tile->texRect().x / width, tile->texRect().y / height};
-    uvs[1] = {uvs[0].x + tile->texRect().w / width, uvs[0].y + tile->texRect().h / height};
+    auto& graphics = SingleGraphicsComponent::into(**tile.graphics);
+    uvs[0] = {graphics.sprite->texRect().x / width, graphics.sprite->texRect().y / height};
+    uvs[1] = {uvs[0].x + graphics.sprite->texRect().w / width,
+        uvs[0].y + graphics.sprite->texRect().h / height};
 
     return uvs;
 }

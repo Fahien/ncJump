@@ -13,7 +13,7 @@ Game::Game(Config& config)
     , resource {PATH("img/tile/tileset.png")}
     , tileset {resource, config.size.tile}
     , tilemap {scene, tileset}
-    , physics {entity.transform.node.x, entity.transform.node.y}
+    , physics {entity.transform.node->x, entity.transform.node->y}
     , editor {*this}
 {
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
@@ -37,8 +37,8 @@ void Game::update(const f32 dt)
     // @todo Move this somewhere else?
     // Update entity from box
     auto& pos = physics.hero_body->GetPosition();
-    entity.transform.node.x = config.size.tile * pos.x + config.size.tile / 2.0f;
-    entity.transform.node.y = config.size.tile * pos.y + config.size.tile / 2.0f;
+    entity.transform.node->x = config.size.tile * pos.x + config.size.tile / 2.0f;
+    entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
 
     input.reset();
 }

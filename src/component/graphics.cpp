@@ -7,13 +7,23 @@
 
 namespace jmp
 {
+SingleGraphicsComponent& SingleGraphicsComponent::into(GraphicsComponent& g)
+{
+    return reinterpret_cast<SingleGraphicsComponent&>(g);
+}
+
+SingleGraphicsComponent::SingleGraphicsComponent(TransformComponent& transform, nc::Texture& texture)
+    : sprite {MK<nc::Sprite>(&*transform.node, &texture)}
+{
+}
+
 void SingleGraphicsComponent::update(const Input& input)
 {
 }
 
 CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& transform)
     : idle_texture {PATH("img/hero/herochar_idle_anim_strip_4.png")}
-    , idle {&transform.node, &idle_texture}
+    , idle {&*transform.node, &idle_texture}
     , movement_texture {PATH("img/hero/herochar_run_anim_strip_6.png")}
     , movement {nullptr, &movement_texture}
     , jump_up_texture {PATH("img/hero/herochar_jump_up_anim_strip_3.png")}

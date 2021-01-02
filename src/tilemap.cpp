@@ -11,20 +11,21 @@ Tilemap::Tilemap(nc::SceneNode& root, const Tileset& tileset)
     for (u32 i = 0; i < width; ++i) {
         for (u32 j = 0; j < height; ++j) {
             auto tile = tileset.create_tile(13);
-            tile->x = i * tileset.tile_size;
-            tile->y = j * tileset.tile_size;
-            tile->setParent(&node);
+            tile.transform.node->x = i * tileset.tile_size;
+            tile.transform.node->y = j * tileset.tile_size;
+            tile.transform.node->setParent(&node);
             tiles.emplaceBack(MV(tile));
         }
     }
 }
 
-void Tilemap::set(u32 x, u32 y, UNIQUE<nc::Sprite>&& tile)
+void Tilemap::set(u32 x, u32 y, Entity&& tile)
 {
     if (x < width && y < height) {
-        tile->setParent(&node);
-        tile->x = x * tile->texRect().w;
-        tile->y = y * tile->texRect().h;
+        tile.transform.node->setParent(&node);
+        auto& graphics = SingleGraphicsComponent::into(**tile.graphics);
+        tile.transform.node->x = x * graphics.sprite->texRect().w;
+        tile.transform.node->y = y * graphics.sprite->texRect().h;
         tiles[y + x * height] = MV(tile);
     }
 }
