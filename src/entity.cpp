@@ -26,9 +26,11 @@ IdleState::IdleState()
     name = "IDLE";
 }
 
+#define CHAR_GFX(e) reinterpret_cast<CharacterGraphicsComponent&>(*e.graphics.value().get())
+
 void IdleState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&entity.idle);
+    entity.transform.node.addChildNode(&CHAR_GFX(entity).idle);
 }
 
 void can_fall(const Input& input, Entity& entity)
@@ -74,7 +76,7 @@ void IdleState::update(const f32 dt, const Input& input, Entity& entity)
 
 void IdleState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&entity.idle);
+    entity.transform.node.removeChildNode(&CHAR_GFX(entity).idle);
 }
 
 MoveState::MoveState()
@@ -84,7 +86,7 @@ MoveState::MoveState()
 
 void MoveState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&entity.movement);
+    entity.transform.node.addChildNode(&CHAR_GFX(entity).movement);
 }
 
 void MoveState::handle(const Input& input, Entity& entity)
@@ -125,7 +127,7 @@ void MoveState::update(const f32 dt, const Input& input, Entity& entity)
 
 void MoveState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&entity.movement);
+    entity.transform.node.removeChildNode(&CHAR_GFX(entity).movement);
 }
 
 JumpUpState::JumpUpState()
@@ -143,7 +145,7 @@ void JumpUpState::handle(const Input& input, Entity& entity)
 
 void JumpUpState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&entity.jump_up);
+    entity.transform.node.addChildNode(&CHAR_GFX(entity).jump_up);
 
     auto force = b2Vec2(
         entity.physics->jump_x_factor * input.joystick.move.x, entity.physics->jump_y_factor);
@@ -158,7 +160,7 @@ void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 
 void JumpUpState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&entity.jump_up);
+    entity.transform.node.removeChildNode(&CHAR_GFX(entity).jump_up);
 }
 
 JumpDownState::JumpDownState()
@@ -168,7 +170,7 @@ JumpDownState::JumpDownState()
 
 void JumpDownState::enter(const Input& input, Entity& entity)
 {
-    entity.transform.node.addChildNode(&entity.jump_down);
+    entity.transform.node.addChildNode(&CHAR_GFX(entity).jump_down);
 }
 
 void JumpDownState::handle(const Input& input, Entity& entity)
@@ -191,7 +193,7 @@ void JumpDownState::update(const f32, const Input& input, Entity& entity)
 
 void JumpDownState::exit(Entity& entity)
 {
-    entity.transform.node.removeChildNode(&entity.jump_down);
+    entity.transform.node.removeChildNode(&CHAR_GFX(entity).jump_down);
 }
 
 const char* to_str(State& state)
@@ -201,82 +203,8 @@ const char* to_str(State& state)
 
 Entity::Entity(nc::SceneNode& scene)
     : transform {scene}
-    , idle_texture {PATH("img/hero/herochar_idle_anim_strip_4.png")}
-    , idle {&transform.node, &idle_texture}
-    , movement_texture {PATH("img/hero/herochar_run_anim_strip_6.png")}
-    , movement {nullptr, &movement_texture}
-    , jump_up_texture {PATH("img/hero/herochar_jump_up_anim_strip_3.png")}
-    , jump_down_texture {PATH("img/hero/herochar_jump_down_anim_strip_3.png")}
-    , jump_up {nullptr, &jump_up_texture}
-    , jump_down {nullptr, &jump_down_texture}
+    , graphics {MK<CharacterGraphicsComponent>(transform)}
 {
-    // Idle animation
-    {
-        idle_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(idle_texture.width() / 4.0f, idle_texture.height());
-
-        for (int i = 0; i < 4; ++i) {
-            anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        idle.addAnimation(MK<nc::RectAnimation>(anim));
-        idle.setPaused(false);
-        idle.setLayer(1);
-    }
-
-    // Movement animation
-    {
-        movement_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(movement_texture.width() / 6.0f, movement_texture.height());
-
-        for (int i = 0; i < 6; ++i) {
-            anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        movement.addAnimation(MK<nc::RectAnimation>(anim));
-        movement.setPaused(false);
-        movement.setLayer(1);
-    }
-
-    // Jump animation
-    {
-        jump_up_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto jump_up_anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(jump_up_texture.width() / 3.0f, jump_up_texture.height());
-
-        for (int i = 0; i < 3; ++i) {
-            jump_up_anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        jump_up.addAnimation(MK<nc::RectAnimation>(jump_up_anim));
-        jump_up.setPaused(false);
-        jump_up.setLayer(1);
-
-        jump_down_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto jump_down_anim = nc::RectAnimation(0.125f,
-            nc::RectAnimation::LoopMode::ENABLED,
-            nc::RectAnimation::RewindMode::FROM_START);
-
-        for (int i = 0; i < 3; ++i) {
-            jump_down_anim.addRect(nc::Recti(i * sprite_size.x, 0.0, sprite_size.x, sprite_size.y));
-        }
-
-        jump_down.addAnimation(MK<nc::RectAnimation>(jump_down_anim));
-        jump_down.setPaused(false);
-        jump_down.setLayer(1);
-    }
 }
 
 void Entity::set_state(const Input& input, State::Value value)
@@ -294,14 +222,8 @@ void Entity::set_state(const Input& input, State::Value value)
 
 void Entity::update(const f32 dt, const Input& input)
 {
-    // Set direction of sprite
-    float movement_x = input.joystick.move.x;
-    if (movement_x) {
-        bool flipped_x = movement_x < 0.0;
-        movement.setFlippedX(flipped_x);
-        idle.setFlippedX(flipped_x);
-        jump_up.setFlippedX(flipped_x);
-        jump_down.setFlippedX(flipped_x);
+    if (graphics) {
+        (*graphics)->update(input);
     }
 
     state->handle(input, *this);
