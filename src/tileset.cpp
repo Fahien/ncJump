@@ -1,8 +1,9 @@
 #include "tileset.h"
+#include "game.h"
 
 namespace jmp
 {
-Tileset::Tileset(nc::Texture& texture, u32 tile_size)
+Tileset::Tileset(Game& game, nc::Texture& texture, u32 tile_size)
     : texture {texture}
     , tile_size {tile_size}
     , width {texture.width() / tile_size}
@@ -12,11 +13,12 @@ Tileset::Tileset(nc::Texture& texture, u32 tile_size)
     ASSERT_MSG(texture.height() % tile_size == 0, "Wrong texture and tile size");
 
     for (usize i = 0; i < width * height; ++i) {
-        tiles.emplaceBack(create_tile(i));
+        tiles_descs.emplaceBack(TileDesc());
+        tiles.emplaceBack(create_tile(i, game));
     }
 }
 
-Entity Tileset::create_tile(u32 i) const
+Entity Tileset::create_tile(u32 i, Game& game) const
 {
     auto tile = Entity();
 
@@ -36,6 +38,12 @@ Entity Tileset::create_tile(u32 i) const
     graphics.sprite->setTexture(&texture);
     graphics.sprite->setTexRect(MV(tex_rect));
     tile.graphics = MK<SingleGraphicsComponent>(MV(graphics));
+
+    auto& tile_desc = tiles_descs[i];
+    if (!tile_desc.passable) {
+        tile.physics =
+            PhysicsComponent::solid_tile(game.physics, tile.transform.node->position());
+    }
 
     return tile;
 }

@@ -142,6 +142,9 @@ void Editor::update_selected_tile(Tileset& tileset)
 
     ImGui::Image(tileset.texture.guiTexId(), tile_size, uvs[0], uvs[1]);
 
+    auto& tile_desc = tileset.tiles_descs[selected_tile];
+    ImGui::Checkbox("Passable", &tile_desc.passable);
+
     ImGui::End();
 }
 
@@ -163,7 +166,7 @@ void Editor::update_tilemap()
         auto y = game.input.mouse.pos.y / tile_size;
 
         if (x < game.tilemap.width && y < game.tilemap.height) {
-            game.tilemap.set(x, y, game.tileset.create_tile(selected_tile));
+            game.tilemap.set(x, y, game.tileset.create_tile(selected_tile, game));
         }
     }
 }

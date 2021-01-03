@@ -6,12 +6,16 @@
 
 namespace jmp
 {
+class Game;
+
 class Tilemap
 {
 public:
-    Tilemap(nc::SceneNode& root, const Tileset& tileset);
+    Tilemap(Game& game, nc::SceneNode& root, const Tileset& tileset);
 
     void set(u32 x, u32 y, Entity&& tile);
+
+    Game& game;
 
     u32 width = 24;
     u32 height = 10;
