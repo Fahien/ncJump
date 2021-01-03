@@ -11,9 +11,9 @@ Game::Game(Config& config)
     , scene {&root}
     , entity {scene}
     , resource {PATH("img/tile/tileset.png")}
-    , tileset {resource, config.size.tile}
-    , tilemap {scene, tileset}
     , physics {entity.transform.node->x, entity.transform.node->y}
+    , tileset {*this, resource, config.size.tile}
+    , tilemap {*this, scene, tileset}
     , editor {*this}
 {
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
@@ -21,7 +21,7 @@ Game::Game(Config& config)
     scene.setScale(config.scale.scene);
 
     // @todo Refactor that
-    entity.physics = PhysicsComponent();
+    entity.physics = PhysicsComponent(physics);
     entity.physics->body = physics.hero_body;
     entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
     entity.state = MK<CharacterStateComponent>();

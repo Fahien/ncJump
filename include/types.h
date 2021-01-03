@@ -15,6 +15,7 @@ using usize = size_t;
 using f32 = float;
 
 using Vec2i = nc::Vector2<i32>;
+using Vec2u = nc::Vector2<u32>;
 using Vec2f = nc::Vector2<f32>;
 constexpr auto None = std::nullopt;
 

@@ -6,11 +6,22 @@
 
 namespace jmp
 {
+class Physics;
+
 class PhysicsComponent {
 public:
-    PhysicsComponent() = default;
+    static PhysicsComponent solid_tile(Physics& physics, const Vec2f& pos);
+
+    PhysicsComponent(Physics& physics);
+
+    PhysicsComponent(PhysicsComponent&& o);
+    PhysicsComponent& operator=(PhysicsComponent&& o) noexcept;
+
+    ~PhysicsComponent();
 
     void update();
+
+    Physics& physics;
 
     b2Body* body = nullptr;
 
