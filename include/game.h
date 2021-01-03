@@ -32,11 +32,11 @@ public:
 
     nc::Texture resource;
 
+    Physics physics;
+
     Tileset tileset;
 
     Tilemap tilemap;
-
-    Physics physics;
 
     Editor editor;
 };
