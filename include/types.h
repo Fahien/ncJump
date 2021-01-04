@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <optional>
+#include <string>
 
 #include <ncine/Vector2.h>
 #include <nctl/StaticArray.h>
@@ -26,3 +28,81 @@ constexpr auto None = std::nullopt;
 #define MV nctl::move
 
 #define PATH(path) nc::fs::joinPath(nc::fs::dataPath(), path).data()
+
+enum class DirectionFlags {
+    NONE = 0,
+    UP = 1 << 0,
+    DOWN = 1 << 1,
+    LEFT = 1 << 2,
+    RIGHT = 1 << 3,
+};
+
+constexpr inline DirectionFlags operator~(DirectionFlags a)
+{
+    return (DirectionFlags) ~(i32)a;
+}
+
+constexpr inline DirectionFlags operator|(DirectionFlags a, DirectionFlags b)
+{
+    return (DirectionFlags)((i32)a | (i32)b);
+}
+
+constexpr inline DirectionFlags operator&(DirectionFlags a, DirectionFlags b)
+{
+    return (DirectionFlags)((i32)a & (i32)b);
+}
+constexpr inline DirectionFlags operator^(DirectionFlags a, DirectionFlags b)
+{
+    return (DirectionFlags)((i32)a ^ (i32)b);
+}
+
+constexpr inline DirectionFlags& operator|=(DirectionFlags& a, DirectionFlags b)
+{
+    return (DirectionFlags&)((i32&)a |= (i32)b);
+}
+
+constexpr inline DirectionFlags& operator&=(DirectionFlags& a, DirectionFlags b)
+{
+    return (DirectionFlags&)((i32&)a &= (i32)b);
+}
+
+constexpr inline DirectionFlags& operator^=(DirectionFlags& a, DirectionFlags b)
+{
+    return (DirectionFlags&)((i32&)a ^= (i32)b);
+}
+
+constexpr inline bool any(DirectionFlags a)
+{
+    return a != DirectionFlags::NONE;
+}
+
+static std::string to_str(DirectionFlags a)
+{
+    if (a == DirectionFlags::NONE) {
+        return "NONE";
+    }
+
+    std::string ret;
+
+    if (any(a & DirectionFlags::UP)) {
+        ret += "UP, ";
+    }
+
+    if (any(a & DirectionFlags::DOWN)) {
+        ret += "DOWN, ";
+    }
+
+    if (any(a & DirectionFlags::LEFT)) {
+        ret += "LEFT, ";
+    }
+
+    if (any(a & DirectionFlags::RIGHT)) {
+        ret += "RIGHT, ";
+    }
+
+    // Remove last ", "
+    assert(ret.length() > 2);
+    ret.resize(ret.length() - 2);
+
+    return ret;
+}
