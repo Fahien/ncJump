@@ -3,7 +3,7 @@
 namespace jmp
 {
 Physics::Physics(f32 x, f32 y)
-    : gravity {0.0, -20.0f}
+    : gravity {0.0, -30.0f}
     , world {gravity}
 {
     // Ground body
@@ -25,17 +25,17 @@ Physics::Physics(f32 x, f32 y)
     auto hero_def = b2BodyDef();
     hero_def.type = b2_dynamicBody;
     hero_def.position.Set(x, y);
-    hero_def.fixedRotation = true;
+    hero_def.angularDamping = 100.0;
 
     hero_body = world.CreateBody(&hero_def);
 
-    auto hero_box = b2PolygonShape();
-    hero_box.SetAsBox(0.5f, 0.5f);
+    auto hero_box = b2CircleShape();
+    hero_box.m_radius = 0.48f;
 
     auto hero_fixture_def = b2FixtureDef();
     hero_fixture_def.shape = &hero_box;
-    hero_fixture_def.density = 32.0f;
-    hero_fixture_def.friction = 3.0f;
+    hero_fixture_def.density = 16.0f;
+    hero_fixture_def.friction = 30.0f;
 
     hero_body->CreateFixture(&hero_fixture_def);
 }

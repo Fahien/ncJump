@@ -35,10 +35,10 @@ PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
     : physics {o.physics}
     , body {o.body}
     , air_factor {o.air_factor}
-    , velocity_factor {64.0f}
-    , jump_y_factor {360.0f}
-    , jump_x_factor {3.0f}
-    , max_x_speed {8.0f}
+    , velocity_factor {o.velocity_factor}
+    , jump_y_factor {o.jump_y_factor}
+    , jump_x_factor {o.jump_x_factor}
+    , max_x_speed {o.max_x_speed}
 {
     o.body = nullptr;
 }
@@ -65,6 +65,31 @@ PhysicsComponent::~PhysicsComponent()
 void PhysicsComponent::update()
 {
     assert(body && "Physics component has no body");
+
+    // Update some variables
+    obstacle = DirectionFlags::NONE;
+    for (auto edge = body->GetContactList(); edge; edge = edge->next) {
+        auto normal = edge->contact->GetManifold()->localNormal;
+        if (edge->contact->GetFixtureA() == body->GetFixtureList()) {
+            normal = -normal;
+        }
+
+        if (normal.x < -0.9f) {
+            obstacle |= DirectionFlags::RIGHT;
+        }
+
+        if (normal.x > 0.9f) {
+            obstacle |= DirectionFlags::LEFT;
+        }
+
+        if (normal.y > 0.9f) {
+            obstacle |= DirectionFlags::DOWN;
+        }
+
+        if (normal.y < -0.9f) {
+            obstacle |= DirectionFlags::UP;
+        }
+    }
 
     // Apply air resistance
     auto vel = -body->GetLinearVelocity();

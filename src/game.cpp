@@ -30,12 +30,13 @@ Game::Game(Config& config)
 void Game::update(const float dt)
 {
     // Update game state
-    entity.update(dt, input);
-    editor.update();
     physics.update(dt);
 
-    // @todo Move this somewhere else?
-    // Update entity from box
+    entity.update(dt, input);
+    editor.update();
+
+    // @todo Move this somewhere else? Possibly PhysicsSystem?
+    // Update entity from body
     auto& pos = physics.hero_body->GetPosition();
     entity.transform.node->x = config.size.tile * pos.x + config.size.tile / 2.0f;
     entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
