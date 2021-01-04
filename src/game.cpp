@@ -10,6 +10,7 @@ Game::Game(Config& config)
     , root {nc::theApplication().rootNode()}
     , scene {&root}
     , entity {scene}
+    , camera{scene, *entity.transform.node.get()}
     , resource {PATH("img/tile/tileset.png")}
     , physics {entity.transform.node->x, entity.transform.node->y}
     , tileset {*this, resource, config.size.tile}
@@ -42,6 +43,9 @@ void Game::update(const f32 dt)
     entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
 
     input.reset();
+
+    // @todo Fix editor place tile according to camera position
+    camera.update();
 }
 
 } // namespace jmp

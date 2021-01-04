@@ -9,6 +9,7 @@
 #include "input.h"
 #include "tilemap.h"
 #include "tileset.h"
+#include "camera.h"
 
 namespace jmp
 {
@@ -29,6 +30,8 @@ public:
     nc::SceneNode scene;
 
     Entity entity;
+
+    Camera camera;
 
     nc::Texture resource;
 
