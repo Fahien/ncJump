@@ -25,7 +25,7 @@ Physics::Physics(f32 x, f32 y)
     auto hero_def = b2BodyDef();
     hero_def.type = b2_dynamicBody;
     hero_def.position.Set(x, y);
-    hero_def.angularDamping = 100.0;
+    hero_def.angularDamping = 1024.0f;
 
     hero_body = world.CreateBody(&hero_def);
 

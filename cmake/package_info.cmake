@@ -19,6 +19,7 @@ set(PACKAGE_SOURCES
 	include/tilemap.h
 	include/editor.h
 	include/physics.h
+	include/camera.h
 	include/component/transform.h
 	include/component/graphics.h
 	include/component/physics.h
@@ -31,6 +32,7 @@ set(PACKAGE_SOURCES
 	src/tilemap.cpp
 	src/editor.cpp
 	src/physics.cpp
+	src/camera.cpp
 	src/component/transform.cpp
 	src/component/graphics.cpp
 	src/component/physics.cpp
