@@ -24,6 +24,8 @@ void Editor::update_physics(PhysicsComponent& physics)
     auto vel = physics.body->GetLinearVelocity();
     ImGui::Text("vel: { x: %.2f, y: %.2f }", vel.x, vel.y);
 
+    ImGui::Text("obstacle: { %s }", to_str(physics.obstacle).c_str());
+
     if (ImGui::TreeNode("Contacts")) {
         for (auto edge = physics.body->GetContactList(); edge; edge = edge->next) {
             auto normal = edge->contact->GetManifold()->localNormal;
