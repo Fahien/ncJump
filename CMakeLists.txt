@@ -13,6 +13,7 @@ endif()
 project(${PACKAGE_NAME})
 
 include(package_options)
+include(package_check_data)
 
 include(find_ncine)
 if(NOT NCINE_DYNAMIC_LIBRARY)
