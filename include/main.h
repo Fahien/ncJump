@@ -28,6 +28,7 @@ public:
     void onMouseButtonPressed(const nc::MouseEvent& event) override;
     void onMouseButtonReleased(const nc::MouseEvent& event) override;
 
+    void onKeyPressed(const nc::KeyboardEvent& event) override;
     void onKeyReleased(const nc::KeyboardEvent& event) override;
 
     void onJoyAxisMoved(const nc::JoyAxisEvent& event) override;

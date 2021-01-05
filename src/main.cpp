@@ -66,11 +66,53 @@ void JumpHandler::onMouseButtonReleased(const nc::MouseEvent& event)
     }
 }
 
+void JumpHandler::onKeyPressed(const nc::KeyboardEvent& event)
+{
+    switch (event.sym) {
+    case nc::KeySym::W:
+        game->input.joystick.move.y += 1.0;
+        break;
+    case nc::KeySym::S:
+        game->input.joystick.move.y += -1.0;
+        break;
+    case nc::KeySym::A:
+        game->input.joystick.move.x += -1.0;
+        break;
+    case nc::KeySym::D:
+        game->input.joystick.move.x += 1.0;
+        break;
+    case nc::KeySym::SPACE:
+        game->input.joystick.a.down = game->input.joystick.a.just_down = true;
+        break;
+    default:
+        break;
+    }
+}
+
 void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
 {
-    if (event.sym == nc::KeySym::ESCAPE) {
+    switch (event.sym) {
+    case nc::KeySym::W:
+        game->input.joystick.move.y += -1.0;
+        break;
+    case nc::KeySym::S:
+        game->input.joystick.move.y += 1.0;
+        break;
+    case nc::KeySym::A:
+        game->input.joystick.move.x += 1.0;
+        break;
+    case nc::KeySym::D:
+        game->input.joystick.move.x += -1.0;
+        break;
+    case nc::KeySym::SPACE:
+        game->input.joystick.a.down = false;
+        break;
+    case nc::KeySym::ESCAPE:
         LOGI("Bye");
         nc::theApplication().quit();
+        break;
+    default:
+        break;
     }
 }
 
