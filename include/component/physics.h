@@ -11,6 +11,7 @@ class Physics;
 class PhysicsComponent {
 public:
     static PhysicsComponent solid_tile(Physics& physics, const Vec2f& pos);
+    static PhysicsComponent character(Physics& physics, const Vec2f& pos);
 
     PhysicsComponent(Physics& physics);
 

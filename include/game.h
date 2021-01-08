@@ -2,14 +2,14 @@
 
 #include <ncine/SceneNode.h>
 
-#include "physics.h"
+#include "camera.h"
 #include "config.h"
 #include "editor.h"
 #include "entity.h"
 #include "input.h"
+#include "physics.h"
 #include "tilemap.h"
 #include "tileset.h"
-#include "camera.h"
 
 namespace jmp
 {
@@ -29,13 +29,13 @@ public:
     /// Root node of the game scene
     nc::SceneNode scene;
 
+    Physics physics;
+
     Entity entity;
 
     Camera camera;
 
     nc::Texture resource;
-
-    Physics physics;
 
     Tileset tileset;
 
