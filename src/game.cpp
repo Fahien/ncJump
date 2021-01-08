@@ -3,6 +3,8 @@
 #include <ncine/Application.h>
 #include <ncine/FileSystem.h>
 
+#include "serialization/config.h"
+
 namespace jmp
 {
 Game::Game(Config& config)
@@ -25,6 +27,8 @@ Game::Game(Config& config)
     entity.physics = PhysicsComponent::character(physics, entity.transform.node->position());
     entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
     entity.state = MK<CharacterStateComponent>();
+
+    save(config, PATH("config.json"));
 }
 
 void Game::update(const f32 dt)
