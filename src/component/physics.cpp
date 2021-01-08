@@ -26,6 +26,31 @@ PhysicsComponent PhysicsComponent::solid_tile(Physics& physics, const Vec2f& pos
     return ret;
 }
 
+PhysicsComponent PhysicsComponent::character(Physics& physics, const Vec2f& pos)
+{
+    auto hero_def = b2BodyDef();
+    hero_def.type = b2_dynamicBody;
+    hero_def.position.Set(pos.x, pos.y);
+    hero_def.angularDamping = 1024.0f;
+
+    auto body = physics.world.CreateBody(&hero_def);
+
+    auto hero_box = b2CircleShape();
+    hero_box.m_radius = 0.48f;
+
+    auto hero_fixture_def = b2FixtureDef();
+    hero_fixture_def.shape = &hero_box;
+    hero_fixture_def.density = 16.0f;
+    hero_fixture_def.friction = 30.0f;
+
+    body->CreateFixture(&hero_fixture_def);
+
+    auto ret = PhysicsComponent(physics);
+    ret.body = body;
+
+    return ret;
+}
+
 PhysicsComponent::PhysicsComponent(Physics& physics)
     : physics {physics}
 {

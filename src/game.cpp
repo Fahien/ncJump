@@ -9,10 +9,10 @@ Game::Game(Config& config)
     : config {config}
     , root {nc::theApplication().rootNode()}
     , scene {&root}
+    , physics {}
     , entity {scene}
-    , camera{scene, *entity.transform.node.get()}
+    , camera {scene, *entity.transform.node.get()}
     , resource {PATH("img/tile/tileset.png")}
-    , physics {entity.transform.node->x, entity.transform.node->y}
     , tileset {*this, resource, config.size.tile}
     , tilemap {*this, scene, tileset}
     , editor {*this}
@@ -22,8 +22,7 @@ Game::Game(Config& config)
     scene.setScale(config.scale.scene);
 
     // @todo Refactor that
-    entity.physics = PhysicsComponent(physics);
-    entity.physics->body = physics.hero_body;
+    entity.physics = PhysicsComponent::character(physics, entity.transform.node->position());
     entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
     entity.state = MK<CharacterStateComponent>();
 }
@@ -38,7 +37,7 @@ void Game::update(const f32 dt)
 
     // @todo Move this somewhere else? Possibly PhysicsSystem?
     // Update entity from body
-    auto& pos = physics.hero_body->GetPosition();
+    auto& pos = entity.physics->body->GetPosition();
     entity.transform.node->x = config.size.tile * pos.x + config.size.tile / 2.0f;
     entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
 
