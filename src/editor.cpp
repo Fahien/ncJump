@@ -162,13 +162,17 @@ void Editor::update_tilemap()
     }
     // Place selected tile on the map at clicked position
     if (selected_tile >= 0 && game.input.mouse.left.down) {
-        i32 tile_size = game.config.size.tile * game.config.scale.scene * game.config.scale.global;
+        i32 global_scale = game.config.scale.global;
+        i32 tile_size = game.config.size.tile * game.config.scale.scene * global_scale;
 
-        auto x = game.input.mouse.pos.x / tile_size;
-        auto y = game.input.mouse.pos.y / tile_size;
+        auto screen_camera = Vec2i {i32(game.camera.get_position().x * global_scale),
+            i32(game.camera.get_position().y * global_scale)};
 
-        if (x < game.tilemap.width && y < game.tilemap.height) {
-            game.tilemap.set(x, y, game.tileset.create_tile(selected_tile, game));
+        Vec2i tile_target = (game.input.mouse.pos - screen_camera) / tile_size;
+
+        if (tile_target.x < game.tilemap.width && tile_target.y < game.tilemap.height) {
+            game.tilemap.set(
+                tile_target.x, tile_target.y, game.tileset.create_tile(selected_tile, game));
         }
     }
 }

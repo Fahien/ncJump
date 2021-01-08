@@ -12,6 +12,10 @@ Camera::Camera(nc::SceneNode& node, nc::SceneNode& follow)
 {
 }
 
+Vec2f Camera::get_position() const {
+    return node.position();
+}
+
 f32 lerp(f32 a, f32 b, f32 t)
 {
     return a + t * (b - a);

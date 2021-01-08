@@ -17,8 +17,8 @@ public:
 
     Game& game;
 
-    u32 width = 24;
-    u32 height = 10;
+    u32 width = 64;
+    u32 height = 32;
 
     nc::SceneNode node;
 
