@@ -17,6 +17,8 @@ public:
 
     void update();
 
+    Vec2f get_position() const;
+
 private:
     nc::SceneNode& node;
     nc::SceneNode& follow;

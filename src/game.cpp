@@ -44,7 +44,6 @@ void Game::update(const f32 dt)
 
     input.reset();
 
-    // @todo Fix editor place tile according to camera position
     camera.update();
 }
 
