@@ -24,17 +24,19 @@ void JumpHandler::onPreInit(nc::AppConfiguration& config)
 #endif
 #endif
 
+    auto jmp_config = jmp::Config::from_json(PATH("config.json"));
+
     config.consoleLogLevel = nc::ILogger::LogLevel::INFO;
 
     config.windowTitle = "ncJump";
     config.windowIconFilename = "jump48.png";
-    config.resolution.x = 1600;
-    config.resolution.y = 800;
+    config.resolution.x = i32(jmp_config.scale.window) * i32(jmp_config.size.window.width);
+    config.resolution.y = i32(jmp_config.scale.window) * i32(jmp_config.size.window.height);
 }
 
 void JumpHandler::onInit()
 {
-    auto config = jmp::Config();
+    auto config = jmp::Config::from_json(PATH("config.json"));
     game = MK<jmp::Game>(config);
 }
 
