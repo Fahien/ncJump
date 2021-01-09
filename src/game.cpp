@@ -15,7 +15,7 @@ Game::Game(Config& config)
     , entity {scene}
     , camera {scene, *entity.transform.node.get()}
     , resource {PATH("img/tile/tileset.png")}
-    , tileset {*this, resource, config.size.tile}
+    , tileset {resource, config.size.tile}
     , tilemap {*this, scene, tileset}
     , editor {*this}
 {
