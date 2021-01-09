@@ -143,7 +143,8 @@ void Editor::update_selected_tile(Tileset& tileset)
     ImGui::Image(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1]);
 
     auto& tile = tileset.tiles[selected_tile];
-    ImGui::Checkbox("Passable", &tile.passable);
+    ImGui::Text("id: %u", tile.id);
+    ImGui::Checkbox("passable", &tile.passable);
 
     ImGui::End();
 }
@@ -152,6 +153,7 @@ void Editor::update_tilemap()
 {
     ImGui::Begin("Tilemap");
     ImGui::Text("width: %u\nheight: %u", game.tilemap.width, game.tilemap.height);
+    ImGui::Text("tiles: %u\nentities: %u", game.tilemap.tiles.size(), game.tilemap.tiles.size());
     ImGui::End();
 
     // Do not place any tile if mouse is hovering ImGui
@@ -169,8 +171,7 @@ void Editor::update_tilemap()
         Vec2i tile_target = (game.input.mouse.pos - screen_camera) / tile_size;
 
         if (tile_target.x < game.tilemap.width && tile_target.y < game.tilemap.height) {
-            game.tilemap.set(
-                tile_target.x, tile_target.y, game.tileset.create_entity(selected_tile, game));
+            game.tilemap.set(tile_target, game.tileset, game.tileset.tiles[selected_tile]);
         }
     }
 }

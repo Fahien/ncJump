@@ -26,8 +26,8 @@ void Tileset::set_texture(nc::Texture& t)
     height = texture->height() / tile_size;
 
     if (tiles.isEmpty()) {
-        for (usize i = 0; i < width * height; ++i) {
-            tiles.emplaceBack(Tile());
+        for (u32 i = 0; i < width * height; ++i) {
+            tiles.emplaceBack(Tile {i});
         }
     }
 
@@ -57,15 +57,15 @@ UNIQUE<nc::Sprite> Tileset::create_sprite(u32 i) const
     return sprite;
 }
 
-Entity Tileset::create_entity(u32 i, Game& game) const
+Entity Tileset::create_entity(const Tile& tile, Game& game) const
 {
-    auto tile = Entity();
+    auto entity = Entity();
 
-    usize row = i / width;
-    usize col = i % width;
+    usize row = tile.id / width;
+    usize col = tile.id % width;
 
-    tile.transform.node->x = col * tile_size;
-    tile.transform.node->y = row * tile_size;
+    entity.transform.node->x = col * tile_size;
+    entity.transform.node->y = row * tile_size;
 
     nc::Recti tex_rect;
     tex_rect.x = col * tile_size;
@@ -73,17 +73,17 @@ Entity Tileset::create_entity(u32 i, Game& game) const
     tex_rect.w = tile_size;
     tex_rect.h = tile_size;
 
-    auto graphics = SingleGraphicsComponent(tile.transform, *texture);
+    auto graphics = SingleGraphicsComponent(entity.transform, *texture);
     graphics.sprite->setTexture(texture);
     graphics.sprite->setTexRect(MV(tex_rect));
-    tile.graphics = MK<SingleGraphicsComponent>(MV(graphics));
+    entity.graphics = MK<SingleGraphicsComponent>(MV(graphics));
 
-    auto& desc = tiles[i];
-    if (!desc.passable) {
-        tile.physics = PhysicsComponent::solid_tile(game.physics, tile.transform.node->position());
+    if (!tile.passable) {
+        entity.physics =
+            PhysicsComponent::solid_tile(game.physics, entity.transform.node->position());
     }
 
-    return tile;
+    return entity;
 }
 
 } // namespace jmp
