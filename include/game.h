@@ -17,6 +17,7 @@ class Game
 {
 public:
     Game(Config& config);
+    ~Game();
 
     void update(f32 dt);
 
