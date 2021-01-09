@@ -16,6 +16,8 @@ class Game;
 class Tile
 {
 public:
+    static Tile from_json(const char* file_path);
+
     bool passable = true;
 };
 
@@ -25,7 +27,12 @@ public:
 class Tileset
 {
 public:
+    static Tileset from_json(const char* file_path);
+
+    Tileset(u32 tile_size = 16);
     Tileset(nc::Texture& texture, u32 tile_size = 16);
+
+    void set_texture(nc::Texture& texture);
 
     /// @return A concrete entity based on the tile description at position passed as a parameter
     Entity create_entity(u32 index, Game& game) const;
@@ -33,8 +40,8 @@ public:
     /// @return A sprite for the tile at position passed as a parameter
     UNIQUE<nc::Sprite> create_sprite(u32 i) const;
 
-    // @todo Do not use references
-    nc::Texture& texture;
+    // @todo Do not use pointers
+    nc::Texture* texture;
 
     u32 tile_size = 16;
 

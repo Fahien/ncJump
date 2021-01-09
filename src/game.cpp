@@ -4,9 +4,18 @@
 #include <ncine/FileSystem.h>
 
 #include "serialization/config.h"
+#include "serialization/tileset.h"
 
 namespace jmp
 {
+Tileset create_tileset(nc::Texture& texture)
+{
+    auto ret = Tileset::from_json(PATH("tileset.json"));
+
+    ret.set_texture(texture);
+
+    return ret;
+}
 Game::Game(Config& config)
     : config {config}
     , root {nc::theApplication().rootNode()}
@@ -15,7 +24,7 @@ Game::Game(Config& config)
     , entity {scene}
     , camera {scene, *entity.transform.node.get()}
     , resource {PATH("img/tile/tileset.png")}
-    , tileset {resource, config.size.tile}
+    , tileset {create_tileset(resource)}
     , tilemap {*this, scene, tileset}
     , editor {*this}
 {
@@ -27,8 +36,12 @@ Game::Game(Config& config)
     entity.physics = PhysicsComponent::character(physics, entity.transform.node->position());
     entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
     entity.state = MK<CharacterStateComponent>();
+}
 
+Game::~Game()
+{
     save(config, PATH("config.json"));
+    save(tileset, PATH("tileset.json"));
 }
 
 void Game::update(const f32 dt)

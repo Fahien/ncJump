@@ -89,13 +89,12 @@ ImVec2 get_tile_size(Config& config)
 ARRAY<ImVec2, 2> get_tile_uvs(Tileset& tileset, u32 index)
 {
     auto& sprite = tileset.sprites[index];
-    f32 width = tileset.texture.width();
-    f32 height = tileset.texture.height();
+    f32 width = tileset.texture->width();
+    f32 height = tileset.texture->height();
 
     auto uvs = ARRAY<ImVec2, 2>(nctl::StaticArrayMode::EXTEND_SIZE);
     uvs[0] = {sprite->texRect().x / width, sprite->texRect().y / height};
-    uvs[1] = {uvs[0].x + sprite->texRect().w / width,
-        uvs[0].y + sprite->texRect().h / height};
+    uvs[1] = {uvs[0].x + sprite->texRect().w / width, uvs[0].y + sprite->texRect().h / height};
 
     return uvs;
 }
@@ -115,7 +114,7 @@ void Editor::update_tileset(Tileset& tileset)
         if (selected) {
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
         }
-        if (ImGui::ImageButton(tileset.texture.guiTexId(), tile_size, uvs[0], uvs[1])) {
+        if (ImGui::ImageButton(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1])) {
             selected_tile = i;
         }
         if (selected) {
@@ -141,7 +140,7 @@ void Editor::update_selected_tile(Tileset& tileset)
     auto tile_size = get_tile_size(game.config);
     auto uvs = get_tile_uvs(tileset, selected_tile);
 
-    ImGui::Image(tileset.texture.guiTexId(), tile_size, uvs[0], uvs[1]);
+    ImGui::Image(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1]);
 
     auto& tile = tileset.tiles[selected_tile];
     ImGui::Checkbox("Passable", &tile.passable);

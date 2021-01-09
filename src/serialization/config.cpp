@@ -1,12 +1,8 @@
 #include "serialization/config.h"
 
-#include <ncine/FileSystem.h>
-#include <ncine/IFile.h>
-#include <nctl/Array.h>
-#include <nlohmann/json.hpp>
-
 #include "config.h"
-#include "types.h"
+
+#include "serialization/file.h"
 
 namespace nl = nlohmann;
 
@@ -35,16 +31,6 @@ void to_json(nl::json& j, const Config& c)
 {
     j["scale"] = c.scale;
     j["size"] = c.size;
-}
-
-auto read_file(const char* path)
-{
-    auto file = nc::IFile::createFileHandle(path);
-    file->open(nc::IFile::OpenMode::READ);
-    nctl::Array<char> data;
-    data.setSize(file->size());
-    file->read(data.data(), file->size());
-    return data;
 }
 
 void from_json(const nl::json& j, Scale& s)
@@ -86,12 +72,8 @@ Config Config::from_json(const char* path)
 void save(const Config& c, const char* file_path)
 {
     nl::json j = c;
-    auto file = nc::IFile::createFileHandle(file_path);
-    file->open(nc::IFile::OpenMode::WRITE);
-
     auto data = j.dump();
-    file->write((void*)data.c_str(), data.length());
-
+    write_file(file_path, data);
     LOGI_X("Config saved to %s", file_path);
 }
 

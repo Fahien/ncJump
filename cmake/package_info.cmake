@@ -24,7 +24,9 @@ set(PACKAGE_SOURCES
 	include/component/graphics.h
 	include/component/physics.h
 	include/component/state.h
+	include/serialization/file.h
 	include/serialization/config.h
+	include/serialization/tileset.h
 	src/main.cpp
 	src/input.cpp
 	src/game.cpp
@@ -38,5 +40,7 @@ set(PACKAGE_SOURCES
 	src/component/graphics.cpp
 	src/component/physics.cpp
 	src/component/state.cpp
+	src/serialization/file.cpp
 	src/serialization/config.cpp
+	src/serialization/tileset.cpp
 )
