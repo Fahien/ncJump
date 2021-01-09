@@ -88,15 +88,14 @@ ImVec2 get_tile_size(Config& config)
 
 ARRAY<ImVec2, 2> get_tile_uvs(Tileset& tileset, u32 index)
 {
-    auto& tile = tileset.tiles[index];
+    auto& sprite = tileset.sprites[index];
     f32 width = tileset.texture.width();
     f32 height = tileset.texture.height();
 
     auto uvs = ARRAY<ImVec2, 2>(nctl::StaticArrayMode::EXTEND_SIZE);
-    auto& graphics = SingleGraphicsComponent::into(**tile.graphics);
-    uvs[0] = {graphics.sprite->texRect().x / width, graphics.sprite->texRect().y / height};
-    uvs[1] = {uvs[0].x + graphics.sprite->texRect().w / width,
-        uvs[0].y + graphics.sprite->texRect().h / height};
+    uvs[0] = {sprite->texRect().x / width, sprite->texRect().y / height};
+    uvs[1] = {uvs[0].x + sprite->texRect().w / width,
+        uvs[0].y + sprite->texRect().h / height};
 
     return uvs;
 }
@@ -108,7 +107,7 @@ void Editor::update_tileset(Tileset& tileset)
     auto tile_size = get_tile_size(game.config);
 
     // Draw selectable tiles using image buttons
-    for (usize i = 0; i < tileset.tiles.size(); ++i) {
+    for (usize i = 0; i < tileset.sprites.size(); ++i) {
         auto uvs = get_tile_uvs(tileset, i);
 
         ImGui::PushID(i);
@@ -144,8 +143,8 @@ void Editor::update_selected_tile(Tileset& tileset)
 
     ImGui::Image(tileset.texture.guiTexId(), tile_size, uvs[0], uvs[1]);
 
-    auto& tile_desc = tileset.tiles_descs[selected_tile];
-    ImGui::Checkbox("Passable", &tile_desc.passable);
+    auto& tile = tileset.tiles[selected_tile];
+    ImGui::Checkbox("Passable", &tile.passable);
 
     ImGui::End();
 }
@@ -172,7 +171,7 @@ void Editor::update_tilemap()
 
         if (tile_target.x < game.tilemap.width && tile_target.y < game.tilemap.height) {
             game.tilemap.set(
-                tile_target.x, tile_target.y, game.tileset.create_tile(selected_tile, game));
+                tile_target.x, tile_target.y, game.tileset.create_entity(selected_tile, game));
         }
     }
 }

@@ -13,7 +13,7 @@ Tilemap::Tilemap(Game& game, nc::SceneNode& root, const Tileset& tileset)
 
     for (u32 i = 0; i < width; ++i) {
         for (u32 j = 0; j < height; ++j) {
-            auto tile = tileset.create_tile(13, game);
+            auto tile = tileset.create_entity(13, game);
             tile.transform.node->x = i * tileset.tile_size;
             tile.transform.node->y = j * tileset.tile_size;
             tile.transform.node->setParent(&node);
