@@ -24,6 +24,7 @@ using Vec2f = nc::Vector2<f32>;
 constexpr auto None = std::nullopt;
 
 #define ARRAY nctl::StaticArray
+#define VECTOR nctl::Array
 #define OPTION std::optional
 #define UNIQUE nctl::UniquePtr
 #define MK nctl::makeUnique

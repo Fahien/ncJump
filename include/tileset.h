@@ -18,6 +18,7 @@ class Tile
 public:
     static Tile from_json(const char* file_path);
 
+    u32 id = 0;
     bool passable = true;
 };
 
@@ -34,8 +35,9 @@ public:
 
     void set_texture(nc::Texture& texture);
 
+    /// @brief The tileset is responsible for this as it knows information about the texture
     /// @return A concrete entity based on the tile description at position passed as a parameter
-    Entity create_entity(u32 index, Game& game) const;
+    Entity create_entity(const Tile& tile, Game& game) const;
 
     /// @return A sprite for the tile at position passed as a parameter
     UNIQUE<nc::Sprite> create_sprite(u32 i) const;

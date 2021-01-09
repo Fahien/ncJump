@@ -27,6 +27,7 @@ set(PACKAGE_SOURCES
 	include/serialization/file.h
 	include/serialization/config.h
 	include/serialization/tileset.h
+	include/serialization/tilemap.h
 	src/main.cpp
 	src/input.cpp
 	src/game.cpp
@@ -43,4 +44,5 @@ set(PACKAGE_SOURCES
 	src/serialization/file.cpp
 	src/serialization/config.cpp
 	src/serialization/tileset.cpp
+	src/serialization/tilemap.cpp
 )
