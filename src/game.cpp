@@ -30,7 +30,7 @@ Game::Game(Config& config)
     , scene {&root}
     , physics {}
     , entity {scene}
-    , camera {scene, *entity.transform.node.get()}
+    , camera {*this, *entity.transform.node.get()}
     , resource {PATH("img/tile/tileset.png")}
     , tileset {create_tileset(resource)}
     , tilemap {create_tilemap(*this)}
