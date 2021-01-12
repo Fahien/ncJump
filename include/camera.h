@@ -9,17 +9,19 @@ class SceneNode;
 
 namespace jmp
 {
+class Game;
 
 class Camera
 {
 public:
-    Camera(nc::SceneNode& node, nc::SceneNode& follow);
+    Camera(Game& game, nc::SceneNode& follow);
 
     void update();
 
     Vec2f get_position() const;
 
 private:
+    Game* game = nullptr;
     nc::SceneNode& node;
     nc::SceneNode& follow;
 };
