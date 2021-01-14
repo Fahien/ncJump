@@ -14,16 +14,21 @@ void from_json(const nl::json& j, Tile& t);
 
 void to_json(nl::json& j, const Tilemap& t)
 {
-    j["width"] = t.width;
-    j["height"] = t.height;
+    j["width"] = t.get_width();
+    j["height"] = t.get_height();
     j["tiles"] = t.tiles;
 }
 
 void from_json(const nl::json& j, Tilemap& t)
 {
-    j["width"].get_to(t.width);
-    j["height"].get_to(t.height);
+    u32 width = 0;
+    u32 height = 0;
+
+    j["width"].get_to(width);
+    j["height"].get_to(height);
     j["tiles"].get_to(t.tiles);
+
+    t.set_dimensions(width, height);
 }
 
 Tilemap Tilemap::from_json(const char* path)
