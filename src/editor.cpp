@@ -152,7 +152,11 @@ void Editor::update_selected_tile(Tileset& tileset)
 void Editor::update_tilemap()
 {
     ImGui::Begin("Tilemap");
-    ImGui::Text("width: %u\nheight: %u", game.tilemap.width, game.tilemap.height);
+    i32 dimensions[2] = {i32(game.tilemap.get_width()), i32(game.tilemap.get_height())};
+    ImGui::Text("width: %u\nheight: %u", game.tilemap.get_width(), game.tilemap.get_height());
+    if (ImGui::DragInt2("dimensions:", dimensions, 1.0f, 0, 64)) {
+        game.tilemap.set_dimensions(dimensions[0], dimensions[1]);
+    }
     ImGui::Text("tiles: %u\nentities: %u", game.tilemap.tiles.size(), game.tilemap.tiles.size());
     ImGui::End();
 
@@ -170,7 +174,7 @@ void Editor::update_tilemap()
 
         Vec2i tile_target = (game.input.mouse.pos - screen_camera) / tile_size;
 
-        if (tile_target.x < game.tilemap.width && tile_target.y < game.tilemap.height) {
+        if (tile_target.x < game.tilemap.get_width() && tile_target.y < game.tilemap.get_height()) {
             game.tilemap.set(tile_target, game.tileset, game.tileset.tiles[selected_tile]);
         }
     }

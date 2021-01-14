@@ -35,10 +35,14 @@ void Camera::update()
     // As we are moving the scene to the opposite direction of the camera max and min are "inverted"
     f32 max_x = 0.0f;
     f32 max_y = 0.0f;
-    f32 min_x = -(game->tilemap.width * game->config.size.tile * game->config.scale.scene -
+    f32 min_x = -(game->tilemap.get_width() * game->config.size.tile * game->config.scale.scene -
         game->config.size.window.width);
-    f32 min_y = -(game->tilemap.height * game->config.size.tile * game->config.scale.scene -
+    f32 min_y = -(game->tilemap.get_height() * game->config.size.tile * game->config.scale.scene -
         game->config.size.window.height);
+    // Make sure min values are less than max values
+    min_x = std::min(min_x, max_x);
+    min_y = std::min(min_y, max_y);
+
     node.x = std::clamp(smoothed_x, min_x, max_x);
     node.y = std::clamp(smoothed_y, min_y, max_y);
 }
