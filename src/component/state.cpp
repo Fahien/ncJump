@@ -181,15 +181,24 @@ void JumpUpState::enter(const Input& input, Entity& entity)
 
     entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_up);
 
-    auto force = b2Vec2(
-        entity.physics->jump_x_factor * input.joystick.move.x, entity.physics->jump_y_factor);
+    auto force = b2Vec2(0.0f, entity.physics->jump_y_factor);
     entity.physics->body->ApplyLinearImpulse(force, entity.physics->body->GetWorldCenter(), true);
+}
+
+/// @brief Jump higher when jump button is kept down
+void can_jump_higher(const Input& input, Entity& entity)
+{
+    if (input.joystick.a.down) {
+        auto force = b2Vec2(0.0f, entity.physics->jump_y_factor / 2.0);
+        entity.physics->body->ApplyForceToCenter(force, true);
+    }
 }
 
 void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 {
     // Can move a bit
     can_move_on_x(input, entity, entity.physics->jump_x_factor);
+    can_jump_higher(input, entity);
 }
 
 void JumpUpState::exit(Entity& entity)
