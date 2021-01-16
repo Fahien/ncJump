@@ -9,7 +9,7 @@ namespace jmp
 class Physics;
 
 struct PhysicsComponent {
-    static PhysicsComponent solid_tile(Physics& physics, const Vec2f& pos);
+    static PhysicsComponent tile(Physics& physics, const Vec2f& pos, bool dynamic);
     static PhysicsComponent character(Physics& physics, const Vec2f& pos);
 
     PhysicsComponent(Physics& physics);

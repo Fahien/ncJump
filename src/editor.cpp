@@ -149,6 +149,29 @@ void Editor::update_selected_tile(Tileset& tileset)
     ImGui::End();
 }
 
+void Editor::place_selected_tile()
+{
+    // Place selected tile on the map at clicked position
+    i32 global_scale = game.config.scale.global;
+    i32 tile_size = game.config.size.tile * game.config.scale.scene * global_scale;
+
+    auto screen_camera = Vec2i {i32(game.camera.get_position().x * global_scale),
+        i32(game.camera.get_position().y * global_scale)};
+
+    if (mode == Mode::TILE) {
+        Vec2i tile_target = (game.input.mouse.pos - screen_camera) / tile_size;
+
+        if (tile_target.x < game.tilemap.get_width() && tile_target.y < game.tilemap.get_height()) {
+            game.tilemap.set_tile(tile_target, game.tileset, game.tileset.tiles[selected_tile]);
+        }
+    } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
+        // Place an object only on mouse left just down
+        auto entity_position = Vec2f {f32((game.input.mouse.pos.x - screen_camera.x) / tile_size),
+            f32((game.input.mouse.pos.y - screen_camera.y) / tile_size)};
+        game.tilemap.set_entity(entity_position, game.tileset, game.tileset.tiles[selected_tile]);
+    }
+}
+
 void Editor::update_tilemap()
 {
     ImGui::Begin("Tilemap");
@@ -157,26 +180,34 @@ void Editor::update_tilemap()
     if (ImGui::DragInt2("dimensions:", dimensions, 1.0f, 0, 64)) {
         game.tilemap.set_dimensions(dimensions[0], dimensions[1]);
     }
-    ImGui::Text("tiles: %u\nentities: %u", game.tilemap.tiles.size(), game.tilemap.tiles.size());
+    ImGui::Text("tiles: %u", game.tilemap.tile_descs.size());
+    if (ImGui::TreeNode("entities:")) {
+        i32 del_num = -1;
+        for (i32 i = 0; i < game.tilemap.entities.size(); ++i) {
+            std::string entity_num = "Delete " + std::to_string(i);
+            if (ImGui::Button(entity_num.c_str())) {
+                del_num = i;
+            }
+        }
+        if (del_num >= 0) {
+            game.tilemap.entities.erase(std::begin(game.tilemap.entities) + del_num);
+        }
+        ImGui::TreePop();
+    }
+
+    if (ImGui::RadioButton("tile", mode == Mode::TILE)) {
+        mode = Mode::TILE;
+    }
+    if (ImGui::RadioButton("entity", mode == Mode::ENTITY)) {
+        mode = Mode::ENTITY;
+    }
     ImGui::End();
 
     // Do not place any tile if mouse is hovering ImGui
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered()) {
-        return;
-    }
-    // Place selected tile on the map at clicked position
-    if (selected_tile >= 0 && game.input.mouse.left.down) {
-        i32 global_scale = game.config.scale.global;
-        i32 tile_size = game.config.size.tile * game.config.scale.scene * global_scale;
-
-        auto screen_camera = Vec2i {i32(game.camera.get_position().x * global_scale),
-            i32(game.camera.get_position().y * global_scale)};
-
-        Vec2i tile_target = (game.input.mouse.pos - screen_camera) / tile_size;
-
-        if (tile_target.x < game.tilemap.get_width() && tile_target.y < game.tilemap.get_height()) {
-            game.tilemap.set(tile_target, game.tileset, game.tileset.tiles[selected_tile]);
-        }
+    bool gui_hovered =
+        ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered();
+    if (!gui_hovered && selected_tile >= 0 && game.input.mouse.left.down) {
+        place_selected_tile();
     }
 }
 
