@@ -31,7 +31,8 @@ public:
 
     void set_game(Game& game);
 
-    void set(const Vec2i& pos, const Tileset& tileset, Tile tile);
+    void set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& tile);
+    void set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile);
 
     Game* game = nullptr;
 
@@ -40,14 +41,17 @@ public:
 
     /// Grid of tiles descriptions where at each position there is a tile description used to
     /// create the concrete tile in the entities array
-    std::vector<std::vector<Tile>> tiles;
+    std::vector<std::vector<Tile>> tile_descs;
 
     /// Grid of concrete tiles where each position corresponds to a cell of the grid
-    std::vector<std::vector<Entity>> entities;
+    std::vector<std::vector<Entity>> tiles;
+
+    /// Other entities which position is not fixed to cells
+    std::vector<Entity> entities;
 
 private:
-    u32 width = 16;
-    u32 height = 8;
+    u32 width = 0;
+    u32 height = 0;
 
 };
 

@@ -66,6 +66,12 @@ void Game::update(const f32 dt)
     auto& pos = entity.physics->body->GetPosition();
     entity.transform.node->x = config.size.tile * pos.x + config.size.tile / 2.0f;
     entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
+    // Update tilemap entities from their bodies
+    for (auto& entity : tilemap.entities) {
+        auto& pos = entity.physics->body->GetPosition();
+        entity.transform.node->x = config.size.tile * pos.x ;
+        entity.transform.node->y = config.size.tile * pos.y ;
+    }
 
     input.reset();
 

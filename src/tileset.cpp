@@ -57,7 +57,7 @@ UNIQUE<nc::Sprite> Tileset::create_sprite(u32 i) const
     return sprite;
 }
 
-Entity Tileset::create_entity(const Tile& tile, Game& game) const
+Entity Tileset::create_entity(const Tile& tile, Game& game, bool dynamic) const
 {
     auto entity = Entity();
 
@@ -80,7 +80,7 @@ Entity Tileset::create_entity(const Tile& tile, Game& game) const
 
     if (!tile.passable) {
         entity.physics =
-            PhysicsComponent::solid_tile(game.physics, entity.transform.node->position());
+            PhysicsComponent::tile(game.physics, entity.transform.node->position(), dynamic);
     }
 
     return entity;

@@ -16,7 +16,7 @@ void to_json(nl::json& j, const Tilemap& t)
 {
     j["width"] = t.get_width();
     j["height"] = t.get_height();
-    j["tiles"] = t.tiles;
+    j["tiles"] = t.tile_descs;
 }
 
 void from_json(const nl::json& j, Tilemap& t)
@@ -26,7 +26,7 @@ void from_json(const nl::json& j, Tilemap& t)
 
     j["width"].get_to(width);
     j["height"].get_to(height);
-    j["tiles"].get_to(t.tiles);
+    j["tiles"].get_to(t.tile_descs);
 
     t.set_dimensions(width, height);
 }

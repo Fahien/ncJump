@@ -5,6 +5,8 @@
 namespace jmp
 {
 Tilemap::Tilemap(Game& g)
+    : width {16}
+    , height {8}
 {
     set_game(g);
 }
@@ -27,35 +29,35 @@ void Tilemap::set_dimensions(u32 w, u32 h)
     width = w;
     height = h;
 
-    // Create new columns with uninitialized entities
+    // Create new columns with uninitialized tile entities
+    tile_descs.resize(width);
     tiles.resize(width);
-    entities.resize(width);
 
     for (i32 i = 0; i < old_width; ++i) {
         // Resize old columns
+        tile_descs[i].resize(height);
         tiles[i].resize(height);
-        entities[i].resize(height);
 
-        // Initialize new entities in old columns
+        // Initialize new tiles in old columns
         if (height > old_height) {
             for (i32 j = old_height; j < height; ++j) {
                 if (game) {
-                    set({i, j}, game->tileset, tiles[i][j]);
+                    set_tile({i, j}, game->tileset, tile_descs[i][j]);
                 }
             }
         }
     }
 
-    // Initialize all new entities in new columns
+    // Initialize all new tiles in new columns
     if (width > old_width) {
         for (i32 i = old_width; i < width; ++i) {
             // Resize new columns
+            tile_descs[i].resize(height);
             tiles[i].resize(height);
-            entities[i].resize(height);
 
             for (i32 j = 0; j < height; ++j) {
                 if (game) {
-                    set({i, j}, game->tileset, tiles[i][j]);
+                    set_tile({i, j}, game->tileset, tile_descs[i][j]);
                 }
             }
         }
@@ -75,22 +77,22 @@ void Tilemap::set_game(Game& g)
     node->y += game->config.size.tile / 2.0f;
 
     // Unless already loaded from somewhere else
-    if (tiles.empty()) {
+    if (tile_descs.empty()) {
         // Create tile prototypes
-        tiles.resize(width, std::vector<Tile>(height));
+        tile_descs.resize(width, std::vector<Tile>(height));
     }
 
-    // Create entities from tile prototypes
-    entities.resize(width);
+    // Create tiles from tile prototypes
+    tiles.resize(width);
     for (i32 i = 0; i < width; ++i) {
-        entities[i].resize(height);
+        tiles[i].resize(height);
         for (i32 j = 0; j < height; ++j) {
-            set({i, j}, game->tileset, tiles[i][j]);
+            set_tile({i, j}, game->tileset, tile_descs[i][j]);
         }
     }
 }
 
-void Tilemap::set(const Vec2i& pos, const Tileset& tileset, Tile tile)
+void Tilemap::set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& tile)
 {
     if (pos.x < width && pos.y < height) {
         auto entity = tileset.create_entity(tile, *game);
@@ -103,9 +105,24 @@ void Tilemap::set(const Vec2i& pos, const Tileset& tileset, Tile tile)
             entity.physics->body->SetTransform({f32(pos.x), f32(pos.y)}, 0);
         }
 
-        tiles[pos.x][pos.y] = MV(tile);
-        entities[pos.x][pos.y] = MV(entity);
+        tile_descs[pos.x][pos.y] = tile;
+        tiles[pos.x][pos.y] = MV(entity);
     }
+}
+
+void Tilemap::set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile)
+{
+    auto entity = tileset.create_entity(tile, *game, true);
+
+    entity.transform.node->setParent(node.get());
+    auto& graphics = SingleGraphicsComponent::into(**entity.graphics);
+    entity.transform.node->x = pos.x * graphics.sprite->texRect().w;
+    entity.transform.node->y = pos.y * graphics.sprite->texRect().h;
+    if (entity.physics) {
+        entity.physics->body->SetTransform({f32(pos.x), f32(pos.y)}, 0);
+    }
+
+    entities.emplace_back(MV(entity));
 }
 
 } // namespace jmp

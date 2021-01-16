@@ -4,10 +4,12 @@
 
 namespace jmp
 {
-PhysicsComponent PhysicsComponent::solid_tile(Physics& physics, const Vec2f& pos)
+PhysicsComponent PhysicsComponent::tile(Physics& physics, const Vec2f& pos, const bool dynamic)
 {
     auto def = b2BodyDef();
     def.position.Set(pos.x, pos.y);
+    def.type = dynamic ? b2_dynamicBody : b2_staticBody;
+    def.fixedRotation = true;
 
     auto body = physics.world.CreateBody(&def);
 
@@ -16,8 +18,8 @@ PhysicsComponent PhysicsComponent::solid_tile(Physics& physics, const Vec2f& pos
 
     auto fixture_def = b2FixtureDef();
     fixture_def.shape = &box;
-    fixture_def.density = 0.0f;
-    fixture_def.friction = 3.0f;
+    fixture_def.density = dynamic ? 16.0f : 0.0f;
+    fixture_def.friction = 2.0f;
     body->CreateFixture(&fixture_def);
 
     auto ret = PhysicsComponent(physics);
