@@ -39,6 +39,9 @@ public:
     /// Root node of the tilemap. The whole tilemap can be transformed using this.
     UNIQUE<nc::SceneNode> node;
 
+    UNIQUE<nc::Texture> background_texture;
+    UNIQUE<nc::Sprite> background_node;
+
     /// Grid of tiles descriptions where at each position there is a tile description used to
     /// create the concrete tile in the entities array
     std::vector<std::vector<Tile>> tile_descs;
@@ -52,7 +55,6 @@ public:
 private:
     u32 width = 0;
     u32 height = 0;
-
 };
 
 } // namespace jmp
