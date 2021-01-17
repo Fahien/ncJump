@@ -72,6 +72,16 @@ void Tilemap::set_game(Game& g)
     // Set map root as child of the game scene node
     node = MK<nc::SceneNode>(&game->scene);
 
+    background_texture = MK<nc::Texture>(PATH("img/tile/background.png"));
+    background_texture->setMagFiltering(nc::Texture::Filtering::NEAREST);
+    background_texture->setWrap(nc::Texture::Wrap::REPEAT);
+    background_node = MK<nc::Sprite>(&game->scene, background_texture.get());
+    background_node->setLayer(0);
+    background_node->setAnchorPoint({});
+    auto background_rect =
+        nc::Recti(0, 0, background_texture->width() * width, background_texture->height());
+    background_node->setTexRect(background_rect);
+
     // Little offset so to anchor the map to bottom-left corner of the first tile
     node->x += game->config.size.tile / 2.0f;
     node->y += game->config.size.tile / 2.0f;

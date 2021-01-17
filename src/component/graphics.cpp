@@ -12,9 +12,11 @@ SingleGraphicsComponent& SingleGraphicsComponent::into(GraphicsComponent& g)
     return reinterpret_cast<SingleGraphicsComponent&>(g);
 }
 
-SingleGraphicsComponent::SingleGraphicsComponent(TransformComponent& transform, nc::Texture& texture)
+SingleGraphicsComponent::SingleGraphicsComponent(TransformComponent& transform,
+    nc::Texture& texture)
     : sprite {MK<nc::Sprite>(&*transform.node, &texture)}
 {
+    sprite->setLayer(1);
 }
 
 void SingleGraphicsComponent::update(const Input& input)
@@ -46,7 +48,7 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
 
         idle.addAnimation(MV(anim));
         idle.setPaused(false);
-        idle.setLayer(1);
+        idle.setLayer(2);
     }
 
     // Movement animation
@@ -64,7 +66,7 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
 
         movement.addAnimation(MV(anim));
         movement.setPaused(false);
-        movement.setLayer(1);
+        movement.setLayer(2);
     }
 
     // Jump animation
@@ -82,7 +84,7 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
 
         jump_up.addAnimation(MV(jump_up_anim));
         jump_up.setPaused(false);
-        jump_up.setLayer(1);
+        jump_up.setLayer(2);
 
         jump_down_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
 
@@ -96,7 +98,7 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
 
         jump_down.addAnimation(MV(jump_down_anim));
         jump_down.setPaused(false);
-        jump_down.setLayer(1);
+        jump_down.setLayer(2);
     }
 }
 

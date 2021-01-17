@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 
+#include <ncine/FileSystem.h>
 #include <ncine/Vector2.h>
 #include <ncine/common_macros.h>
 #include <nctl/StaticArray.h>
