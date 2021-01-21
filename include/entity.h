@@ -19,11 +19,15 @@ class Entity;
 class Entity
 {
 public:
+    static bool is_player(const Entity& e);
+
     Entity() = default;
 
     Entity(nc::SceneNode& scene);
 
     void update(f32 dt, const Input& input);
+
+    nctl::String name = "tile";
 
     TransformComponent transform;
 

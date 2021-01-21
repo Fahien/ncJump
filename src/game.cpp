@@ -44,6 +44,7 @@ Game::Game(Config& config)
     entity.physics = PhysicsComponent::character(physics, entity.transform.node->position());
     entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
     entity.state = MK<CharacterStateComponent>();
+    entity.name = "player";
 }
 
 Game::~Game()

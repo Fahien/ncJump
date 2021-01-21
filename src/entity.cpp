@@ -9,6 +9,11 @@ namespace nc = ncine;
 
 namespace jmp
 {
+bool Entity::is_player(const Entity& e)
+{
+    return e.name == "player";
+}
+
 Entity::Entity(nc::SceneNode& scene)
     : transform {scene}
 {
