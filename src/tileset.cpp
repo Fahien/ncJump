@@ -57,15 +57,15 @@ UNIQUE<nc::Sprite> Tileset::create_sprite(u32 i) const
     return sprite;
 }
 
-Entity Tileset::create_entity(const Tile& tile, Game& game, bool dynamic) const
+UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic) const
 {
-    auto entity = Entity();
+    auto entity = MK<Entity>();
 
     usize row = tile.id / width;
     usize col = tile.id % width;
 
-    entity.transform.node->x = col * tile_size;
-    entity.transform.node->y = row * tile_size;
+    entity->transform.node->x = col * tile_size;
+    entity->transform.node->y = row * tile_size;
 
     nc::Recti tex_rect;
     tex_rect.x = col * tile_size;
@@ -73,14 +73,14 @@ Entity Tileset::create_entity(const Tile& tile, Game& game, bool dynamic) const
     tex_rect.w = tile_size;
     tex_rect.h = tile_size;
 
-    auto graphics = SingleGraphicsComponent(entity.transform, *texture);
+    auto graphics = SingleGraphicsComponent(entity->transform, *texture);
     graphics.sprite->setTexture(texture);
     graphics.sprite->setTexRect(MV(tex_rect));
-    entity.graphics = MK<SingleGraphicsComponent>(MV(graphics));
+    entity->graphics = MK<SingleGraphicsComponent>(MV(graphics));
 
     if (!tile.passable) {
-        entity.physics =
-            PhysicsComponent::tile(game.physics, entity.transform.node->position(), dynamic);
+        entity->physics =
+            PhysicsComponent::tile(game.physics, entity->transform.node->position(), dynamic);
     }
 
     return entity;

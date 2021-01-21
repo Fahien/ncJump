@@ -102,19 +102,28 @@ void Tilemap::set_game(Game& g)
     }
 }
 
+UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
+    const Tileset& tileset,
+    const Tile& tile,
+    const bool dynamic)
+{
+    auto entity = tileset.create_entity(tile, *game, dynamic);
+
+    entity->transform.node->setParent(node.get());
+    auto& graphics = SingleGraphicsComponent::into(**entity->graphics);
+    entity->transform.node->x = pos.x * graphics.sprite->texRect().w;
+    entity->transform.node->y = pos.y * graphics.sprite->texRect().h;
+    if (auto& physics = entity->get_physics()) {
+        physics->body->SetTransform({f32(pos.x), f32(pos.y)}, 0);
+    }
+
+    return entity;
+}
+
 void Tilemap::set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& tile)
 {
     if (pos.x < width && pos.y < height) {
-        auto entity = tileset.create_entity(tile, *game);
-
-        entity.transform.node->setParent(node.get());
-        auto& graphics = SingleGraphicsComponent::into(**entity.graphics);
-        entity.transform.node->x = pos.x * graphics.sprite->texRect().w;
-        entity.transform.node->y = pos.y * graphics.sprite->texRect().h;
-        if (entity.physics) {
-            entity.physics->body->SetTransform({f32(pos.x), f32(pos.y)}, 0);
-        }
-
+        auto entity = create_entity(Vec2f(pos.x, pos.y), tileset, tile, false);
         tile_descs[pos.x][pos.y] = tile;
         tiles[pos.x][pos.y] = MV(entity);
     }
@@ -122,16 +131,7 @@ void Tilemap::set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& til
 
 void Tilemap::set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile)
 {
-    auto entity = tileset.create_entity(tile, *game, true);
-
-    entity.transform.node->setParent(node.get());
-    auto& graphics = SingleGraphicsComponent::into(**entity.graphics);
-    entity.transform.node->x = pos.x * graphics.sprite->texRect().w;
-    entity.transform.node->y = pos.y * graphics.sprite->texRect().h;
-    if (entity.physics) {
-        entity.physics->body->SetTransform({f32(pos.x), f32(pos.y)}, 0);
-    }
-
+    auto entity = create_entity(pos, tileset, tile, true);
     entities.emplace_back(MV(entity));
 }
 
