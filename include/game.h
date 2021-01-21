@@ -30,13 +30,14 @@ public:
     /// Root node of the game scene
     nc::SceneNode scene;
 
+    /// Generic shared assets
+    nc::Texture resource;
+
     Physics physics;
 
     Entity entity;
 
     Camera camera;
-
-    nc::Texture resource;
 
     Tileset tileset;
 
