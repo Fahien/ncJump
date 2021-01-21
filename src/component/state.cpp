@@ -74,7 +74,7 @@ void IdleState::enter(const Input& input, Entity& entity)
 void can_fall(const Input& input, Entity& entity)
 {
     // Can fall if there is no platform below
-    bool should_fall = !any(entity.physics->obstacle & DirectionFlags::DOWN);
+    bool should_fall = !any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
 
     if (should_fall) {
         CHAR_STT(entity).set_state(State::JUMP_DOWN, input, entity);
@@ -134,7 +134,7 @@ void MoveState::handle(const Input& input, Entity& entity)
 
 void can_move_on_x(const Input& input, Entity& entity, f32 x_factor)
 {
-    f32 x_velocity = entity.physics->body->GetLinearVelocity().x;
+    f32 x_velocity = entity.get_physics()->body->GetLinearVelocity().x;
 
     // Applying a force to move in the opposite direction of current velocity is always allowed
     bool opposite_move = (input.joystick.move.x < 0 && x_velocity >= 0) ||
@@ -142,18 +142,18 @@ void can_move_on_x(const Input& input, Entity& entity, f32 x_factor)
 
     // Make sure current velocity is within limits, otherwise do not apply further force
     bool within_limit =
-        fabs(entity.physics->body->GetLinearVelocity().x) < entity.physics->max_x_speed;
+        fabs(entity.get_physics()->body->GetLinearVelocity().x) < entity.get_physics()->max_x_speed;
 
     if (opposite_move || within_limit) {
         auto force = b2Vec2(x_factor * input.joystick.move.x, 0.0f);
-        entity.physics->body->ApplyLinearImpulse(
-            force, entity.physics->body->GetWorldCenter(), true);
+        entity.get_physics()->body->ApplyLinearImpulse(
+            force, entity.get_physics()->body->GetWorldCenter(), true);
     }
 }
 
 void MoveState::update(const f32 dt, const Input& input, Entity& entity)
 {
-    can_move_on_x(input, entity, entity.physics->velocity_factor);
+    can_move_on_x(input, entity, entity.get_physics()->velocity_factor);
 }
 
 void MoveState::exit(Entity& entity)
@@ -170,40 +170,40 @@ JumpUpState::JumpUpState()
 void JumpUpState::handle(const Input& input, Entity& entity)
 {
     // @todo Double jump?
-    if (entity.physics->body->GetLinearVelocity().y <= 0.0f) {
+    if (entity.get_physics()->body->GetLinearVelocity().y <= 0.0f) {
         CHAR_STT(entity).set_state(State::JUMP_DOWN, input, entity);
     }
 }
 
 void JumpUpState::enter(const Input& input, Entity& entity)
 {
-    entity.physics->body->GetFixtureList()->SetFriction(0.0f);
+    entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
 
     entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_up);
 
-    auto force = b2Vec2(0.0f, entity.physics->jump_y_factor);
-    entity.physics->body->ApplyLinearImpulse(force, entity.physics->body->GetWorldCenter(), true);
+    auto force = b2Vec2(0.0f, entity.get_physics()->jump_y_factor);
+    entity.get_physics()->body->ApplyLinearImpulse(force, entity.get_physics()->body->GetWorldCenter(), true);
 }
 
 /// @brief Jump higher when jump button is kept down
 void can_jump_higher(const Input& input, Entity& entity)
 {
     if (input.joystick.a.down) {
-        auto force = b2Vec2(0.0f, entity.physics->jump_y_factor / 2.0);
-        entity.physics->body->ApplyForceToCenter(force, true);
+        auto force = b2Vec2(0.0f, entity.get_physics()->jump_y_factor / 2.0);
+        entity.get_physics()->body->ApplyForceToCenter(force, true);
     }
 }
 
 void JumpUpState::update(const f32 dt, const Input& input, Entity& entity)
 {
     // Can move a bit
-    can_move_on_x(input, entity, entity.physics->jump_x_factor);
+    can_move_on_x(input, entity, entity.get_physics()->jump_x_factor);
     can_jump_higher(input, entity);
 }
 
 void JumpUpState::exit(Entity& entity)
 {
-    entity.physics->body->GetFixtureList()->SetFriction(3.0f);
+    entity.get_physics()->body->GetFixtureList()->SetFriction(3.0f);
     entity.transform.node->removeChildNode(&CHAR_GFX(entity).jump_up);
 }
 
@@ -215,13 +215,13 @@ JumpDownState::JumpDownState()
 
 void JumpDownState::enter(const Input& input, Entity& entity)
 {
-    entity.physics->body->GetFixtureList()->SetFriction(0.0f);
+    entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
     entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_down);
 }
 
 void JumpDownState::handle(const Input& input, Entity& entity)
 {
-    if (any(entity.physics->obstacle & DirectionFlags::DOWN)) {
+    if (any(entity.get_physics()->obstacle & DirectionFlags::DOWN)) {
         CHAR_STT(entity).set_state(State::MOVE, input, entity);
     }
 }
@@ -229,20 +229,20 @@ void JumpDownState::handle(const Input& input, Entity& entity)
 void JumpDownState::update(const f32, const Input& input, Entity& entity)
 {
     // Can move a bit
-    can_move_on_x(input, entity, entity.physics->jump_x_factor);
+    can_move_on_x(input, entity, entity.get_physics()->jump_x_factor);
 
     // Make sure it goes down
-    if (entity.physics->body->GetLinearVelocity().y > -1.0) {
-        entity.physics->body->ApplyForceToCenter({0.0, -100.0f}, true);
+    if (entity.get_physics()->body->GetLinearVelocity().y > -1.0) {
+        entity.get_physics()->body->ApplyForceToCenter({0.0, -100.0f}, true);
     }
 }
 
 void JumpDownState::exit(Entity& entity)
 {
-    auto fixture = entity.physics->body->GetFixtureList();
+    auto fixture = entity.get_physics()->body->GetFixtureList();
     fixture->SetFriction(3.0f);
 
-    for (auto edge = entity.physics->body->GetContactList(); edge; edge = edge->next) {
+    for (auto edge = entity.get_physics()->body->GetContactList(); edge; edge = edge->next) {
         edge->contact->ResetFriction();
     }
 

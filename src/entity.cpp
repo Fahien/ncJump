@@ -19,6 +19,17 @@ Entity::Entity(nc::SceneNode& scene)
 {
 }
 
+OPTION<PhysicsComponent>& Entity::get_physics()
+{
+    return physics;
+}
+
+void Entity::set_physics(OPTION<PhysicsComponent> ph)
+{
+    physics = MV(ph);
+    physics->body->SetUserData(this);
+}
+
 void Entity::update(const f32 dt, const Input& input)
 {
     if (graphics) {

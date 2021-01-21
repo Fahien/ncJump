@@ -41,7 +41,7 @@ Game::Game(Config& config)
     scene.setScale(config.scale.scene);
 
     // @todo Refactor that
-    entity.physics = PhysicsComponent::character(physics, entity.transform.node->position());
+    entity.set_physics(PhysicsComponent::character(physics, entity.transform.node->position()));
     entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
     entity.state = MK<CharacterStateComponent>();
     entity.name = "player";
@@ -64,14 +64,16 @@ void Game::update(const f32 dt)
 
     // @todo Move this somewhere else? Possibly PhysicsSystem?
     // Update entity from body
-    auto& pos = entity.physics->body->GetPosition();
+    auto& pos = entity.get_physics()->body->GetPosition();
     entity.transform.node->x = config.size.tile * pos.x + config.size.tile / 2.0f;
     entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
     // Update tilemap entities from their bodies
     for (auto& entity : tilemap.entities) {
-        auto& pos = entity.physics->body->GetPosition();
-        entity.transform.node->x = config.size.tile * pos.x ;
-        entity.transform.node->y = config.size.tile * pos.y ;
+        if (auto& physics = entity->get_physics()) {
+            auto& pos = physics->body->GetPosition();
+            entity->transform.node->x = config.size.tile * pos.x;
+            entity->transform.node->y = config.size.tile * pos.y;
+        }
     }
 
     input.reset();

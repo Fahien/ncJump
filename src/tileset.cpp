@@ -79,8 +79,9 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
     entity->graphics = MK<SingleGraphicsComponent>(MV(graphics));
 
     if (!tile.passable) {
-        entity->physics =
+        auto physics =
             PhysicsComponent::tile(game.physics, entity->transform.node->position(), dynamic);
+        entity->set_physics(MV(physics));
     }
 
     return entity;
