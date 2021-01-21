@@ -47,12 +47,14 @@ public:
     std::vector<std::vector<Tile>> tile_descs;
 
     /// Grid of concrete tiles where each position corresponds to a cell of the grid
-    std::vector<std::vector<Entity>> tiles;
+    std::vector<std::vector<UNIQUE<Entity>>> tiles;
 
     /// Other entities which position is not fixed to cells
-    std::vector<Entity> entities;
+    std::vector<UNIQUE<Entity>> entities;
 
 private:
+    UNIQUE<Entity> create_entity(const Vec2f& pos, const Tileset& ts, const Tile& t, bool dynamic);
+
     u32 width = 0;
     u32 height = 0;
 };
