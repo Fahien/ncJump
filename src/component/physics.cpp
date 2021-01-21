@@ -67,6 +67,7 @@ PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
     , jump_y_factor {o.jump_y_factor}
     , jump_x_factor {o.jump_x_factor}
     , max_x_speed {o.max_x_speed}
+    , destructible {o.destructible}
 {
     o.body = nullptr;
 }
@@ -80,6 +81,7 @@ PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
     std::swap(jump_y_factor, o.jump_y_factor);
     std::swap(jump_x_factor, o.jump_x_factor);
     std::swap(max_x_speed, o.max_x_speed);
+    std::swap(destructible, o.destructible);
 
     return *this;
 }
