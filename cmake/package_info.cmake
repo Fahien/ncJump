@@ -28,6 +28,7 @@ set(PACKAGE_SOURCES
 	include/serialization/config.h
 	include/serialization/tileset.h
 	include/serialization/tilemap.h
+	include/system/physics/destruction.h
 	src/main.cpp
 	src/input.cpp
 	src/game.cpp
@@ -45,4 +46,5 @@ set(PACKAGE_SOURCES
 	src/serialization/config.cpp
 	src/serialization/tileset.cpp
 	src/serialization/tilemap.cpp
+	src/system/physics/destruction.cpp
 )

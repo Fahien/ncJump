@@ -13,13 +13,12 @@
 namespace jmp
 {
 class Input;
-class Button;
-class Entity;
 
 class Entity
 {
 public:
     static bool is_player(const Entity& e);
+    static inline Entity& from(b2Fixture& fixture);
 
     Entity() = default;
 
@@ -42,5 +41,10 @@ public:
 private:
     OPTION<PhysicsComponent> physics;
 };
+
+Entity& Entity::from(b2Fixture& fixture)
+{
+    return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData());
+}
 
 } // namespace jmp

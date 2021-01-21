@@ -28,10 +28,10 @@ Game::Game(Config& config)
     : config {config}
     , root {nc::theApplication().rootNode()}
     , scene {&root}
-    , physics {}
+    , resource {PATH("img/tile/tileset.png")}
+    , physics {*this}
     , entity {scene}
     , camera {*this, *entity.transform.node.get()}
-    , resource {PATH("img/tile/tileset.png")}
     , tileset {create_tileset(resource)}
     , tilemap {create_tilemap(*this)}
     , editor {*this}
@@ -57,7 +57,7 @@ Game::~Game()
 void Game::update(const f32 dt)
 {
     // Update game state
-    physics.update(dt);
+    physics.update(dt, tilemap);
 
     entity.update(dt, input);
     editor.update();
