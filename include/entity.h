@@ -25,6 +25,10 @@ public:
 
     Entity(nc::SceneNode& scene);
 
+    OPTION<PhysicsComponent>& get_physics();
+
+    void set_physics(OPTION<PhysicsComponent> physics);
+
     void update(f32 dt, const Input& input);
 
     nctl::String name = "tile";
@@ -33,9 +37,10 @@ public:
 
     OPTION<UNIQUE<GraphicsComponent>> graphics;
 
-    OPTION<PhysicsComponent> physics;
-
     OPTION<UNIQUE<StateComponent>> state;
+
+private:
+    OPTION<PhysicsComponent> physics;
 };
 
 } // namespace jmp

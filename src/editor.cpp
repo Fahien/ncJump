@@ -58,8 +58,8 @@ void Editor::update_entity(Entity& entity)
         update_state(**entity.state);
     }
 
-    if (entity.physics) {
-        update_physics(*entity.physics);
+    if (auto& physics = entity.get_physics()) {
+        update_physics(*physics);
     }
 
     ImGui::End();
