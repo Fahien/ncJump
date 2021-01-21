@@ -12,6 +12,7 @@ void to_json(nl::json& j, const Tile& t)
 {
     j["id"] = t.id;
     j["passable"] = t.passable;
+    j["destructible"] = t.destructible;
 }
 
 void to_json(nl::json& j, const Tileset& t)
@@ -23,6 +24,7 @@ void from_json(const nl::json& j, Tile& t)
 {
     j["id"].get_to(t.id);
     j["passable"].get_to(t.passable);
+    j["destructible"].get_to(t.destructible);
 }
 
 void from_json(const nl::json& j, Tileset& t)

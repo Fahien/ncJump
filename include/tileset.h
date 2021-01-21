@@ -20,6 +20,7 @@ public:
 
     u32 id = 0;
     bool passable = true;
+    bool destructible = false;
 };
 
 /// @brief A tile set has a collection of sprites, one for each tile, used for rendering by the

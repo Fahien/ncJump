@@ -33,6 +33,10 @@ public:
     f32 jump_y_factor = 160.0f;
     f32 jump_x_factor = 3.0f;
     f32 max_x_speed = 6.0f;
+
+    /// A destructible object must have a physics component to
+    /// be able to detect collisions that can destroy it
+    bool destructible = false;
 };
 
 } // namespace jmp

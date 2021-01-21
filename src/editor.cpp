@@ -145,6 +145,7 @@ void Editor::update_selected_tile(Tileset& tileset)
     auto& tile = tileset.tiles[selected_tile];
     ImGui::Text("id: %u", tile.id);
     ImGui::Checkbox("passable", &tile.passable);
+    ImGui::Checkbox("destructible", &tile.destructible);
 
     ImGui::End();
 }
