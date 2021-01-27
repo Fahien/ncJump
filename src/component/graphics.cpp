@@ -32,6 +32,8 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
     , jump_up {nullptr, &jump_up_texture}
     , jump_down_texture {PATH("img/hero/herochar_jump_down_anim_strip_3.png")}
     , jump_down {nullptr, &jump_down_texture}
+    , push_texture {PATH("img/hero/herochar_pushing_foward_anim_strip_6.png")}
+    , push {nullptr, &push_texture}
 {
     // Idle animation
     {
@@ -100,6 +102,24 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
         jump_down.setPaused(false);
         jump_down.setLayer(2);
     }
+
+    // Push animation
+    {
+        push_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
+
+        auto push_anim = nc::RectAnimation(
+            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
+
+        auto sprite_size = Vec2f(push_texture.width() / 6.0f, push_texture.height());
+
+        for (int i = 0; i < 6; ++i) {
+            push_anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
+        }
+
+        push.addAnimation(MV(push_anim));
+        push.setPaused(false);
+        push.setLayer(2);
+    }
 }
 
 void CharacterGraphicsComponent::update(const Input& input)
@@ -112,6 +132,7 @@ void CharacterGraphicsComponent::update(const Input& input)
         idle.setFlippedX(flipped_x);
         jump_up.setFlippedX(flipped_x);
         jump_down.setFlippedX(flipped_x);
+        push.setFlippedX(flipped_x);
     }
 }
 

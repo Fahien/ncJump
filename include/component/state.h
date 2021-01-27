@@ -22,7 +22,7 @@ public:
 class State
 {
 public:
-    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN };
+    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH };
 
     static State* get_state(State::Value state);
 
