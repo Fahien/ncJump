@@ -42,6 +42,9 @@ struct CharacterGraphicsComponent : public GraphicsComponent {
 
     nc::Texture jump_down_texture;
     nc::AnimatedSprite jump_down;
+
+    nc::Texture push_texture;
+    nc::AnimatedSprite push;
 };
 
 } // namespace jmp

@@ -5,45 +5,24 @@
 
 namespace jmp
 {
-class IdleState : public State
-{
-public:
-    IdleState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
+#define DEF_STATE(NewState)                                                                        \
+    class NewState : public State                                                                  \
+    {                                                                                              \
+    public:                                                                                        \
+        NewState();                                                                                \
+        void enter(const Input& input, Entity& entity) override;                                   \
+        void handle(const Input& input, Entity& entity) override;                                  \
+        void update(const f32 dt, const Input& input, Entity& entity) override;                    \
+        void exit(Entity& entity) override;                                                        \
+    }
 
-class MoveState : public State
-{
-public:
-    MoveState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
+DEF_STATE(IdleState);
+DEF_STATE(MoveState);
+DEF_STATE(JumpUpState);
+DEF_STATE(JumpDownState);
+DEF_STATE(PushState);
 
-class JumpUpState : public State
-{
-public:
-    JumpUpState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
-
-class JumpDownState : public State
-{
-public:
-    JumpDownState();
-    void enter(const Input& input, Entity& entity) override;
-    void handle(const Input& input, Entity& entity) override;
-    void update(const f32 dt, const Input& input, Entity& entity) override;
-    void exit(Entity& entity) override;
-};
+#undef DEF_STATE
 
 State* State::get_state(State::Value state)
 {
@@ -52,6 +31,7 @@ State* State::get_state(State::Value state)
         MK<MoveState>(),
         MK<JumpUpState>(),
         MK<JumpDownState>(),
+        MK<PushState>(),
     };
 
     return states[state].get();
@@ -71,10 +51,34 @@ void IdleState::enter(const Input& input, Entity& entity)
     entity.transform.node->addChildNode(&CHAR_GFX(entity).idle);
 }
 
+void can_stop(const Input& input, Entity& entity)
+{
+    if (input.joystick.move.x == 0.0) {
+        CHAR_STT(entity).set_state(State::IDLE, input, entity);
+    }
+}
+
+void can_move(const Input& input, Entity& entity)
+{
+    if (input.joystick.move.x != 0.0) {
+        CHAR_STT(entity).set_state(State::MOVE, input, entity);
+    }
+}
+
+void can_jump(const Input& input, Entity& entity)
+{
+    if (input.joystick.a.just_down) {
+        CHAR_STT(entity).set_state(State::JUMP_UP, input, entity);
+    }
+}
+
 void can_fall(const Input& input, Entity& entity)
 {
     // Can fall if there is no platform below
-    bool should_fall = !any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
+    bool no_obstacle_down = !any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
+
+    bool should_fall =
+        no_obstacle_down && entity.get_physics()->body->GetLinearVelocity().y < -0.125f;
 
     if (should_fall) {
         CHAR_STT(entity).set_state(State::JUMP_DOWN, input, entity);
@@ -83,16 +87,8 @@ void can_fall(const Input& input, Entity& entity)
 
 void IdleState::handle(const Input& input, Entity& entity)
 {
-    // Can move
-    if (input.joystick.move.x != 0.0) {
-        CHAR_STT(entity).set_state(State::MOVE, input, entity);
-    }
-
-    // Can jump
-    if (input.joystick.a.just_down) {
-        CHAR_STT(entity).set_state(State::JUMP_UP, input, entity);
-    }
-
+    can_move(input, entity);
+    can_jump(input, entity);
     can_fall(input, entity);
 }
 
@@ -117,19 +113,26 @@ void MoveState::enter(const Input& input, Entity& entity)
     entity.transform.node->addChildNode(&CHAR_GFX(entity).movement);
 }
 
+void can_push(const Input& input, Entity& entity)
+{
+    // Check this entity collisions and find something on the right or on the left
+    bool left_obstacle = any(entity.get_physics()->obstacle & DirectionFlags::LEFT);
+    bool left_push = input.joystick.move.x < 0.0f;
+
+    bool right_obstacle = any(entity.get_physics()->obstacle & DirectionFlags::RIGHT);
+    bool right_push = input.joystick.move.x > 0.0f;
+
+    if ((left_obstacle && left_push) || (right_obstacle && right_push)) {
+        CHAR_STT(entity).set_state(State::PUSH, input, entity);
+    }
+}
+
 void MoveState::handle(const Input& input, Entity& entity)
 {
-    // Can go quiet
-    if (input.joystick.move.x == 0.0) {
-        CHAR_STT(entity).set_state(State::IDLE, input, entity);
-    }
-
-    // Can jump
-    if (input.joystick.a.just_down) {
-        CHAR_STT(entity).set_state(State::JUMP_UP, input, entity);
-    }
-
+    can_stop(input, entity);
+    can_jump(input, entity);
     can_fall(input, entity);
+    can_push(input, entity);
 }
 
 void can_move_on_x(const Input& input, Entity& entity, f32 x_factor)
@@ -182,7 +185,8 @@ void JumpUpState::enter(const Input& input, Entity& entity)
     entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_up);
 
     auto force = b2Vec2(0.0f, entity.get_physics()->jump_y_factor);
-    entity.get_physics()->body->ApplyLinearImpulse(force, entity.get_physics()->body->GetWorldCenter(), true);
+    entity.get_physics()->body->ApplyLinearImpulse(
+        force, entity.get_physics()->body->GetWorldCenter(), true);
 }
 
 /// @brief Jump higher when jump button is kept down
@@ -221,7 +225,10 @@ void JumpDownState::enter(const Input& input, Entity& entity)
 
 void JumpDownState::handle(const Input& input, Entity& entity)
 {
-    if (any(entity.get_physics()->obstacle & DirectionFlags::DOWN)) {
+    bool obstacle_down = any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
+    bool not_falling = (entity.get_physics()->body->GetLinearVelocity().y == 0);
+
+    if (obstacle_down || not_falling) {
         CHAR_STT(entity).set_state(State::MOVE, input, entity);
     }
 }
@@ -247,6 +254,42 @@ void JumpDownState::exit(Entity& entity)
     }
 
     entity.transform.node->removeChildNode(&CHAR_GFX(entity).jump_down);
+}
+
+PushState::PushState()
+{
+    name = "PUSH";
+    value = Value::PUSH;
+}
+
+void PushState::enter(const Input& input, Entity& entity)
+{
+    entity.transform.node->addChildNode(&CHAR_GFX(entity).push);
+}
+
+void can_stop_pushing(const Input& input, Entity& entity)
+{
+    if (!any(entity.get_physics()->obstacle & (DirectionFlags::LEFT | DirectionFlags::RIGHT))) {
+        CHAR_STT(entity).set_state(State::MOVE, input, entity);
+    }
+}
+
+void PushState::handle(const Input& input, Entity& entity)
+{
+    can_stop(input, entity);
+    can_stop_pushing(input, entity);
+    can_jump(input, entity);
+    can_fall(input, entity);
+}
+
+void PushState::update(const f32, const Input& input, Entity& entity)
+{
+    can_move_on_x(input, entity, entity.get_physics()->velocity_factor);
+}
+
+void PushState::exit(Entity& entity)
+{
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).push);
 }
 
 const char* to_str(State& state)
