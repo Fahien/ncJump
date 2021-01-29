@@ -28,6 +28,9 @@ public:
 
     DirectionFlags obstacle;
 
+    /// A list of obstacles for each Direction
+    std::vector<b2Body*> obstacles_dir[4];
+
     f32 air_factor = 1.0f / 16.0f;
     f32 velocity_factor = 32.0f;
     f32 jump_y_factor = 160.0f;

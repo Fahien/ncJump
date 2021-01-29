@@ -33,12 +33,22 @@ constexpr auto None = std::nullopt;
 
 #define PATH(path) nc::fs::joinPath(nc::fs::dataPath(), path).data()
 
+struct Direction {
+    enum Value {
+        NONE = -1,
+        UP = 0,
+        DOWN = 1,
+        LEFT = 2,
+        RIGHT = 3,
+    };
+};
+
 enum class DirectionFlags {
     NONE = 0,
-    UP = 1 << 0,
-    DOWN = 1 << 1,
-    LEFT = 1 << 2,
-    RIGHT = 1 << 3,
+    UP = 1 << Direction::UP,
+    DOWN = 1 << Direction::DOWN,
+    LEFT = 1 << Direction::LEFT,
+    RIGHT = 1 << Direction::RIGHT,
 };
 
 constexpr inline DirectionFlags operator~(DirectionFlags a)

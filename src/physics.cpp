@@ -17,6 +17,8 @@ Physics::Physics(Game& game)
 void Physics::update(const f32 delta, Tilemap& tilemap)
 {
     world.Step(delta, velocity_iterations, position_iterations);
+
+    // @todo Process destruction after all updates
     destruction.update(tilemap);
 }
 
