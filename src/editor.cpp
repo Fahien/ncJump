@@ -77,6 +77,9 @@ void Editor::update_input(Input& input)
     ImGui::Text("\ta: { down: %s, just_down: %s }\n}",
         input.joystick.a.down ? "T" : "F",
         input.joystick.a.just_down ? "T" : "F");
+    ImGui::Text("\tx: { down: %s, just_down: %s }\n}",
+        input.joystick.x.down ? "T" : "F",
+        input.joystick.x.just_down ? "T" : "F");
     ImGui::End();
 }
 
