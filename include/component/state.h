@@ -20,7 +20,7 @@ struct SingleStateComponent : public StateComponent {
 class State
 {
 public:
-    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH };
+    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH, PULL };
 
     static State* get_state(State::Value state);
 
