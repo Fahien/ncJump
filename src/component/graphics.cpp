@@ -23,6 +23,21 @@ void SingleGraphicsComponent::update(const Input& input)
 {
 }
 
+#define INIT_ANIMATION(texture, sprite, count)                                                     \
+    {                                                                                              \
+        texture.setMagFiltering(nc::Texture::Filtering::NEAREST);                                  \
+        auto anim = nc::RectAnimation(0.125,                                                       \
+            nc::RectAnimation::LoopMode::ENABLED,                                                  \
+            nc::RectAnimation::RewindMode::FROM_START);                                            \
+        auto sprite_size = Vec2f(texture.width() / float(count), texture.height());                \
+        for (int i = 0; i < count; ++i) {                                                          \
+            anim.addRect(nc::Recti(i* sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));         \
+        }                                                                                          \
+        sprite.addAnimation(MV(anim));                                                             \
+        sprite.setPaused(false);                                                                   \
+        sprite.setLayer(2);                                                                        \
+    }
+
 CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& transform)
     : idle_texture {PATH("img/hero/herochar_idle_anim_strip_4.png")}
     , idle {&*transform.node, &idle_texture}
@@ -35,91 +50,11 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
     , push_texture {PATH("img/hero/herochar_pushing_foward_anim_strip_6.png")}
     , push {nullptr, &push_texture}
 {
-    // Idle animation
-    {
-        idle_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(idle_texture.width() / 4.0f, idle_texture.height());
-
-        for (int i = 0; i < 4; ++i) {
-            anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        idle.addAnimation(MV(anim));
-        idle.setPaused(false);
-        idle.setLayer(2);
-    }
-
-    // Movement animation
-    {
-        movement_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(movement_texture.width() / 6.0f, movement_texture.height());
-
-        for (int i = 0; i < 6; ++i) {
-            anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        movement.addAnimation(MV(anim));
-        movement.setPaused(false);
-        movement.setLayer(2);
-    }
-
-    // Jump animation
-    {
-        jump_up_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto jump_up_anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(jump_up_texture.width() / 3.0f, jump_up_texture.height());
-
-        for (int i = 0; i < 3; ++i) {
-            jump_up_anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        jump_up.addAnimation(MV(jump_up_anim));
-        jump_up.setPaused(false);
-        jump_up.setLayer(2);
-
-        jump_down_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto jump_down_anim = nc::RectAnimation(0.125f,
-            nc::RectAnimation::LoopMode::ENABLED,
-            nc::RectAnimation::RewindMode::FROM_START);
-
-        for (int i = 0; i < 3; ++i) {
-            jump_down_anim.addRect(nc::Recti(i * sprite_size.x, 0.0, sprite_size.x, sprite_size.y));
-        }
-
-        jump_down.addAnimation(MV(jump_down_anim));
-        jump_down.setPaused(false);
-        jump_down.setLayer(2);
-    }
-
-    // Push animation
-    {
-        push_texture.setMagFiltering(nc::Texture::Filtering::NEAREST);
-
-        auto push_anim = nc::RectAnimation(
-            0.125, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-
-        auto sprite_size = Vec2f(push_texture.width() / 6.0f, push_texture.height());
-
-        for (int i = 0; i < 6; ++i) {
-            push_anim.addRect(nc::Recti(i * sprite_size.x, 0.0f, sprite_size.x, sprite_size.y));
-        }
-
-        push.addAnimation(MV(push_anim));
-        push.setPaused(false);
-        push.setLayer(2);
-    }
+    INIT_ANIMATION(idle_texture, idle, 4);
+    INIT_ANIMATION(movement_texture, movement, 6);
+    INIT_ANIMATION(jump_up_texture, jump_up, 3);
+    INIT_ANIMATION(jump_down_texture, jump_down, 3);
+    INIT_ANIMATION(push_texture, push, 6);
 }
 
 void CharacterGraphicsComponent::update(const Input& input)
