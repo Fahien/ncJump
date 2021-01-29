@@ -2,7 +2,6 @@
 
 #include "types.h"
 
-
 namespace jmp
 {
 struct Button {
@@ -18,6 +17,7 @@ struct Mouse {
 struct Joystick {
     Vec2f move = {0.0, 0.0};
     Button a = {};
+    Button x = {};
 };
 
 struct Input {

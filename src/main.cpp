@@ -149,11 +149,20 @@ void JumpHandler::onJoyMappedButtonPressed(const nc::JoyMappedButtonEvent& event
         game->input.joystick.a.down = true;
         game->input.joystick.a.just_down = true;
     }
+
+    if (event.buttonName == nc::ButtonName::X) {
+        game->input.joystick.x.down = true;
+        game->input.joystick.x.just_down = true;
+    }
 }
 
 void JumpHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent& event)
 {
     if (event.buttonName == nc::ButtonName::A) {
         game->input.joystick.a.down = false;
+    }
+
+    if (event.buttonName == nc::ButtonName::X) {
+        game->input.joystick.x.down = false;
     }
 }
