@@ -97,28 +97,42 @@ void PhysicsComponent::update()
 {
     assert(body && "Physics component has no body");
 
+    // Clear list of obstacles from previous frame
+    for (auto& obstacles : obstacles_dir) {
+        obstacles.clear();
+    }
+
     // Update some variables
     obstacle = DirectionFlags::NONE;
     for (auto edge = body->GetContactList(); edge; edge = edge->next) {
+        // Suppose the other body is A
+        b2Body* other = edge->contact->GetFixtureA()->GetBody();
         auto normal = edge->contact->GetManifold()->localNormal;
-        if (edge->contact->GetFixtureA() == body->GetFixtureList()) {
+
+        if (other == body) {
+            other = edge->contact->GetFixtureB()->GetBody();
+            // Weird normal adjustment
             normal = -normal;
         }
 
         if (normal.x < -0.9f) {
             obstacle |= DirectionFlags::RIGHT;
+            obstacles_dir[Direction::RIGHT].emplace_back(other);
         }
 
         if (normal.x > 0.9f) {
             obstacle |= DirectionFlags::LEFT;
+            obstacles_dir[Direction::LEFT].emplace_back(other);
         }
 
         if (normal.y > 0.9f) {
             obstacle |= DirectionFlags::DOWN;
+            obstacles_dir[Direction::DOWN].emplace_back(other);
         }
 
         if (normal.y < -0.9f) {
             obstacle |= DirectionFlags::UP;
+            obstacles_dir[Direction::UP].emplace_back(other);
         }
     }
 

@@ -12,7 +12,14 @@ struct TransformComponent;
 
 struct GraphicsComponent {
     virtual void update(const Input& input) = 0;
+
+    inline virtual Direction::Value get_direction() const;
 };
+
+inline Direction::Value GraphicsComponent::get_direction() const
+{
+    return Direction::NONE;
+}
 
 // Graphics component with a single static image which never changes
 struct SingleGraphicsComponent : public GraphicsComponent {
@@ -31,6 +38,10 @@ struct CharacterGraphicsComponent : public GraphicsComponent {
 
     void update(const Input& input) override;
 
+    inline Direction::Value get_direction() const override;
+
+    Direction::Value direction = Direction::RIGHT;
+
     nc::Texture idle_texture;
     nc::AnimatedSprite idle;
 
@@ -46,5 +57,10 @@ struct CharacterGraphicsComponent : public GraphicsComponent {
     nc::Texture push_texture;
     nc::AnimatedSprite push;
 };
+
+inline Direction::Value CharacterGraphicsComponent::get_direction() const
+{
+    return direction;
+}
 
 } // namespace jmp

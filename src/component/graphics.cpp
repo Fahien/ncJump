@@ -128,6 +128,7 @@ void CharacterGraphicsComponent::update(const Input& input)
     f32 movement_x = input.joystick.move.x;
     if (movement_x) {
         bool flipped_x = movement_x < 0.0;
+        direction = flipped_x ? Direction::LEFT : Direction::RIGHT;
         movement.setFlippedX(flipped_x);
         idle.setFlippedX(flipped_x);
         jump_up.setFlippedX(flipped_x);
