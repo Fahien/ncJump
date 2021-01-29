@@ -59,6 +59,9 @@ public:
 
     nc::Texture push_texture;
     nc::AnimatedSprite push;
+
+    nc::Texture pull_texture;
+    nc::AnimatedSprite pull;
 };
 
 inline Direction::Value CharacterGraphicsComponent::get_direction() const

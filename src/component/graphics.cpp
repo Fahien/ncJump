@@ -49,6 +49,8 @@ CharacterGraphicsComponent::CharacterGraphicsComponent(TransformComponent& trans
     , jump_down {nullptr, &jump_down_texture}
     , push_texture {PATH("img/hero/herochar_pushing_foward_anim_strip_6.png")}
     , push {nullptr, &push_texture}
+    , pull_texture {PATH("img/hero/herochar_pushing_foward_anim_strip_6.png")}
+    , pull {nullptr, &pull_texture}
 {
     INIT_ANIMATION(idle_texture, idle, 4);
     INIT_ANIMATION(movement_texture, movement, 6);

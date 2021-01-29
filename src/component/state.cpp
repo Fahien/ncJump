@@ -22,6 +22,20 @@ DEF_STATE(JumpUpState);
 DEF_STATE(JumpDownState);
 DEF_STATE(PushState);
 
+class PullState : public State
+{
+public:
+    PullState();
+    void enter(const Input& input, Entity& entity) override;
+    void handle(const Input& input, Entity& entity) override;
+    void update(const f32 dt, const Input& input, Entity& entity) override;
+    void exit(Entity& entity) override;
+
+    void destroy_joint(b2World& world);
+
+    b2Joint* joint = nullptr;
+};
+
 #undef DEF_STATE
 
 State* State::get_state(State::Value state)
@@ -32,6 +46,7 @@ State* State::get_state(State::Value state)
         MK<JumpUpState>(),
         MK<JumpDownState>(),
         MK<PushState>(),
+        MK<PullState>(),
     };
 
     return states[state].get();
@@ -85,11 +100,55 @@ void can_fall(const Input& input, Entity& entity)
     }
 }
 
+bool check_pull(const Input& input, Entity& entity, const std::vector<b2Body*>& obstacles)
+{
+    for (auto other : obstacles) {
+        if (other->GetType() != b2_dynamicBody) {
+            continue;
+        }
+
+        b2DistanceJointDef joint;
+        auto body = entity.get_physics()->body;
+        joint.Initialize(body, other, body->GetPosition(), other->GetPosition());
+        joint.collideConnected = true;
+
+        CHAR_STT(entity).set_state(State::PULL, input, entity);
+        auto pull_state = reinterpret_cast<PullState*>(CHAR_STT(entity).state);
+
+        pull_state->destroy_joint(*body->GetWorld());
+        pull_state->joint = other->GetWorld()->CreateJoint(&joint);
+
+        return true;
+    }
+
+    return false;
+}
+
+void can_pull(const Input& input, Entity& entity)
+{
+    if (!input.joystick.x.down) {
+        return;
+    }
+
+    auto& obstacles_dir = entity.get_physics()->obstacles_dir;
+
+    if (check_pull(input, entity, obstacles_dir[Direction::LEFT])) {
+        CHAR_GFX(entity).pull.setFlippedX(true);
+        return;
+    }
+
+    if (check_pull(input, entity, obstacles_dir[Direction::RIGHT])) {
+        CHAR_GFX(entity).pull.setFlippedX(false);
+        return;
+    }
+}
+
 void IdleState::handle(const Input& input, Entity& entity)
 {
     can_move(input, entity);
     can_jump(input, entity);
     can_fall(input, entity);
+    can_pull(input, entity);
 }
 
 void IdleState::update(const f32 dt, const Input& input, Entity& entity)
@@ -280,6 +339,7 @@ void PushState::handle(const Input& input, Entity& entity)
     can_stop_pushing(input, entity);
     can_jump(input, entity);
     can_fall(input, entity);
+    can_pull(input, entity);
 }
 
 void PushState::update(const f32, const Input& input, Entity& entity)
@@ -290,6 +350,53 @@ void PushState::update(const f32, const Input& input, Entity& entity)
 void PushState::exit(Entity& entity)
 {
     entity.transform.node->removeChildNode(&CHAR_GFX(entity).push);
+}
+
+PullState::PullState()
+{
+    name = "PULL";
+    value = Value::PULL;
+}
+
+void PullState::destroy_joint(b2World& world)
+{
+    if (joint) {
+        world.DestroyJoint(joint);
+        joint = nullptr;
+    }
+}
+
+void PullState::enter(const Input& input, Entity& entity)
+{
+    auto& idle = CHAR_GFX(entity).idle;
+    auto& pull = CHAR_GFX(entity).pull;
+    pull.setFlippedX(idle.isFlippedX());
+    entity.transform.node->addChildNode(&pull);
+}
+
+void can_stop_pulling(const Input& input, Entity& entity)
+{
+    if (!input.joystick.x.down) {
+        CHAR_STT(entity).set_state(State::IDLE, input, entity);
+    }
+}
+
+void PullState::handle(const Input& input, Entity& entity)
+{
+    can_stop_pulling(input, entity);
+    can_jump(input, entity);
+    can_fall(input, entity);
+}
+
+void PullState::update(const f32, const Input& input, Entity& entity)
+{
+    can_move_on_x(input, entity, entity.get_physics()->velocity_factor);
+}
+
+void PullState::exit(Entity& entity)
+{
+    destroy_joint(*entity.get_physics()->body->GetWorld());
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).pull);
 }
 
 const char* to_str(State& state)
