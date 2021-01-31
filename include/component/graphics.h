@@ -12,6 +12,7 @@ class TransformComponent;
 
 class GraphicsComponent {
 public:
+    virtual ~GraphicsComponent() = default;
     virtual void update(const Input& input) = 0;
 
     inline virtual Direction::Value get_direction() const;

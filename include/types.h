@@ -70,17 +70,17 @@ constexpr inline DirectionFlags operator^(DirectionFlags a, DirectionFlags b)
     return (DirectionFlags)((i32)a ^ (i32)b);
 }
 
-constexpr inline DirectionFlags& operator|=(DirectionFlags& a, DirectionFlags b)
+inline DirectionFlags& operator|=(DirectionFlags& a, DirectionFlags b)
 {
     return (DirectionFlags&)((i32&)a |= (i32)b);
 }
 
-constexpr inline DirectionFlags& operator&=(DirectionFlags& a, DirectionFlags b)
+inline DirectionFlags& operator&=(DirectionFlags& a, DirectionFlags b)
 {
     return (DirectionFlags&)((i32&)a &= (i32)b);
 }
 
-constexpr inline DirectionFlags& operator^=(DirectionFlags& a, DirectionFlags b)
+inline DirectionFlags& operator^=(DirectionFlags& a, DirectionFlags b)
 {
     return (DirectionFlags&)((i32&)a ^= (i32)b);
 }

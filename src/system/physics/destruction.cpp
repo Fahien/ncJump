@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "system/physics/destruction.h"
 
 #include "config.h"

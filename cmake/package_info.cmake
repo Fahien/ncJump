@@ -48,3 +48,48 @@ set(PACKAGE_SOURCES
 	src/serialization/tilemap.cpp
 	src/system/physics/destruction.cpp
 )
+
+function(callback_before_target)
+	if(EMSCRIPTEN)
+		add_library(box2d::box2d STATIC IMPORTED)
+		set_target_properties(box2d::box2d PROPERTIES
+			IMPORTED_LOCATION ${EMSCRIPTEN_LIBDIR}/libbox2d.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+		set(BOX2D_FOUND 1)
+	elseif(ANDROID)
+		if(EXISTS ${EXTERNAL_ANDROID_DIR}/box2d/${ANDROID_ABI}/libbox2d.a)
+			add_library(box2d::box2d STATIC IMPORTED)
+			set_target_properties(box2d::box2d PROPERTIES
+				IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/box2d/${ANDROID_ABI}/libbox2d.a
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/box2d/include")
+			set(BOX2D_FOUND 1)
+		endif()
+	else()
+		find_package(box2d REQUIRED)
+	endif()
+endfunction()
+
+function(callback_after_target)
+	target_compile_features(${PACKAGE_EXE_NAME} PUBLIC cxx_std_17)
+	target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE box2d::box2d)
+
+	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+		include(custom_nlohmannjson)
+
+		if(IS_DIRECTORY ${PACKAGE_DATA_DIR})
+			set(IMAGES_FILES
+				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_idle_anim_strip_4.png"
+				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_run_anim_strip_6.png"
+				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_jump_up_anim_strip_3.png"
+				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_jump_down_anim_strip_3.png"
+				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_pushing_foward_anim_strip_6.png"
+				"${PACKAGE_DATA_DIR}/data/img/tile/tileset.png"
+				"${PACKAGE_DATA_DIR}/data/img/tile/background.png"
+			)
+			file(GLOB JSON_FILES "${PACKAGE_DATA_DIR}/data/*.json")
+		endif()
+		set(PACKAGE_ANDROID_ASSETS ${IMAGES_FILES} ${JSON_FILES} CACHE STRING "" FORCE)
+	else()
+		target_include_directories(${PACKAGE_EXE_NAME} PRIVATE ${GENERATED_INCLUDE_DIR}/../../nlohmannjson-src/include)
+	endif()
+endfunction()

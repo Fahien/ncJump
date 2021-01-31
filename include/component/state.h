@@ -11,6 +11,7 @@ class Entity;
 
 class StateComponent {
 public:
+    virtual ~StateComponent() = default;
     virtual void update(f32 dt, const Input& input, Entity& entity) = 0;
 };
 
@@ -28,6 +29,8 @@ public:
 
     nctl::String name;
     Value value;
+
+    virtual ~State() {}
 
     virtual void enter(const Input& input, Entity& entity) = 0;
     virtual void handle(const Input& input, Entity& entity) = 0;

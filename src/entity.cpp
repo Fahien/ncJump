@@ -27,7 +27,7 @@ OPTION<PhysicsComponent>& Entity::get_physics()
 void Entity::set_physics(OPTION<PhysicsComponent> ph)
 {
     physics = MV(ph);
-    physics->body->SetUserData(this);
+    physics->body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
 }
 
 void Entity::update(const f32 dt, const Input& input)
