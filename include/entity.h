@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 #include <ncine/AnimatedSprite.h>
 #include <ncine/Texture.h>
 #include <nctl/String.h>
@@ -44,7 +44,7 @@ private:
 
 Entity& Entity::from(b2Fixture& fixture)
 {
-    return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData());
+    return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData().pointer);
 }
 
 } // namespace jmp

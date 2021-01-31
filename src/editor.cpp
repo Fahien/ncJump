@@ -184,7 +184,7 @@ void Editor::update_tilemap()
     if (ImGui::DragInt2("dimensions:", dimensions, 1.0f, 0, 64)) {
         game.tilemap.set_dimensions(dimensions[0], dimensions[1]);
     }
-    ImGui::Text("tiles: %u", game.tilemap.tile_descs.size());
+    ImGui::Text("tiles: %lu", game.tilemap.tile_descs.size());
     if (ImGui::TreeNode("entities:")) {
         i32 del_num = -1;
         for (i32 i = 0; i < game.tilemap.entities.size(); ++i) {

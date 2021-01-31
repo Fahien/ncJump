@@ -13,7 +13,6 @@ endif()
 project(${PACKAGE_NAME})
 
 include(package_options)
-include(package_check_data)
 
 include(find_ncine)
 if(NOT NCINE_DYNAMIC_LIBRARY)
@@ -23,11 +22,8 @@ if(NOT ANDROID AND NOT EMSCRIPTEN AND NCINE_WITH_QT5)
 	find_package(Qt5 COMPONENTS Widgets)
 endif()
 
-find_package(Box2D REQUIRED)
-find_package(nlohmann_json REQUIRED)
-
 if(NOT IS_DIRECTORY ${PACKAGE_DATA_DIR})
-	if(IS_DIRECTORY ${CMAKE_SOURCE_DIR})
+	if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/data AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/icons)
 		set(PACKAGE_DATA_DIR ${CMAKE_SOURCE_DIR})
 		message(STATUS "${PACKAGE_NAME} data directory not found at ${PACKAGE_DATA_DIR}: using source directory for data")
 	else()
@@ -43,8 +39,7 @@ if(COMMAND callback_before_target)
 	callback_before_target()
 endif()
 
-add_executable(${PACKAGE_EXE_NAME} ${PACKAGE_SOURCES})
-target_compile_features(${PACKAGE_EXE_NAME} PUBLIC cxx_std_17)
+add_executable(${PACKAGE_EXE_NAME} WIN32 ${PACKAGE_SOURCES})
 include(package_generated_sources)
 target_sources(${PACKAGE_EXE_NAME} PRIVATE ${GENERATED_SOURCES})
 
@@ -63,7 +58,7 @@ elseif(MINGW)
 	# Should be linked before `ncine_main`
 	target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE mingw32)
 endif()
-target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE ncine::ncine_main ncine::ncine Box2D nlohmann_json)
+target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE ncine::ncine_main ncine::ncine)
 
 target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:${PACKAGE_UPPER_NAME}_DEBUG>")
 target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCINE_ASSERT_BREAK>")

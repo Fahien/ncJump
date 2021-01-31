@@ -11,6 +11,7 @@ struct Input;
 struct TransformComponent;
 
 struct GraphicsComponent {
+    virtual ~GraphicsComponent() {}
     virtual void update(const Input& input) = 0;
 
     inline virtual Direction::Value get_direction() const;

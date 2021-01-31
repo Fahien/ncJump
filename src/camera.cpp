@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "camera.h"
 
 #include <ncine/SceneNode.h>
