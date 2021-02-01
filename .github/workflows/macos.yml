@@ -40,6 +40,8 @@ jobs:
         export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
         export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
 
+        git submodule update --init --recursive
+
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
@@ -66,8 +68,6 @@ jobs:
 
         cd ..
         rm -rf nCine-artifacts
-
-        #git clone https://github.com/$GITHUB_REPOSITORY-data.git
 
     - name: 'CMake Configuration'
       run: |

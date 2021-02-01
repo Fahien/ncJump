@@ -44,6 +44,8 @@ jobs:
           "windows-2016" {"vs2017"}
         }
 
+        git submodule update --init --recursive
+
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
@@ -72,8 +74,6 @@ jobs:
 
         cd ..
         Remove-Item nCine-artifacts -Recurse -Force
-
-        #git clone https://github.com/$env:GITHUB_REPOSITORY-data.git
 
     - name: 'CMake Configuration'
       run: |
