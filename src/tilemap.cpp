@@ -71,6 +71,8 @@ void Tilemap::set_game(Game& g)
     game = &g;
     // Set map root as child of the game scene node
     node = MK<nc::SceneNode>(&game->scene);
+    tiles_root = MK<nc::SceneNode>(node.get());
+    entities_root = MK<nc::SceneNode>(node.get());
 
     background_texture = MK<nc::Texture>(PATH("img/tile/background.png"));
     background_texture->setMagFiltering(nc::Texture::Filtering::NEAREST);
@@ -109,7 +111,6 @@ UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
 {
     auto entity = tileset.create_entity(tile, *game, dynamic);
 
-    entity->transform.node->setParent(node.get());
     auto& graphics = SingleGraphicsComponent::into(**entity->graphics);
     entity->transform.node->x = pos.x * graphics.sprite->texRect().w;
     entity->transform.node->y = pos.y * graphics.sprite->texRect().h;
@@ -124,6 +125,7 @@ void Tilemap::set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& til
 {
     if (pos.x < width && pos.y < height) {
         auto entity = create_entity(Vec2f(pos.x, pos.y), tileset, tile, false);
+        entity->transform.node->setParent(tiles_root.get());
         tile_descs[pos.x][pos.y] = tile;
         tiles[pos.x][pos.y] = MV(entity);
     }
@@ -132,6 +134,7 @@ void Tilemap::set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& til
 void Tilemap::set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile)
 {
     auto entity = create_entity(pos, tileset, tile, true);
+    entity->transform.node->setParent(entities_root.get());
     entities.emplace_back(MV(entity));
 }
 

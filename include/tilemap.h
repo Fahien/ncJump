@@ -38,6 +38,8 @@ public:
 
     /// Root node of the tilemap. The whole tilemap can be transformed using this.
     UNIQUE<nc::SceneNode> node;
+    UNIQUE<nc::SceneNode> tiles_root;
+    UNIQUE<nc::SceneNode> entities_root;
 
     UNIQUE<nc::Texture> background_texture;
     UNIQUE<nc::Sprite> background_node;
