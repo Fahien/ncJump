@@ -4,6 +4,7 @@
 
 namespace jmp
 {
+class Config;
 class Game;
 class Entity;
 class Input;
@@ -21,10 +22,13 @@ public:
 
 private:
     enum class Mode {
+        NONE,
         TILE,
         ENTITY,
     };
 
+    void update_menu();
+    void update_config(Config& config);
     void update_state(StateComponent& state);
     void update_physics(PhysicsComponent& physics);
     void update_entity(Entity& entity);
@@ -37,7 +41,7 @@ private:
     Game& game;
 
     /// Tilemap place mode
-    Mode mode = Mode::TILE;
+    Mode mode = Mode::NONE;
 
     /// Negative means no tile selected
     i32 selected_tile = -1;
