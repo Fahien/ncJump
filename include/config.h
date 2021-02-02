@@ -7,6 +7,7 @@ namespace jmp
 struct Scale {
     f32 window = 4.0f;
     f32 global = 4.0f;
+    f32 gui = 2.0f;
     f32 scene = 2.0f;
 };
 
@@ -20,6 +21,11 @@ struct Size {
     Extent window = {};
 };
 
+struct Toggle {
+    bool gui_demo = false;
+    bool editor = false;
+};
+
 /// @brief Game configuration
 struct Config {
     /// @return A new config from a json file, or a default instance if such a file does not exist
@@ -27,6 +33,7 @@ struct Config {
 
     Scale scale = {};
     Size size = {};
+    Toggle toggle = {};
 };
 
 } // namespace jmp
