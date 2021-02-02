@@ -12,6 +12,7 @@ void to_json(nl::json& j, const Scale& s)
 {
     j["window"] = s.window;
     j["global"] = s.global;
+    j["gui"] = s.gui;
     j["scene"] = s.scene;
 }
 
@@ -27,16 +28,24 @@ void to_json(nl::json& j, const Size& s)
     j["window"] = s.window;
 }
 
+void to_json(nl::json& j, const Toggle& t)
+{
+    j["gui_demo"] = t.gui_demo;
+    j["editor"] = t.editor;
+}
+
 void to_json(nl::json& j, const Config& c)
 {
     j["scale"] = c.scale;
     j["size"] = c.size;
+    j["toggle"] = c.toggle;
 }
 
 void from_json(const nl::json& j, Scale& s)
 {
     j["window"].get_to(s.window);
     j["global"].get_to(s.global);
+    j["gui"].get_to(s.gui);
     j["scene"].get_to(s.scene);
 }
 
@@ -52,10 +61,17 @@ void from_json(const nl::json& j, Size& s)
     j["window"].get_to(s.window);
 }
 
+void from_json(const nl::json& j, Toggle& t)
+{
+    j["gui_demo"].get_to(t.gui_demo);
+    j["editor"].get_to(t.editor);
+}
+
 void from_json(const nl::json& j, Config& c)
 {
     j["scale"].get_to(c.scale);
     j["size"].get_to(c.size);
+    j["toggle"].get_to(c.toggle);
 }
 
 Config Config::from_json(const char* path)
