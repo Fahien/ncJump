@@ -43,8 +43,8 @@ void Camera::update()
     min_x = std::min(min_x, max_x);
     min_y = std::min(min_y, max_y);
 
-    node.x = std::clamp(smoothed_x, min_x, max_x);
-    node.y = std::clamp(smoothed_y, min_y, max_y);
+    node.x = std::clamp(smoothed_x, min_x, max_x) + offset.x;
+    node.y = std::clamp(smoothed_y, min_y, max_y) + offset.y;
 }
 
 } // namespace jmp

@@ -20,6 +20,8 @@ public:
 
     Vec2f get_position() const;
 
+    Vec2f offset = {};
+
 private:
     Game* game = nullptr;
     nc::SceneNode& node;
