@@ -1,5 +1,7 @@
 #include "editor.h"
 #include "game.h"
+#include <ncine/AppConfiguration.h>
+#include <ncine/Application.h>
 #include <ncine/imgui.h>
 
 namespace jmp
@@ -9,9 +11,120 @@ Editor::Editor(Game& g)
 {
     auto& style = ImGui::GetStyle();
     style.WindowRounding = 0.0f;
-    style.ScaleAllSizes(game.config.scale.scene);
+    style.ScaleAllSizes(game.config.scale.gui);
     auto& io = ImGui::GetIO();
-    io.FontGlobalScale = game.config.scale.scene;
+    io.FontGlobalScale = game.config.scale.gui;
+}
+
+bool active_button(const char* name, bool active)
+{
+    bool pushed = false;
+
+    if (active) {
+        auto& color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        pushed = true;
+    }
+    bool ret = ImGui::Button(name);
+    if (pushed) {
+        ImGui::PopStyleColor();
+    }
+
+    return ret;
+}
+
+void Editor::update_menu()
+{
+    if (ImGui::BeginMainMenuBar()) {
+        u32 button_count = 2;
+        auto text_size = ImGui::CalcTextSize("TileEntity");
+        float padding = ImGui::GetStyle().FramePadding.x * (button_count + 1);
+        float hwidth = ImGui::GetIO().DisplaySize.x / 2.0f;
+        float center = hwidth - padding - text_size.x / 2.0f;
+        ImGui::SetCursorPosX(center);
+
+        if (active_button("Tile", mode == Mode::TILE)) {
+            if (mode == Mode::TILE) {
+                mode = Mode::NONE;
+                game.tilemap.entities_root->setAlphaF(1.0f);
+            } else {
+                mode = Mode::TILE;
+                game.tilemap.tiles_root->setAlphaF(1.0f);
+                game.tilemap.entities_root->setAlphaF(0.5f);
+            }
+        }
+
+        if (active_button("Entity", mode == Mode::ENTITY)) {
+            if (mode == Mode::ENTITY) {
+                mode = Mode::NONE;
+                game.tilemap.tiles_root->setAlphaF(1.0f);
+            } else {
+                mode = Mode::ENTITY;
+                game.tilemap.tiles_root->setAlphaF(0.5f);
+                game.tilemap.entities_root->setAlphaF(1.0f);
+            }
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+}
+
+void update_resolution(Config& config)
+{
+    nc::theApplication().gfxDevice().setResolution(
+        int(config.size.window.width * config.scale.window),
+        int(config.size.window.height * config.scale.window));
+}
+
+void Editor::update_config(Config& config)
+{
+    ImGui::Begin("Config");
+
+    if (ImGui::CollapsingHeader("Window")) {
+        if (ImGui::SliderFloat("Scale", &config.scale.window, 1.0f, 4.0f, "%.0f")) {
+            update_resolution(config);
+        }
+
+        u32 window_min = 240;
+        u32 window_max = 960;
+        if (ImGui::SliderScalarN("Size",
+                ImGuiDataType_U32,
+                &config.size.window.width,
+                2,
+                &window_min,
+                &window_max)) {
+            update_resolution(config);
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Scene")) {
+        ImGui::PushID(&config.scale.scene);
+        if (ImGui::SliderFloat("Scale", &config.scale.scene, 1.0f, 4.0f, "%.0f")) {
+            game.scene.setScale(config.scale.scene);
+        }
+        ImGui::PopID();
+
+        u32 tile_min = 8;
+        u32 tile_max = 64;
+        ImGui::SliderScalarN("Tile", ImGuiDataType_U32, &config.size.tile, 1, &tile_min, &tile_max);
+
+        ImGui::SliderFloat2("Offset", game.camera.offset.data(), -960.0f, 960.0f, "%.0f");
+    }
+
+    if (ImGui::CollapsingHeader("Gui")) {
+        int new_scale = int(config.scale.gui);
+        ImGui::PushID(&new_scale);
+        if (ImGui::SliderInt("Scale", &new_scale, 1, 4)) {
+            game.config.scale.gui = float(new_scale);
+            auto new_style = ImGuiStyle();
+            new_style.ScaleAllSizes(game.config.scale.gui);
+            ImGui::GetStyle() = new_style;
+            ImGui::GetIO().FontGlobalScale = game.config.scale.gui;
+        }
+        ImGui::PopID();
+    }
+
+    ImGui::End();
 }
 
 void Editor::update_state(StateComponent& state)
@@ -68,24 +181,25 @@ void Editor::update_entity(Entity& entity)
 void Editor::update_input(Input& input)
 {
     ImGui::Begin("Input");
-    ImGui::Text("mouse.left: {\n\tdown: %s,\n\tpos: { x: %d, y: %d }\n}",
+    ImGui::Text("mouse.left: {\n\tdown: %s,\n\tpos: { x: %d, y: %d },\n}",
         input.mouse.left.down ? "T" : "F",
         input.mouse.pos.x,
         input.mouse.pos.y);
     ImGui::Text("joystick: {");
     ImGui::Text("\tmove: { x: %f, y: %f },", input.joystick.move.x, input.joystick.move.y);
-    ImGui::Text("\ta: { down: %s, just_down: %s }\n}",
+    ImGui::Text("\ta: { down: %s, just_down: %s },",
         input.joystick.a.down ? "T" : "F",
         input.joystick.a.just_down ? "T" : "F");
-    ImGui::Text("\tx: { down: %s, just_down: %s }\n}",
+    ImGui::Text("\tx: { down: %s, just_down: %s },",
         input.joystick.x.down ? "T" : "F",
         input.joystick.x.just_down ? "T" : "F");
+    ImGui::Text("}");
     ImGui::End();
 }
 
 ImVec2 get_tile_size(Config& config)
 {
-    f32 size = config.size.tile * config.scale.scene;
+    f32 size = config.size.tile * config.scale.gui;
     return {size, size};
 }
 
@@ -104,12 +218,17 @@ ARRAY<ImVec2, 2> get_tile_uvs(Tileset& tileset, u32 index)
 
 void Editor::update_tileset(Tileset& tileset)
 {
+    static u32 tileset_window_width = 1;
+
     ImGui::Begin("Tileset");
 
     auto tile_size = get_tile_size(game.config);
 
+    u32 step = u32(tile_size.x) * 2;
+    u32 elements_per_line = tileset_window_width / step - 1;
+
     // Draw selectable tiles using image buttons
-    for (usize i = 0; i < tileset.sprites.size(); ++i) {
+    for (u32 i = 0; i < tileset.sprites.size(); ++i) {
         auto uvs = get_tile_uvs(tileset, i);
 
         ImGui::PushID(i);
@@ -124,11 +243,13 @@ void Editor::update_tileset(Tileset& tileset)
             ImGui::PopStyleColor();
         }
         ImGui::PopID();
-        if ((i + 1) % tileset.width) {
+
+        if (elements_per_line && ((i + 1) % elements_per_line)) {
             ImGui::SameLine();
         }
     }
 
+    tileset_window_width = u32(ImGui::GetWindowSize().x);
     ImGui::End();
 }
 
@@ -179,12 +300,11 @@ void Editor::place_selected_tile()
 void Editor::update_tilemap()
 {
     ImGui::Begin("Tilemap");
+
     i32 dimensions[2] = {i32(game.tilemap.get_width()), i32(game.tilemap.get_height())};
-    ImGui::Text("width: %u\nheight: %u", game.tilemap.get_width(), game.tilemap.get_height());
-    if (ImGui::DragInt2("dimensions:", dimensions, 1.0f, 0, 64)) {
+    if (ImGui::DragInt2("Size", dimensions, 1.0f, 0, 64)) {
         game.tilemap.set_dimensions(dimensions[0], dimensions[1]);
     }
-    ImGui::Text("tiles: %u", game.tilemap.tile_descs.size());
     if (ImGui::TreeNode("entities:")) {
         i32 del_num = -1;
         for (i32 i = 0; i < game.tilemap.entities.size(); ++i) {
@@ -199,29 +319,27 @@ void Editor::update_tilemap()
         ImGui::TreePop();
     }
 
-    if (ImGui::RadioButton("tile", mode == Mode::TILE)) {
-        mode = Mode::TILE;
-    }
-    if (ImGui::RadioButton("entity", mode == Mode::ENTITY)) {
-        mode = Mode::ENTITY;
-    }
     ImGui::End();
 
     // Do not place any tile if mouse is hovering ImGui
     bool gui_hovered =
         ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered();
-    if (!gui_hovered && selected_tile >= 0 && game.input.mouse.left.down) {
+    if (mode != Mode::NONE && !gui_hovered && selected_tile >= 0 && game.input.mouse.left.down) {
         place_selected_tile();
     }
 }
 
 void Editor::update()
 {
-    update_entity(game.entity);
-    update_input(game.input);
-    update_tileset(game.tileset);
-    update_selected_tile(game.tileset);
-    update_tilemap();
+    if (game.config.toggle.editor) {
+        update_menu();
+        update_config(game.config);
+        update_entity(game.entity);
+        update_input(game.input);
+        update_tileset(game.tileset);
+        update_selected_tile(game.tileset);
+        update_tilemap();
+    }
 }
 
 } // namespace jmp
