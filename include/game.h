@@ -6,6 +6,7 @@
 #include "config.h"
 #include "editor.h"
 #include "entity.h"
+#include "factory/entity_factory.h"
 #include "input.h"
 #include "physics.h"
 #include "tilemap.h"
@@ -34,6 +35,8 @@ public:
     nc::Texture resource;
 
     Physics physics;
+
+    EntityFactory entity_factory;
 
     Entity entity;
 

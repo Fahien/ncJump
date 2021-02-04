@@ -12,6 +12,7 @@ class Tileset;
 class Tilemap;
 class StateComponent;
 class PhysicsComponent;
+class EntityFactory;
 
 class Editor
 {
@@ -31,10 +32,11 @@ private:
     void update_config(Config& config);
     void update_state(StateComponent& state);
     void update_physics(PhysicsComponent& physics);
-    void update_entity(Entity& entity);
+    void update_player(Entity& entity);
     void update_input(Input& input);
     void update_tileset(Tileset& tileset);
     void update_selected_tile(Tileset& tileset);
+    void update_entities(EntityFactory& factory);
     void update_tilemap();
     void place_selected_tile();
 

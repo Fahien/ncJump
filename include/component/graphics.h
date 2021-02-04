@@ -13,6 +13,7 @@ class TransformComponent;
 class GraphicsComponent {
 public:
     virtual ~GraphicsComponent() = default;
+
     virtual void update(const Input& input) = 0;
 
     inline virtual Direction::Value get_direction() const;
@@ -38,7 +39,9 @@ public:
 
 class CharacterGraphicsComponent : public GraphicsComponent {
 public:
-    CharacterGraphicsComponent(TransformComponent& t);
+    static CharacterGraphicsComponent& into(GraphicsComponent& g);
+
+    CharacterGraphicsComponent(TransformComponent& t, nc::Texture texture);
 
     void update(const Input& input) override;
 
