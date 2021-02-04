@@ -1,8 +1,11 @@
 #include "editor.h"
-#include "game.h"
+
 #include <ncine/AppConfiguration.h>
 #include <ncine/Application.h>
 #include <ncine/imgui.h>
+
+#include "component/graphics.h"
+#include "game.h"
 
 namespace jmp
 {
@@ -164,7 +167,7 @@ void Editor::update_physics(PhysicsComponent& physics)
     ImGui::DragFloat("Max X speed", &physics.max_x_speed, 0.125f);
 }
 
-void Editor::update_entity(Entity& entity)
+void Editor::update_player(Entity& entity)
 {
     ImGui::Begin("Player");
 
@@ -275,6 +278,26 @@ void Editor::update_selected_tile(Tileset& tileset)
     ImGui::End();
 }
 
+void Editor::update_entities(EntityFactory& factory)
+{
+    ImGui::Begin("Entities");
+
+    for (auto& entity : factory.entities) {
+        auto& graphics = CharacterGraphicsComponent::into(**entity->graphics);
+        graphics.idle.update(ncine::theApplication().interval());
+        auto& frame = graphics.idle.animations()[graphics.idle.animationIndex()];
+        auto& rect = frame.rect();
+        auto size = ImVec2(rect.w * game.config.scale.gui, rect.h * game.config.scale.gui);
+        auto& texture = graphics.idle_texture;
+        ImVec2 uv[2] = {ImVec2(rect.x / float(texture.width()), rect.y / float(texture.height())),
+            ImVec2((rect.x + rect.w) / float(texture.width()),
+                (rect.y + rect.h) / float(texture.height()))};
+        ImGui::ImageButton(graphics.idle_texture.guiTexId(), size, uv[0], uv[1]);
+    }
+
+    ImGui::End();
+}
+
 void Editor::place_selected_tile()
 {
     // Place selected tile on the map at clicked position
@@ -339,10 +362,11 @@ void Editor::update()
 
         update_menu();
         update_config(game.config);
-        update_entity(game.entity);
+        update_player(game.entity);
         update_input(game.input);
         update_tileset(game.tileset);
         update_selected_tile(game.tileset);
+        update_entities(game.entity_factory);
         update_tilemap();
     }
 }

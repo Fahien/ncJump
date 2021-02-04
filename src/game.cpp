@@ -30,6 +30,7 @@ Game::Game(Config& config)
     , scene {&root}
     , resource {PATH("img/tile/tileset.png")}
     , physics {*this}
+    , entity_factory {physics}
     , entity {scene}
     , camera {*this, *entity.transform.node.get()}
     , tileset {create_tileset(resource)}
@@ -42,7 +43,9 @@ Game::Game(Config& config)
 
     // @todo Refactor that
     entity.set_physics(PhysicsComponent::character(physics, entity.transform.node->position()));
-    entity.graphics = MK<CharacterGraphicsComponent>(entity.transform);
+
+    auto idle_texture = nc::Texture(PATH("img/hero/herochar_idle_anim_strip_4.png"));
+    entity.graphics = MK<CharacterGraphicsComponent>(entity.transform, MV(idle_texture));
     entity.state = MK<CharacterStateComponent>();
     entity.name = "player";
 }

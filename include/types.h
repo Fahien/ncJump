@@ -8,6 +8,7 @@
 #include <ncine/FileSystem.h>
 #include <ncine/Vector2.h>
 #include <ncine/common_macros.h>
+#include <nctl/Array.h>
 #include <nctl/StaticArray.h>
 
 namespace nc = ncine;

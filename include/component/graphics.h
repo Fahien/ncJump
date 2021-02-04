@@ -11,6 +11,8 @@ struct Input;
 struct TransformComponent;
 
 struct GraphicsComponent {
+    virtual ~GraphicsComponent() = default;
+
     virtual void update(const Input& input) = 0;
 
     inline virtual Direction::Value get_direction() const;
@@ -34,7 +36,9 @@ struct SingleGraphicsComponent : public GraphicsComponent {
 };
 
 struct CharacterGraphicsComponent : public GraphicsComponent {
-    CharacterGraphicsComponent(TransformComponent& t);
+    static CharacterGraphicsComponent& into(GraphicsComponent& g);
+
+    CharacterGraphicsComponent(TransformComponent& t, nc::Texture texture);
 
     void update(const Input& input) override;
 
