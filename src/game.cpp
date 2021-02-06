@@ -32,7 +32,7 @@ Game::Game(Config& config)
     , physics {*this}
     , entity_factory {physics}
     , entity {scene}
-    , camera {*this, *entity.transform.node.get()}
+    , camera {*this, entity.transform.node.get()}
     , tileset {create_tileset(resource)}
     , tilemap {create_tilemap(*this)}
     , editor {*this}
