@@ -10,10 +10,14 @@ class Input;
 class Entity;
 
 struct StateComponent {
+    virtual UNIQUE<StateComponent> clone() = 0;
+
     virtual void update(f32 dt, const Input& input, Entity& entity) = 0;
 };
 
 struct SingleStateComponent : public StateComponent {
+    UNIQUE<StateComponent> clone() override;
+
     void update(f32 dt, const Input& input, Entity& entity) override;
 };
 
@@ -39,6 +43,8 @@ struct CharacterStateComponent : public StateComponent {
     static CharacterStateComponent& into(StateComponent& s);
 
     CharacterStateComponent();
+
+    UNIQUE<StateComponent> clone() override;
 
     void update(f32 dt, const Input& input, Entity& entity) override;
 

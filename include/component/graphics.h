@@ -14,12 +14,19 @@ class Entity;
 struct GraphicsComponent {
     virtual ~GraphicsComponent() = default;
 
+    inline virtual UNIQUE<GraphicsComponent> clone();
+
     virtual void set(Entity& entity) = 0;
 
     virtual void update(const Input& input) = 0;
 
     inline virtual Direction::Value get_direction() const;
 };
+
+inline UNIQUE<GraphicsComponent> GraphicsComponent::clone()
+{
+    return UNIQUE<GraphicsComponent>();
+}
 
 inline Direction::Value GraphicsComponent::get_direction() const
 {
@@ -44,6 +51,8 @@ struct CharacterGraphicsComponent : public GraphicsComponent {
     static CharacterGraphicsComponent& into(GraphicsComponent& g);
 
     CharacterGraphicsComponent() = default;
+
+    UNIQUE<GraphicsComponent> clone() override;
 
     void set(Entity& entity) override;
 

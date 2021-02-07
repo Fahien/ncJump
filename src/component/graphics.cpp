@@ -34,6 +34,22 @@ CharacterGraphicsComponent& CharacterGraphicsComponent::into(GraphicsComponent& 
     return reinterpret_cast<CharacterGraphicsComponent&>(g);
 }
 
+UNIQUE<GraphicsComponent> CharacterGraphicsComponent::clone()
+{
+    auto ret = UNIQUE<CharacterGraphicsComponent>(new CharacterGraphicsComponent());
+
+    ret->direction = direction;
+    ret->idle = idle.clone();
+    ret->idle.setFrame(0);
+    ret->movement = movement.clone();
+    ret->jump_up = jump_up.clone();
+    ret->jump_down = jump_down.clone();
+    ret->push = push.clone();
+    ret->pull = pull.clone();
+
+    return ret;
+}
+
 void CharacterGraphicsComponent::set(Entity& entity)
 {
     idle.setParent(entity.transform.node.get());
