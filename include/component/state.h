@@ -12,11 +12,16 @@ class Entity;
 class StateComponent {
 public:
     virtual ~StateComponent() = default;
+
+    virtual UNIQUE<StateComponent> clone() = 0;
+
     virtual void update(f32 dt, const Input& input, Entity& entity) = 0;
 };
 
 class SingleStateComponent : public StateComponent {
 public:
+    UNIQUE<StateComponent> clone() override;
+
     void update(f32 dt, const Input& input, Entity& entity) override;
 };
 
@@ -45,6 +50,8 @@ public:
     static CharacterStateComponent& into(StateComponent& s);
 
     CharacterStateComponent();
+
+    UNIQUE<StateComponent> clone() override;
 
     void update(f32 dt, const Input& input, Entity& entity) override;
 

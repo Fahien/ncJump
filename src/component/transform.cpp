@@ -9,4 +9,11 @@ TransformComponent::TransformComponent(nc::SceneNode& parent)
     node->y += 2;
 }
 
+TransformComponent TransformComponent::clone()
+{
+    auto ret = TransformComponent();
+    *ret.node = node->clone();
+    return ret;
+}
+
 } // namespace jmp

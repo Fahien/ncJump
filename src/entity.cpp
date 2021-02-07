@@ -19,6 +19,30 @@ Entity::Entity(nc::SceneNode& scene)
 {
 }
 
+UNIQUE<Entity> Entity::clone()
+{
+    auto ret = MK<Entity>();
+
+    ret->name = name;
+    ret->transform = transform.clone();
+
+    if (graphics) {
+        ret->set_graphics(graphics->clone());
+    }
+
+    if (state) {
+        ret->state = OPTION<UNIQUE<StateComponent>>((**state).clone());
+    }
+
+    if (physics) {
+        auto new_physics = PhysicsComponent::character(
+            *physics->body->GetWorld(), ret->transform.node->position());
+        ret->set_physics(OPTION<PhysicsComponent>(MV(new_physics)));
+    }
+
+    return ret;
+}
+
 OPTION<PhysicsComponent>& Entity::get_physics()
 {
     return physics;

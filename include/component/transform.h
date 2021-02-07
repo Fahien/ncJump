@@ -12,6 +12,8 @@ public:
 
     TransformComponent(nc::SceneNode& parent);
 
+    TransformComponent clone();
+
     // nCine relies on pointers therefore this must live on the heap for the moment
     UNIQUE<nc::SceneNode> node = MK<nc::SceneNode>();
 };
