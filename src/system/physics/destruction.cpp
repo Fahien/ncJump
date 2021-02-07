@@ -69,7 +69,7 @@ void DestructionListener::emit_particles(Entity& entity)
     init.setVelocityAndRadius({0.0f, 0.0f}, 32.0f);
 
     auto& single_graphics = SingleGraphicsComponent::into(*entity.get_graphics());
-    auto rect = single_graphics.sprite->texRect();
+    auto rect = single_graphics.sprite.texRect();
     rect.x += rect.w / 4.0f;
     rect.y += rect.h / 4.0f;
     rect.w /= 2.0f;

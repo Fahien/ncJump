@@ -24,6 +24,8 @@ public:
 
     Entity(nc::SceneNode& scene);
 
+    UNIQUE<Entity> clone();
+
     inline UNIQUE<GraphicsComponent>& get_graphics();
     OPTION<PhysicsComponent>& get_physics();
 

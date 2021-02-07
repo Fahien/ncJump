@@ -15,6 +15,8 @@ class GraphicsComponent {
 public:
     virtual ~GraphicsComponent() = default;
 
+    virtual UNIQUE<GraphicsComponent> clone() const = 0;
+
     virtual void set(Entity& entity) = 0;
 
     virtual void update(const Input& input) = 0;
@@ -32,14 +34,17 @@ class SingleGraphicsComponent : public GraphicsComponent {
 public:
     static SingleGraphicsComponent& into(GraphicsComponent& g);
 
+    SingleGraphicsComponent() = default;
     SingleGraphicsComponent(TransformComponent& t, nc::Texture& texture);
+
+    UNIQUE<GraphicsComponent> clone() const override;
 
     void set(Entity& entity) override;
 
     void update(const Input& input) override;
 
     // nCine works with pointers
-    UNIQUE<nc::Sprite> sprite;
+    nc::Sprite sprite;
 };
 
 class CharacterGraphicsComponent : public GraphicsComponent {
@@ -47,6 +52,8 @@ public:
     static CharacterGraphicsComponent& into(GraphicsComponent& g);
 
     CharacterGraphicsComponent() = default;
+
+    UNIQUE<GraphicsComponent> clone() const override;
 
     void set(Entity& entity) override;
 

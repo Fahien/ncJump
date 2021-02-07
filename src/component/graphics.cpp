@@ -8,6 +8,22 @@
 
 namespace jmp
 {
+nc::Sprite clone_sprite(const nc::Sprite& sprite)
+{
+    auto ret = sprite.clone();
+    ret.setLayer(sprite.layer());
+    return ret;
+}
+
+/// @todo Workaround as `AnimatedSprite::clone()` is currently bugged
+nc::AnimatedSprite clone_sprite(const nc::AnimatedSprite& sprite)
+{
+    auto ret = sprite.clone();
+    ret.setFrame(0);
+    ret.setLayer(sprite.layer());
+    return ret;
+}
+
 SingleGraphicsComponent& SingleGraphicsComponent::into(GraphicsComponent& g)
 {
     return reinterpret_cast<SingleGraphicsComponent&>(g);
@@ -15,14 +31,21 @@ SingleGraphicsComponent& SingleGraphicsComponent::into(GraphicsComponent& g)
 
 SingleGraphicsComponent::SingleGraphicsComponent(TransformComponent& transform,
     nc::Texture& texture)
-    : sprite {MK<nc::Sprite>(&*transform.node, &texture)}
+    : sprite {&*transform.node, &texture}
 {
-    sprite->setLayer(1);
+    sprite.setLayer(1);
+}
+
+UNIQUE<GraphicsComponent> SingleGraphicsComponent::clone() const
+{
+    auto ret = MK<SingleGraphicsComponent>();
+    ret->sprite = clone_sprite(sprite);
+    return ret;
 }
 
 void SingleGraphicsComponent::set(Entity& entity)
 {
-    sprite->setParent(entity.transform.node.get());
+    sprite.setParent(entity.transform.node.get());
 }
 
 void SingleGraphicsComponent::update(const Input& input)
@@ -32,6 +55,22 @@ void SingleGraphicsComponent::update(const Input& input)
 CharacterGraphicsComponent& CharacterGraphicsComponent::into(GraphicsComponent& g)
 {
     return reinterpret_cast<CharacterGraphicsComponent&>(g);
+}
+
+UNIQUE<GraphicsComponent> CharacterGraphicsComponent::clone() const
+{
+    auto ret = UNIQUE<CharacterGraphicsComponent>(new CharacterGraphicsComponent());
+
+    ret->direction = direction;
+    ret->idle = idle.clone();
+    ret->idle.setFrame(0);
+    ret->movement = movement.clone();
+    ret->jump_up = jump_up.clone();
+    ret->jump_down = jump_down.clone();
+    ret->push = push.clone();
+    ret->pull = pull.clone();
+
+    return ret;
 }
 
 void CharacterGraphicsComponent::set(Entity& entity)

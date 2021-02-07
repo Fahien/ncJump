@@ -414,6 +414,15 @@ CharacterStateComponent::CharacterStateComponent()
 {
 }
 
+/// @todo Nothing special to clone even though PullState keeps track of a physics joint which
+/// is for a specific interaction. That forces a different approach for state objects which
+/// would not involve singletons as we do now with the `get_state` function.
+UNIQUE<StateComponent> CharacterStateComponent::clone()
+{
+    auto ret = MK<CharacterStateComponent>();
+    return ret;
+}
+
 void CharacterStateComponent::update(const f32 dt, const Input& input, Entity& entity)
 {
     state->handle(input, entity);
