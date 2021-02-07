@@ -35,8 +35,6 @@ jobs:
         export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
         export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
 
-        git submodule update --init --recursive
-
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
@@ -62,13 +60,15 @@ jobs:
         cd ..
         rm -rf nCine-artifacts
 
+        git clone https://github.com/$GITHUB_REPOSITORY-data.git
+
         # CMake Configuration and Make
         export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
         export NCINE_DIRECTORY=$(pwd)/nCine/lib/cmake/nCine
         export BuildType=Debug
 
         cd $PACKAGE_NAME
-        cmake -B ../$PACKAGE_NAME-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D nCine_DIR=$NCINE_DIRECTORY
+        cmake -B ../$PACKAGE_NAME-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D nCine_DIR=$NCINE_DIRECTORY -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external
 
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/../nCine-external/lib
         make -j2 -C ../$PACKAGE_NAME-build-$BuildType

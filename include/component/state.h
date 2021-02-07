@@ -6,7 +6,7 @@
 
 namespace jmp
 {
-class Input;
+struct Input;
 class Entity;
 
 class StateComponent {

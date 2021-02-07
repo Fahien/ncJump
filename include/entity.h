@@ -12,7 +12,7 @@
 
 namespace jmp
 {
-class Input;
+struct Input;
 
 class Entity
 {
@@ -44,7 +44,11 @@ private:
 
 Entity& Entity::from(b2Fixture& fixture)
 {
+#ifdef BOX2D_PRE241
+    return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData());
+#else
     return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData().pointer);
+#endif
 }
 
 } // namespace jmp

@@ -6,7 +6,7 @@ namespace jmp
 {
 class Game;
 class Entity;
-class Input;
+struct Input;
 class Tileset;
 class Tilemap;
 class StateComponent;

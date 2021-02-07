@@ -27,7 +27,11 @@ OPTION<PhysicsComponent>& Entity::get_physics()
 void Entity::set_physics(OPTION<PhysicsComponent> ph)
 {
     physics = MV(ph);
+#ifdef BOX2D_PRE241
+    physics->body->SetUserData(this);
+#else
     physics->body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
+#endif
 }
 
 void Entity::update(const f32 dt, const Input& input)

@@ -51,10 +51,20 @@ set(PACKAGE_SOURCES
 
 function(callback_before_target)
 	if(EMSCRIPTEN)
+		find_path(EMSCRIPTEN_LIBDIR_EXT
+			NAMES libbox2d.a
+			PATHS ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external-emscripten ${PARENT_BINARY_DIR}/nCine-external-emscripten
+			PATH_SUFFIXES lib
+			DOC "Path to the nCine external Emscripten libraries directory"
+			NO_DEFAULT_PATH # To avoid finding MSYS/MinGW libraries
+			NO_CMAKE_FIND_ROOT_PATH) # To avoid using the cross-compiler root
+
+		get_filename_component(EXTERNAL_EMSCRIPTEN_DIR_EXT ${EMSCRIPTEN_LIBDIR_EXT} DIRECTORY)
+
 		add_library(box2d::box2d STATIC IMPORTED)
 		set_target_properties(box2d::box2d PROPERTIES
-			IMPORTED_LOCATION ${EMSCRIPTEN_LIBDIR}/libbox2d.a
-			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+			IMPORTED_LOCATION ${EMSCRIPTEN_LIBDIR_EXT}/libbox2d.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR_EXT}/include")
 		set(BOX2D_FOUND 1)
 	elseif(ANDROID)
 		if(EXISTS ${EXTERNAL_ANDROID_DIR}/box2d/${ANDROID_ABI}/libbox2d.a)
@@ -64,14 +74,55 @@ function(callback_before_target)
 				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/box2d/include")
 			set(BOX2D_FOUND 1)
 		endif()
+	elseif(MSVC)
+		find_path(MSVC_BINDIR_EXT
+			NAMES box2d.dll
+			PATHS ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
+			PATH_SUFFIXES bin bin/${MSVC_ARCH_SUFFIX}
+			DOC "Path to the nCine external MSVC DLL libraries directory"
+			NO_DEFAULT_PATH) # To avoid finding MSYS/MinGW libraries
+
+		find_path(MSVC_LIBDIR
+			NAMES box2d.lib
+			PATHS ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
+			PATH_SUFFIXES lib/${MSVC_ARCH_SUFFIX}
+			DOC "Path to the nCine external MSVC import libraries directory"
+			NO_DEFAULT_PATH) # To avoid finding MSYS/MinGW libraries
+
+		get_filename_component(EXTERNAL_MSVC_DIR ${MSVC_LIBDIR} DIRECTORY)
+		get_filename_component(EXTERNAL_MSVC_DIR ${EXTERNAL_MSVC_DIR} DIRECTORY)
+
+		if(EXISTS ${MSVC_LIBDIR}/box2d.lib AND EXISTS ${MSVC_BINDIR_EXT}/box2d.dll)
+			add_library(box2d::box2d SHARED IMPORTED)
+			set_target_properties(box2d::box2d PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/box2d.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR_EXT}/box2d.dll
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+			set(BOX2D_FOUND 1)
+		endif()
 	else()
 		find_package(box2d REQUIRED)
+	endif()
+
+	if(APPLE)
+		set(CMAKE_MACOSX_RPATH ON)
+
+		if(BOX2D_FOUND)
+			set_target_properties(box2d::box2d PROPERTIES
+				IMPORTED_LOCATION ${BOX2D_LIBRARY}/box2d
+				IMPORTED_LOCATION_RELEASE ${BOX2D_LIBRARY}/box2d
+				IMPORTED_LOCATION_DEBUG ${BOX2D_LIBRARY}/box2d)
+		endif()
 	endif()
 endfunction()
 
 function(callback_after_target)
 	target_compile_features(${PACKAGE_EXE_NAME} PUBLIC cxx_std_17)
 	target_link_libraries(${PACKAGE_EXE_NAME} PRIVATE box2d::box2d)
+	if(MINGW)
+		# MinGW and MSYS haven't yet updated Box2D to a version >=2.4.1
+		target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "BOX2D_PRE241")
+	endif()
 
 	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 		include(custom_nlohmannjson)
