@@ -86,6 +86,9 @@ void JumpHandler::onKeyPressed(const nc::KeyboardEvent& event)
     case nc::KeySym::SPACE:
         game->input.joystick.a.down = game->input.joystick.a.just_down = true;
         break;
+    case nc::KeySym::ESCAPE:
+        game->input.key.esc.down = game->input.key.esc.just_down = true;
+        break;
     default:
         break;
     }
@@ -110,8 +113,7 @@ void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
         game->input.joystick.a.down = false;
         break;
     case nc::KeySym::ESCAPE:
-        LOGI("Bye");
-        nc::theApplication().quit();
+        game->input.key.esc.down = false;
         break;
     default:
         break;

@@ -9,6 +9,10 @@ struct Button {
     bool just_down = false;
 };
 
+struct Key {
+    Button esc = {};
+};
+
 struct Mouse {
     Button left = {};
     Vec2i pos = {0, 0};
@@ -21,6 +25,7 @@ struct Joystick {
 };
 
 struct Input {
+    Key key = {};
     Mouse mouse = {};
     Joystick joystick = {};
 
