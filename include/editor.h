@@ -6,6 +6,7 @@ namespace jmp
 {
 class Config;
 class Game;
+class Camera;
 class Entity;
 class Input;
 class Tileset;
@@ -28,8 +29,15 @@ private:
         ENTITY,
     };
 
+    void reset();
+
+    void set_mode(Mode mode);
+    void set_selected_tile(OPTION<u32> s);
+    void set_selected_entity(OPTION<u32> s);
+
     void update_menu();
     void update_config(Config& config);
+    void update_camera(Camera& camera, Config& config);
     void update_state(StateComponent& state);
     void update_physics(PhysicsComponent& physics);
     void update_player(Entity& entity);
@@ -38,15 +46,17 @@ private:
     void update_selected_tile(Tileset& tileset);
     void update_entities(EntityFactory& factory);
     void update_tilemap();
+
     void place_selected_tile();
+    void place_selected_entity();
 
     Game& game;
 
     /// Tilemap place mode
     Mode mode = Mode::NONE;
 
-    /// Negative means no tile selected
-    i32 selected_tile = -1;
+    OPTION<u32> selected_tile = None;
+    OPTION<u32> selected_entity = None;
 };
 
 } // namespace jmp
