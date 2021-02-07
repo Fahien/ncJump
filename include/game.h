@@ -7,6 +7,7 @@
 #include "editor.h"
 #include "entity.h"
 #include "factory/entity_factory.h"
+#include "factory/graphics_factory.h"
 #include "input.h"
 #include "physics.h"
 #include "tilemap.h"
@@ -36,6 +37,7 @@ public:
 
     Physics physics;
 
+    GraphicsFactory graphics_factory;
     EntityFactory entity_factory;
 
     Entity entity;

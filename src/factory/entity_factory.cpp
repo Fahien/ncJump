@@ -17,8 +17,11 @@ UNIQUE<Entity> make_mushroom(Physics& physics)
         OPTION(PhysicsComponent::character(physics, mushroom->transform.node->position())));
 
     auto idle_texture = nc::Texture(PATH("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png"));
-    mushroom->graphics =
-        OPTION(MK<CharacterGraphicsComponent>(mushroom->transform, MV(idle_texture)));
+
+    auto graphics = MK<CharacterGraphicsComponent>();
+    graphics->idle =
+        factory.create_animation("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
+    mushroom->set_graphics(MV(graphics));
 
     return mushroom;
 }

@@ -30,6 +30,7 @@ set(PACKAGE_SOURCES
 	include/serialization/tilemap.h
 	include/system/physics/destruction.h
 	include/factory/entity_factory.h
+	include/factory/graphics_factory.h
 	src/main.cpp
 	src/input.cpp
 	src/game.cpp
@@ -49,6 +50,7 @@ set(PACKAGE_SOURCES
 	src/serialization/tilemap.cpp
 	src/system/physics/destruction.cpp
 	src/factory/entity_factory.cpp
+	src/factory/graphics_factory.cpp
 )
 
 function(callback_before_target)

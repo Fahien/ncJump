@@ -24,6 +24,14 @@ OPTION<PhysicsComponent>& Entity::get_physics()
     return physics;
 }
 
+void Entity::set_graphics(UNIQUE<GraphicsComponent> gfx)
+{
+    graphics = MV(gfx);
+    if (graphics) {
+        graphics->set(*this);
+    }
+}
+
 void Entity::set_physics(OPTION<PhysicsComponent> ph)
 {
     physics = MV(ph);
@@ -37,7 +45,7 @@ void Entity::set_physics(OPTION<PhysicsComponent> ph)
 void Entity::update(const f32 dt, const Input& input)
 {
     if (graphics) {
-        (*graphics)->update(input);
+        graphics->update(input);
     }
 
     if (state) {

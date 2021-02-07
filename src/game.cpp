@@ -30,6 +30,7 @@ Game::Game(Config& config)
     , scene {&root}
     , resource {PATH("img/tile/tileset.png")}
     , physics {*this}
+    , graphics_factory {}
     , entity_factory {physics}
     , entity {scene}
     , camera {*this, entity.transform.node.get()}
@@ -44,8 +45,17 @@ Game::Game(Config& config)
     // @todo Refactor that
     entity.set_physics(PhysicsComponent::character(physics, entity.transform.node->position()));
 
-    auto idle_texture = nc::Texture(PATH("img/hero/herochar_idle_anim_strip_4.png"));
-    entity.graphics = MK<CharacterGraphicsComponent>(entity.transform, MV(idle_texture));
+    auto graphics = MK<CharacterGraphicsComponent>();
+    graphics->idle = graphics_factory.create_animation("img/hero/herochar_idle_anim_strip_4.png");
+    graphics->movement =
+        graphics_factory.create_animation("img/hero/herochar_run_anim_strip_6.png");
+    graphics->jump_up =
+        graphics_factory.create_animation("img/hero/herochar_jump_up_anim_strip_3.png");
+    graphics->jump_down =
+        graphics_factory.create_animation("img/hero/herochar_jump_down_anim_strip_3.png");
+    graphics->push =
+        graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
+    entity.set_graphics(MV(graphics));
     entity.state = MK<CharacterStateComponent>();
     entity.name = "player";
 }

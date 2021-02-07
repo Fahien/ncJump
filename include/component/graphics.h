@@ -9,10 +9,13 @@ namespace jmp
 {
 struct Input;
 class TransformComponent;
+class Entity;
 
 class GraphicsComponent {
 public:
     virtual ~GraphicsComponent() = default;
+
+    virtual void set(Entity& entity) = 0;
 
     virtual void update(const Input& input) = 0;
 
@@ -31,6 +34,8 @@ public:
 
     SingleGraphicsComponent(TransformComponent& t, nc::Texture& texture);
 
+    void set(Entity& entity) override;
+
     void update(const Input& input) override;
 
     // nCine works with pointers
@@ -41,7 +46,9 @@ class CharacterGraphicsComponent : public GraphicsComponent {
 public:
     static CharacterGraphicsComponent& into(GraphicsComponent& g);
 
-    CharacterGraphicsComponent(TransformComponent& t, nc::Texture texture);
+    CharacterGraphicsComponent() = default;
+
+    void set(Entity& entity) override;
 
     void update(const Input& input) override;
 
@@ -49,22 +56,11 @@ public:
 
     Direction::Value direction = Direction::RIGHT;
 
-    nc::Texture idle_texture;
     nc::AnimatedSprite idle;
-
-    nc::Texture movement_texture;
     nc::AnimatedSprite movement;
-
-    nc::Texture jump_up_texture;
     nc::AnimatedSprite jump_up;
-
-    nc::Texture jump_down_texture;
     nc::AnimatedSprite jump_down;
-
-    nc::Texture push_texture;
     nc::AnimatedSprite push;
-
-    nc::Texture pull_texture;
     nc::AnimatedSprite pull;
 };
 
