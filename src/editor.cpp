@@ -300,22 +300,20 @@ void Editor::update_entities(EntityFactory& factory)
 void Editor::place_selected_tile()
 {
     // Place selected tile on the map at clicked position
-    i32 global_scale = game.config.scale.global;
-    i32 tile_size = game.config.size.tile * game.config.scale.scene * global_scale;
+    i32 tile_size = game.config.size.tile * game.config.scale.scene * game.config.scale.global;
 
-    auto screen_camera = Vec2i {i32(game.camera.get_position().x * global_scale),
-        i32(game.camera.get_position().y * global_scale)};
+    auto camera_pos = game.config.scene_to_screen(game.camera.get_position());
 
     if (mode == Mode::TILE) {
-        Vec2i tile_target = (game.input.mouse.pos - screen_camera) / tile_size;
+        Vec2i tile_target = (game.input.mouse.pos - camera_pos) / tile_size;
 
         if (tile_target.x < game.tilemap.get_width() && tile_target.y < game.tilemap.get_height()) {
             game.tilemap.set_tile(tile_target, game.tileset, game.tileset.tiles[selected_tile]);
         }
     } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
         // Place an object only on mouse left just down
-        auto entity_position = Vec2f {f32((game.input.mouse.pos.x - screen_camera.x) / tile_size),
-            f32((game.input.mouse.pos.y - screen_camera.y) / tile_size)};
+        auto entity_position = Vec2f {f32((game.input.mouse.pos.x - camera_pos.x) / tile_size),
+            f32((game.input.mouse.pos.y - camera_pos.y) / tile_size)};
         game.tilemap.set_entity(entity_position, game.tileset, game.tileset.tiles[selected_tile]);
     }
 }
