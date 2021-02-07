@@ -33,6 +33,7 @@ public:
 
     void set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& tile);
     void set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile);
+    void add_entity(UNIQUE<Entity> entity);
 
     Game* game = nullptr;
 
