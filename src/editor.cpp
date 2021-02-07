@@ -36,6 +36,47 @@ bool active_button(const char* name, bool active)
     return ret;
 }
 
+void Editor::reset()
+{
+    selected_tile = None;
+    selected_entity = None;
+    set_mode(Mode::NONE);
+}
+
+void Editor::set_mode(Mode new_mode)
+{
+    f32 tiles_alpha = 1.0f;
+    f32 entities_alpha = 1.0f;
+
+    switch (new_mode) {
+    case Mode::TILE:
+        entities_alpha = 0.5f;
+        break;
+    case Mode::ENTITY:
+        tiles_alpha = 0.5;
+        break;
+    default:
+        break;
+    }
+
+    game.tilemap.tiles_root->setAlphaF(tiles_alpha);
+    game.tilemap.entities_root->setAlphaF(entities_alpha);
+
+    mode = new_mode;
+}
+
+void Editor::set_selected_tile(OPTION<u32> s)
+{
+    selected_tile = s;
+    selected_entity = None;
+}
+
+void Editor::set_selected_entity(OPTION<u32> s)
+{
+    selected_entity = s;
+    selected_tile = None;
+}
+
 void Editor::update_menu()
 {
     if (ImGui::BeginMainMenuBar()) {
@@ -47,25 +88,11 @@ void Editor::update_menu()
         ImGui::SetCursorPosX(center);
 
         if (active_button("Tile", mode == Mode::TILE)) {
-            if (mode == Mode::TILE) {
-                mode = Mode::NONE;
-                game.tilemap.entities_root->setAlphaF(1.0f);
-            } else {
-                mode = Mode::TILE;
-                game.tilemap.tiles_root->setAlphaF(1.0f);
-                game.tilemap.entities_root->setAlphaF(0.5f);
-            }
+            set_mode(mode == Mode::TILE ? Mode::NONE : Mode::TILE);
         }
 
         if (active_button("Entity", mode == Mode::ENTITY)) {
-            if (mode == Mode::ENTITY) {
-                mode = Mode::NONE;
-                game.tilemap.tiles_root->setAlphaF(1.0f);
-            } else {
-                mode = Mode::ENTITY;
-                game.tilemap.tiles_root->setAlphaF(0.5f);
-                game.tilemap.entities_root->setAlphaF(1.0f);
-            }
+            set_mode(mode == Mode::ENTITY ? Mode::NONE : Mode::ENTITY);
         }
 
         ImGui::EndMainMenuBar();
@@ -127,6 +154,15 @@ void Editor::update_config(Config& config)
         ImGui::PopID();
     }
 
+    ImGui::End();
+}
+
+void Editor::update_camera(Camera& camera, Config& config)
+{
+    ImGui::Begin("Camera");
+    ImGui::Text("offset: { %f, %f }", camera.offset.x, camera.offset.y);
+    auto screen = config.scene_to_screen(camera.get_position());
+    ImGui::Text("screen: { %d, %d }", screen.x, screen.y);
     ImGui::End();
 }
 
@@ -240,7 +276,7 @@ void Editor::update_tileset(Tileset& tileset)
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
         }
         if (ImGui::ImageButton(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1])) {
-            selected_tile = i;
+            set_selected_tile(i);
         }
         if (selected) {
             ImGui::PopStyleColor();
@@ -258,18 +294,18 @@ void Editor::update_tileset(Tileset& tileset)
 
 void Editor::update_selected_tile(Tileset& tileset)
 {
-    if (selected_tile < 0) {
+    if (!selected_tile) {
         return;
     }
 
     ImGui::Begin("Tile");
 
     auto tile_size = get_tile_size(game.config);
-    auto uvs = get_tile_uvs(tileset, selected_tile);
+    auto uvs = get_tile_uvs(tileset, *selected_tile);
 
     ImGui::Image(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1]);
 
-    auto& tile = tileset.tiles[selected_tile];
+    auto& tile = tileset.tiles[*selected_tile];
     ImGui::Text("id: %u", tile.id);
     ImGui::Checkbox("passable", &tile.passable);
     ImGui::Checkbox("destructible", &tile.destructible);
@@ -281,17 +317,35 @@ void Editor::update_entities(EntityFactory& factory)
 {
     ImGui::Begin("Entities");
 
-    for (auto& entity : factory.entities) {
+    for (u32 i = 0; i < factory.entities.size(); ++i) {
+        auto& entity = factory.entities[i];
         auto& graphics = CharacterGraphicsComponent::into(*entity->get_graphics());
         graphics.idle.update(ncine::theApplication().interval());
         auto& frame = graphics.idle.animations()[graphics.idle.animationIndex()];
         auto& rect = frame.rect();
         auto size = ImVec2(rect.w * game.config.scale.gui, rect.h * game.config.scale.gui);
-        auto& texture = graphics.idle_texture;
-        ImVec2 uv[2] = {ImVec2(rect.x / float(texture.width()), rect.y / float(texture.height())),
-            ImVec2((rect.x + rect.w) / float(texture.width()),
-                (rect.y + rect.h) / float(texture.height()))};
-        ImGui::ImageButton(graphics.idle_texture.guiTexId(), size, uv[0], uv[1]);
+        auto texture = const_cast<nc::Texture*>(graphics.idle.texture());
+        ImVec2 uv[2] = {ImVec2(rect.x / float(texture->width()), rect.y / float(texture->height())),
+            ImVec2((rect.x + rect.w) / float(texture->width()),
+                (rect.y + rect.h) / float(texture->height()))};
+
+        bool selected = selected_entity == i;
+        if (selected) {
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
+        }
+
+        if (ImGui::ImageButton(texture->guiTexId(), size, uv[0], uv[1])) {
+            set_selected_entity(i);
+            set_mode(Mode::ENTITY);
+        }
+
+        if (selected) {
+            ImGui::PopStyleColor();
+        }
+    }
+
+    if (selected_entity) {
+        ImGui::Text("Selected: %u", *selected_entity);
     }
 
     ImGui::End();
@@ -308,14 +362,24 @@ void Editor::place_selected_tile()
         Vec2i tile_target = (game.input.mouse.pos - camera_pos) / tile_size;
 
         if (tile_target.x < game.tilemap.get_width() && tile_target.y < game.tilemap.get_height()) {
-            game.tilemap.set_tile(tile_target, game.tileset, game.tileset.tiles[selected_tile]);
+            game.tilemap.set_tile(tile_target, game.tileset, game.tileset.tiles[*selected_tile]);
         }
     } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
         // Place an object only on mouse left just down
         auto entity_position = Vec2f {f32((game.input.mouse.pos.x - camera_pos.x) / tile_size),
             f32((game.input.mouse.pos.y - camera_pos.y) / tile_size)};
-        game.tilemap.set_entity(entity_position, game.tileset, game.tileset.tiles[selected_tile]);
+        game.tilemap.set_entity(entity_position, game.tileset, game.tileset.tiles[*selected_tile]);
     }
+}
+
+void Editor::place_selected_entity()
+{
+    auto entity = game.entity_factory.entities[*selected_entity]->clone();
+    auto pos = game.input.mouse.pos - game.config.scene_to_screen(game.camera.get_position());
+    entity->set_position(Vec2f(
+        f32(pos.x / (game.config.size.tile * game.config.scale.scene * game.config.scale.global)),
+        f32(pos.y / (game.config.size.tile * game.config.scale.scene * game.config.scale.global))));
+    game.tilemap.add_entity(MV(entity));
 }
 
 void Editor::update_tilemap()
@@ -345,16 +409,25 @@ void Editor::update_tilemap()
     // Do not place any tile if mouse is hovering ImGui
     bool gui_hovered =
         ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered();
-    if (mode != Mode::NONE && !gui_hovered && selected_tile >= 0 && game.input.mouse.left.down) {
-        place_selected_tile();
+    if (mode != Mode::NONE && !gui_hovered && game.input.mouse.left.just_down) {
+        if (selected_tile) {
+            place_selected_tile();
+        } else if (mode == Mode::ENTITY && selected_entity) {
+            place_selected_entity();
+        }
     }
 }
 
 void Editor::update()
 {
     if (game.config.toggle.editor) {
+        if (game.input.key.esc.just_down) {
+            reset();
+        }
+
         update_menu();
         update_config(game.config);
+        update_camera(game.camera, game.config);
         update_player(game.entity);
         update_input(game.input);
         update_tileset(game.tileset);
