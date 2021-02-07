@@ -26,6 +26,9 @@ public:
 
     UNIQUE<Entity> clone();
 
+    /// @brief Propagates this position to required components
+    void set_position(const Vec2f& position);
+
     inline UNIQUE<GraphicsComponent>& get_graphics();
     OPTION<PhysicsComponent>& get_physics();
 

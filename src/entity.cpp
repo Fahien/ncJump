@@ -43,6 +43,15 @@ UNIQUE<Entity> Entity::clone()
     return ret;
 }
 
+void Entity::set_position(const Vec2f& pos)
+{
+    transform.node->setPosition(pos);
+    if (physics) {
+        auto bpos = b2Vec2(pos.x, pos.y);
+        physics->body->SetTransform(bpos, 0);
+    }
+}
+
 OPTION<PhysicsComponent>& Entity::get_physics()
 {
     return physics;
