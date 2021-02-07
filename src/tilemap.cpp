@@ -111,7 +111,7 @@ UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
 {
     auto entity = tileset.create_entity(tile, *game, dynamic);
 
-    auto& graphics = SingleGraphicsComponent::into(**entity->graphics);
+    auto& graphics = SingleGraphicsComponent::into(*entity->get_graphics());
     entity->transform.node->x = pos.x * graphics.sprite->texRect().w;
     entity->transform.node->y = pos.y * graphics.sprite->texRect().h;
     if (auto& physics = entity->get_physics()) {

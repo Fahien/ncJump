@@ -58,7 +58,7 @@ IdleState::IdleState()
     value = Value::IDLE;
 }
 
-#define CHAR_GFX(e) reinterpret_cast<CharacterGraphicsComponent&>(*e.graphics.value().get())
+#define CHAR_GFX(e) reinterpret_cast<CharacterGraphicsComponent&>(*e.get_graphics())
 #define CHAR_STT(e) reinterpret_cast<CharacterStateComponent&>(*e.state.value().get())
 
 void IdleState::enter(const Input& input, Entity& entity)

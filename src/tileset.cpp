@@ -73,10 +73,10 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
     tex_rect.w = tile_size;
     tex_rect.h = tile_size;
 
-    auto graphics = SingleGraphicsComponent(entity->transform, *texture);
-    graphics.sprite->setTexture(texture);
-    graphics.sprite->setTexRect(MV(tex_rect));
-    entity->graphics = MK<SingleGraphicsComponent>(MV(graphics));
+    auto graphics = MK<SingleGraphicsComponent>(entity->transform, *texture);
+    graphics->sprite->setTexture(texture);
+    graphics->sprite->setTexRect(MV(tex_rect));
+    entity->set_graphics(MV(graphics));
 
     if (!tile.passable) {
         auto physics =

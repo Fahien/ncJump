@@ -24,8 +24,10 @@ public:
 
     Entity(nc::SceneNode& scene);
 
+    inline UNIQUE<GraphicsComponent>& get_graphics();
     OPTION<PhysicsComponent>& get_physics();
 
+    void set_graphics(UNIQUE<GraphicsComponent> graphics);
     void set_physics(OPTION<PhysicsComponent> physics);
 
     void update(f32 dt, const Input& input);
@@ -34,17 +36,21 @@ public:
 
     TransformComponent transform;
 
-    OPTION<UNIQUE<GraphicsComponent>> graphics;
-
     OPTION<UNIQUE<StateComponent>> state;
 
 private:
+    UNIQUE<GraphicsComponent> graphics;
     OPTION<PhysicsComponent> physics;
 };
 
 Entity& Entity::from(b2Fixture& fixture)
 {
     return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData());
+}
+
+inline UNIQUE<GraphicsComponent>& Entity::get_graphics()
+{
+    return graphics;
 }
 
 } // namespace jmp

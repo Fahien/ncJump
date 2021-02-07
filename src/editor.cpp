@@ -283,7 +283,7 @@ void Editor::update_entities(EntityFactory& factory)
     ImGui::Begin("Entities");
 
     for (auto& entity : factory.entities) {
-        auto& graphics = CharacterGraphicsComponent::into(**entity->graphics);
+        auto& graphics = CharacterGraphicsComponent::into(*entity->get_graphics());
         graphics.idle.update(ncine::theApplication().interval());
         auto& frame = graphics.idle.animations()[graphics.idle.animationIndex()];
         auto& rect = frame.rect();
