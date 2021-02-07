@@ -138,4 +138,10 @@ void Tilemap::set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& t
     entities.emplace_back(MV(entity));
 }
 
+void Tilemap::add_entity(UNIQUE<Entity> entity)
+{
+    entity->transform.node->setParent(entities_root.get());
+    entities.emplace_back(MV(entity));
+}
+
 } // namespace jmp
