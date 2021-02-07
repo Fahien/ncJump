@@ -31,7 +31,7 @@ Game::Game(Config& config)
     , resource {PATH("img/tile/tileset.png")}
     , physics {*this}
     , graphics_factory {}
-    , entity_factory {physics}
+    , entity_factory {*this}
     , entity {scene}
     , camera {*this, entity.transform.node.get()}
     , tileset {create_tileset(resource)}
@@ -43,7 +43,8 @@ Game::Game(Config& config)
     scene.setScale(config.scale.scene);
 
     // @todo Refactor that
-    entity.set_physics(PhysicsComponent::character(physics, entity.transform.node->position()));
+    entity.set_physics(
+        PhysicsComponent::character(physics.world, entity.transform.node->position()));
 
     auto graphics = MK<CharacterGraphicsComponent>();
     graphics->idle = graphics_factory.create_animation("img/hero/herochar_idle_anim_strip_4.png");

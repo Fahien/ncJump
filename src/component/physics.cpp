@@ -1,17 +1,15 @@
 #include "component/physics.h"
 
-#include "physics.h"
-
 namespace jmp
 {
-PhysicsComponent PhysicsComponent::tile(Physics& physics, const Vec2f& pos, const bool dynamic)
+PhysicsComponent PhysicsComponent::tile(b2World& world, const Vec2f& pos, const bool dynamic)
 {
     auto def = b2BodyDef();
     def.position.Set(pos.x, pos.y);
     def.type = dynamic ? b2_dynamicBody : b2_staticBody;
     def.fixedRotation = true;
 
-    auto body = physics.world.CreateBody(&def);
+    auto body = world.CreateBody(&def);
 
     auto box = b2PolygonShape();
     box.SetAsBox(0.5f, 0.5f);
@@ -22,20 +20,20 @@ PhysicsComponent PhysicsComponent::tile(Physics& physics, const Vec2f& pos, cons
     fixture_def.friction = 2.0f;
     body->CreateFixture(&fixture_def);
 
-    auto ret = PhysicsComponent(physics);
+    auto ret = PhysicsComponent();
     ret.body = body;
 
     return ret;
 }
 
-PhysicsComponent PhysicsComponent::character(Physics& physics, const Vec2f& pos)
+PhysicsComponent PhysicsComponent::character(b2World& world, const Vec2f& pos)
 {
     auto hero_def = b2BodyDef();
     hero_def.type = b2_dynamicBody;
     hero_def.position.Set(pos.x, pos.y);
     hero_def.angularDamping = 1024.0f;
 
-    auto body = physics.world.CreateBody(&hero_def);
+    auto body = world.CreateBody(&hero_def);
 
     auto hero_box = b2CircleShape();
     hero_box.m_radius = 0.48f;
@@ -47,20 +45,14 @@ PhysicsComponent PhysicsComponent::character(Physics& physics, const Vec2f& pos)
 
     body->CreateFixture(&hero_fixture_def);
 
-    auto ret = PhysicsComponent(physics);
+    auto ret = PhysicsComponent();
     ret.body = body;
 
     return ret;
 }
 
-PhysicsComponent::PhysicsComponent(Physics& physics)
-    : physics {physics}
-{
-}
-
 PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
-    : physics {o.physics}
-    , body {o.body}
+    : body {o.body}
     , obstacle {o.obstacle}
     , air_factor {o.air_factor}
     , velocity_factor {o.velocity_factor}
@@ -89,7 +81,7 @@ PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
 PhysicsComponent::~PhysicsComponent()
 {
     if (body) {
-        physics.world.DestroyBody(body);
+        body->GetWorld()->DestroyBody(body);
     }
 }
 

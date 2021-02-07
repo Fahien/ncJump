@@ -4,17 +4,18 @@
 
 #include "component/graphics.h"
 #include "entity.h"
+#include "game.h"
 
 namespace jmp
 {
-UNIQUE<Entity> make_mushroom(Physics& physics)
+UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
 {
     auto mushroom = MK<Entity>();
 
     mushroom->name = "Mushroom";
 
     mushroom->set_physics(
-        OPTION(PhysicsComponent::character(physics, mushroom->transform.node->position())));
+        OPTION(PhysicsComponent::character(world, mushroom->transform.node->position())));
 
     auto idle_texture = nc::Texture(PATH("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png"));
 
@@ -26,10 +27,9 @@ UNIQUE<Entity> make_mushroom(Physics& physics)
     return mushroom;
 }
 
-EntityFactory::EntityFactory(Physics& physics)
-    : physics {physics}
+EntityFactory::EntityFactory(Game& game)
 {
-    entities.pushBack(make_mushroom(physics));
+    entities.pushBack(make_mushroom(game.physics.world, game.graphics_factory));
     assert(entities.size());
 }
 

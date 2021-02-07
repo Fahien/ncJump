@@ -7,14 +7,12 @@
 
 namespace jmp
 {
-class Physics;
-
 class PhysicsComponent {
 public:
-    static PhysicsComponent tile(Physics& physics, const Vec2f& pos, bool dynamic);
-    static PhysicsComponent character(Physics& physics, const Vec2f& pos);
+    static PhysicsComponent tile(b2World& world, const Vec2f& pos, bool dynamic);
+    static PhysicsComponent character(b2World& world, const Vec2f& pos);
 
-    PhysicsComponent(Physics& physics);
+    PhysicsComponent() = default;
 
     PhysicsComponent(PhysicsComponent&& o);
     PhysicsComponent& operator=(PhysicsComponent&& o) noexcept;
@@ -22,8 +20,6 @@ public:
     ~PhysicsComponent();
 
     void update();
-
-    Physics& physics;
 
     b2Body* body = nullptr;
 
