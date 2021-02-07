@@ -6,13 +6,11 @@
 
 namespace jmp
 {
-class Physics;
-
 struct PhysicsComponent {
-    static PhysicsComponent tile(Physics& physics, const Vec2f& pos, bool dynamic);
-    static PhysicsComponent character(Physics& physics, const Vec2f& pos);
+    static PhysicsComponent tile(b2World& world, const Vec2f& pos, bool dynamic);
+    static PhysicsComponent character(b2World& world, const Vec2f& pos);
 
-    PhysicsComponent(Physics& physics);
+    PhysicsComponent() = default;
 
     PhysicsComponent(PhysicsComponent&& o);
     PhysicsComponent& operator=(PhysicsComponent&& o) noexcept;
@@ -20,8 +18,6 @@ struct PhysicsComponent {
     ~PhysicsComponent();
 
     void update();
-
-    Physics& physics;
 
     b2Body* body = nullptr;
 
