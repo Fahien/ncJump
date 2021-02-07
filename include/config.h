@@ -31,9 +31,17 @@ struct Config {
     /// @return A new config from a json file, or a default instance if such a file does not exist
     static Config from_json(const char* path);
 
+    /// @return Conversion of scene coordinates to screen coordinates
+    inline Vec2i scene_to_screen(const Vec2f& p) const;
+
     Scale scale = {};
     Size size = {};
     Toggle toggle = {};
 };
+
+inline Vec2i Config::scene_to_screen(const Vec2f& p) const
+{
+    return Vec2i(p.x * scale.global, p.y * scale.global);
+}
 
 } // namespace jmp
