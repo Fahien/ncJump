@@ -31,6 +31,7 @@ set(PACKAGE_SOURCES
 	include/system/physics/destruction.h
 	include/factory/entity_factory.h
 	include/factory/graphics_factory.h
+	include/command/command.h
 	src/main.cpp
 	src/input.cpp
 	src/game.cpp
@@ -51,6 +52,7 @@ set(PACKAGE_SOURCES
 	src/system/physics/destruction.cpp
 	src/factory/entity_factory.cpp
 	src/factory/graphics_factory.cpp
+	src/command/command.cpp
 )
 
 function(callback_before_target)

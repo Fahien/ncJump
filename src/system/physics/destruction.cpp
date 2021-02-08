@@ -47,7 +47,7 @@ void DestructionListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
 
     if (auto player = get_player_or_null(*contact)) {
         bool jumping =
-            CharacterStateComponent::into(*player->state->get()).state->value == State::JUMP_UP;
+            CharacterStateComponent::get(*player).state->value == State::JUMP_UP;
         impulse_factor = jumping ? 3.0f : 1.0f;
     }
 

@@ -207,7 +207,7 @@ void Editor::update_player(Entity& entity)
     ImGui::Begin("Player");
 
     if (entity.state) {
-        update_state(**entity.state);
+        update_state(*entity.state);
     }
 
     if (auto& physics = entity.get_physics()) {

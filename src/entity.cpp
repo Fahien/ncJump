@@ -3,6 +3,7 @@
 #include <ncine/Application.h>
 #include <ncine/FileSystem.h>
 
+#include "command/command.h"
 #include "input.h"
 
 namespace nc = ncine;
@@ -31,7 +32,7 @@ UNIQUE<Entity> Entity::clone()
     }
 
     if (state) {
-        ret->state = OPTION<UNIQUE<StateComponent>>((**state).clone());
+        ret->state = state->clone();
     }
 
     if (physics) {
@@ -75,14 +76,20 @@ void Entity::set_physics(OPTION<PhysicsComponent> ph)
 #endif
 }
 
+/// @todo Do we still need input as a parameter here?
 void Entity::update(const f32 dt, const Input& input)
 {
+    for (auto& command : commands) {
+        command->execute(*this);
+    }
+    commands.clear();
+
     if (graphics) {
         graphics->update(input);
     }
 
     if (state) {
-        (*state)->update(dt, input, *this);
+        state->update(*this);
     }
 
     if (physics) {
