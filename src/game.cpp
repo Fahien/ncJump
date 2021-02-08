@@ -3,6 +3,7 @@
 #include <ncine/Application.h>
 #include <ncine/FileSystem.h>
 
+#include "command/command.h"
 #include "serialization/config.h"
 #include "serialization/tilemap.h"
 #include "serialization/tileset.h"
@@ -56,6 +57,8 @@ Game::Game(Config& config)
         graphics_factory.create_animation("img/hero/herochar_jump_down_anim_strip_3.png");
     graphics->push =
         graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
+    graphics->pull =
+        graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
     entity.set_graphics(MV(graphics));
     entity.state = MK<CharacterStateComponent>();
     entity.name = "player";
@@ -68,12 +71,30 @@ Game::~Game()
     save(tilemap, PATH("tilemap.json"));
 }
 
+/// @todo Move this handling somewhere else?
+void handle_input(const Input& input, Entity& entity)
+{
+    if (input.joystick.move.x != 0.0f) {
+        entity.command(MK<MoveCommand>(input.joystick.move.x, 0.0f));
+    }
+
+    if (input.joystick.a.down) {
+        entity.command(MK<MoveCommand>(MoveCommand::Jump()));
+    }
+
+    if (input.joystick.x.down) {
+        entity.command(MK<MoveCommand>(MoveCommand::Pull()));
+    }
+}
+
 void Game::update(const f32 dt)
 {
     // Update game state
     physics.update(dt, tilemap);
 
+    handle_input(input, entity);
     entity.update(dt, input);
+
     editor.update();
 
     // @todo Move this somewhere else? Possibly PhysicsSystem?
