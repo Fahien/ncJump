@@ -3,6 +3,7 @@
 #include <ncine/Texture.h>
 
 #include "component/graphics.h"
+#include "component/script.h"
 #include "entity.h"
 #include "game.h"
 
@@ -22,7 +23,15 @@ UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
     auto graphics = MK<CharacterGraphicsComponent>();
     graphics->idle =
         factory.create_animation("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
+    graphics->movement =
+        factory.create_animation("img/enemy/mushroom/mushroom_walk_anim_strip_8.png");
+    graphics->jump_down =
+        factory.create_animation("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     mushroom->set_graphics(MV(graphics));
+
+    mushroom->state = MK<CharacterStateComponent>();
+
+    mushroom->add_script(MK<WanderingScript>());
 
     return mushroom;
 }

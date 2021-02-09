@@ -14,6 +14,7 @@ namespace jmp
 {
 struct Input;
 class Command;
+class Script;
 
 class Entity
 {
@@ -36,7 +37,8 @@ public:
     void set_graphics(UNIQUE<GraphicsComponent> graphics);
     void set_physics(OPTION<PhysicsComponent> physics);
 
-    inline void command(UNIQUE<Command> command);
+    inline void add_command(UNIQUE<Command> command);
+    inline void add_script(UNIQUE<Script> script);
 
     void update(f32 dt, const Input& input);
 
@@ -51,6 +53,7 @@ private:
     OPTION<PhysicsComponent> physics;
 
     VECTOR<UNIQUE<Command>> commands;
+    VECTOR<UNIQUE<Script>> scripts;
 };
 
 Entity& Entity::from(b2Fixture& fixture)
@@ -67,9 +70,14 @@ inline UNIQUE<GraphicsComponent>& Entity::get_graphics()
     return graphics;
 }
 
-inline void Entity::command(UNIQUE<Command> command)
+inline void Entity::add_command(UNIQUE<Command> command)
 {
     commands.pushBack(MV(command));
+}
+
+inline void Entity::add_script(UNIQUE<Script> script)
+{
+    scripts.pushBack(MV(script));
 }
 
 } // namespace jmp

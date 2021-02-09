@@ -75,15 +75,15 @@ Game::~Game()
 void handle_input(const Input& input, Entity& entity)
 {
     if (input.joystick.move.x != 0.0f) {
-        entity.command(MK<MoveCommand>(input.joystick.move.x, 0.0f));
+        entity.add_command(MK<MoveCommand>(input.joystick.move.x, 0.0f));
     }
 
     if (input.joystick.a.down) {
-        entity.command(MK<MoveCommand>(MoveCommand::Jump()));
+        entity.add_command(MK<MoveCommand>(MoveCommand::Jump()));
     }
 
     if (input.joystick.x.down) {
-        entity.command(MK<MoveCommand>(MoveCommand::Pull()));
+        entity.add_command(MK<MoveCommand>(MoveCommand::Pull()));
     }
 }
 
