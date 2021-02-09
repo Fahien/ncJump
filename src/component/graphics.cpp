@@ -48,10 +48,6 @@ void SingleGraphicsComponent::set(Entity& entity)
     sprite.setParent(entity.transform.node.get());
 }
 
-void SingleGraphicsComponent::update(const Input& input)
-{
-}
-
 CharacterGraphicsComponent& CharacterGraphicsComponent::into(GraphicsComponent& g)
 {
     return reinterpret_cast<CharacterGraphicsComponent&>(g);
@@ -78,11 +74,12 @@ void CharacterGraphicsComponent::set(Entity& entity)
     idle.setParent(entity.transform.node.get());
 }
 
-void CharacterGraphicsComponent::update(const Input& input)
+void CharacterGraphicsComponent::update(const PhysicsComponent& physics, const Input* input)
 {
     // Set direction of the sprite
-    f32 movement_x = input.joystick.move.x;
-    if (movement_x) {
+    f32 movement_x = input ? input->joystick.move.x : physics.body->GetLinearVelocity().x;
+
+    if (!closef(movement_x, 0.0f)) {
         bool flipped_x = movement_x < 0.0;
         direction = flipped_x ? Direction::LEFT : Direction::RIGHT;
         movement.setFlippedX(flipped_x);
