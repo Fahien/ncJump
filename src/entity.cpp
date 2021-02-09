@@ -81,7 +81,7 @@ void Entity::update(const f32 dt, const Input& input)
     commands.clear();
 
     if (graphics) {
-        graphics->update(input);
+        graphics->update(*physics, nullptr);
     }
 
     if (state) {

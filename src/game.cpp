@@ -94,6 +94,7 @@ void Game::update(const f32 dt)
 
     handle_input(input, entity);
     entity.update(dt, input);
+    entity.get_graphics()->update(*entity.get_physics(), &input);
 
     editor.update();
 
@@ -104,6 +105,8 @@ void Game::update(const f32 dt)
     entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
     // Update tilemap entities from their bodies
     for (auto& entity : tilemap.entities) {
+        entity->update(dt, input);
+
         if (auto& physics = entity->get_physics()) {
             auto& pos = physics->body->GetPosition();
             entity->transform.node->x = config.size.tile * pos.x;

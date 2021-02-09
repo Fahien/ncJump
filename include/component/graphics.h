@@ -9,6 +9,7 @@ namespace jmp
 {
 struct Input;
 struct TransformComponent;
+class PhysicsComponent;
 class Entity;
 
 struct GraphicsComponent {
@@ -18,7 +19,7 @@ struct GraphicsComponent {
 
     virtual void set(Entity& entity) = 0;
 
-    virtual void update(const Input& input) = 0;
+    virtual void update(const PhysicsComponent& physics, const Input* input) = 0;
 
     inline virtual Direction::Value get_direction() const;
 };
@@ -41,11 +42,15 @@ struct SingleGraphicsComponent : public GraphicsComponent {
 
     void set(Entity& entity) override;
 
-    void update(const Input& input) override;
+    inline void update(const PhysicsComponent& physics, const Input* input) override;
 
     // nCine works with pointers
     UNIQUE<nc::Sprite> sprite;
 };
+
+inline void SingleGraphicsComponent::update(const PhysicsComponent& physics, const Input* input)
+{
+}
 
 struct CharacterGraphicsComponent : public GraphicsComponent {
     static CharacterGraphicsComponent& into(GraphicsComponent& g);
@@ -56,7 +61,7 @@ struct CharacterGraphicsComponent : public GraphicsComponent {
 
     void set(Entity& entity) override;
 
-    void update(const Input& input) override;
+    void update(const PhysicsComponent& physics, const Input* input) override;
 
     inline Direction::Value get_direction() const override;
 
