@@ -5,6 +5,7 @@
 
 #include "command/command.h"
 #include "input.h"
+#include "component/script.h"
 
 namespace nc = ncine;
 
@@ -39,6 +40,10 @@ UNIQUE<Entity> Entity::clone()
         auto new_physics = PhysicsComponent::character(
             *physics->body->GetWorld(), ret->transform.node->position());
         ret->set_physics(OPTION<PhysicsComponent>(MV(new_physics)));
+    }
+
+    for (auto& script : scripts) {
+        ret->add_script(script->clone());
     }
 
     return ret;
@@ -79,6 +84,10 @@ void Entity::update(const f32 dt, const Input& input)
         command->execute(*this);
     }
     commands.clear();
+
+    for (auto& script : scripts) {
+        script->update(*this);
+    }
 
     if (graphics) {
         graphics->update(*physics, nullptr);
