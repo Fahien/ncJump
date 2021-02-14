@@ -17,6 +17,7 @@ Editor::Editor(Game& g)
     style.ScaleAllSizes(game.config.scale.gui);
     auto& io = ImGui::GetIO();
     io.FontGlobalScale = game.config.scale.gui;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
 }
 
 bool active_button(const char* name, bool active)
@@ -79,7 +80,26 @@ void Editor::set_selected_entity(OPTION<u32> s)
 
 void Editor::update_menu()
 {
-    if (ImGui::BeginMainMenuBar()) {
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    window_flags |= ImGuiWindowFlags_NoBackground;
+    ImGui::Begin("DockSpace", nullptr, window_flags);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dockspace_id = ImGui::GetID("DockId");
+    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+    ImGui::DockSpace(dockspace_id, {0.0f, 0.0f}, dockspace_flags);
+
+    if (ImGui::BeginMenuBar()) {
         u32 button_count = 2;
         auto text_size = ImGui::CalcTextSize("TileEntity");
         float padding = ImGui::GetStyle().FramePadding.x * (button_count + 1);
@@ -95,8 +115,10 @@ void Editor::update_menu()
             set_mode(mode == Mode::ENTITY ? Mode::NONE : Mode::ENTITY);
         }
 
-        ImGui::EndMainMenuBar();
+        ImGui::EndMenuBar();
     }
+
+    ImGui::End();
 }
 
 void update_resolution(Config& config)
