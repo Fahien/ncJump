@@ -18,11 +18,15 @@ public:
 
     void update();
 
+    /// @return Basically an inverted position of the scene
     Vec2f get_position() const;
+
+    /// @param follow Sets the node to follow or stops following if `nullptr` is passed
+    void set_follow(nc::SceneNode* follow);
 
     Vec2f offset = {};
 
-    void set_follow(nc::SceneNode* follow);
+    Vec2f target = {};
 
 private:
     Game* game = nullptr;
