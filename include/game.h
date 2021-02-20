@@ -40,13 +40,13 @@ public:
     GraphicsFactory graphics_factory;
     EntityFactory entity_factory;
 
-    Entity entity;
-
-    Camera camera;
-
     Tileset tileset;
 
     Tilemap tilemap;
+
+    Entity entity;
+
+    Camera camera;
 
     Editor editor;
 };

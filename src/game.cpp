@@ -33,10 +33,10 @@ Game::Game(Config& config)
     , physics {*this}
     , graphics_factory {}
     , entity_factory {*this}
-    , entity {scene}
-    , camera {*this, entity.transform.node.get()}
     , tileset {create_tileset(resource)}
     , tilemap {create_tilemap(*this)}
+    , entity {*tilemap.node}
+    , camera {*this, entity.transform.node.get()}
     , editor {*this}
 {
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
@@ -101,8 +101,8 @@ void Game::update(const f32 dt)
     // @todo Move this somewhere else? Possibly PhysicsSystem?
     // Update entity from body
     auto& pos = entity.get_physics()->body->GetPosition();
-    entity.transform.node->x = config.size.tile * pos.x + config.size.tile / 2.0f;
-    entity.transform.node->y = config.size.tile * pos.y + config.size.tile / 2.0f;
+    entity.transform.node->x = config.size.tile * pos.x;
+    entity.transform.node->y = config.size.tile * pos.y;
     // Update tilemap entities from their bodies
     for (auto& entity : tilemap.entities) {
         entity->update(dt, input);
