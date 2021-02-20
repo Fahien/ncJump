@@ -17,7 +17,8 @@ Camera::Camera(Game& game, nc::SceneNode* follow)
 
 Vec2f Camera::get_position() const
 {
-    return node.position();
+    // Need to scale cause the scene node position is already scaled. Do not know why.
+    return Vec2f(-node.x / game->config.scale.scene, -node.y / game->config.scale.scene);
 }
 
 void Camera::set_follow(nc::SceneNode* f)
@@ -37,25 +38,35 @@ void Camera::update()
     }
 
     const f32 smooth_factor = 0.125f;
-    f32 target_x = -follow->x * node.scale().x + game->config.size.window.width / 2.0f;
-    f32 target_y = -follow->y * node.scale().y + game->config.size.window.height / 2.0f;
-    f32 smoothed_x = lerp(node.x, target_x, smooth_factor);
-    f32 smoothed_y = lerp(node.y, target_y, smooth_factor);
+
+    // Window in game space
+    auto window = game->config.get_real_window_size() / game->config.scale.global;
+
+    // Target needs to be in game space as well
+    auto hard_target = Vec2f(-follow->x * game->config.scale.scene + window.width / 2.0f,
+        -follow->y * game->config.scale.scene + window.height / 2.0f);
+    hard_target += offset;
+
+    // The real target is smoothed
+    target.x = lerp(node.x, hard_target.x, smooth_factor);
+    target.y = lerp(node.y, hard_target.y, smooth_factor);
 
     // Clamp to tilemap borders
-    // As we are moving the scene to the opposite direction of the camera max and min are "inverted"
-    f32 max_x = 0.0f;
-    f32 max_y = 0.0f;
-    f32 min_x = -(game->tilemap.get_width() * game->config.size.tile * game->config.scale.scene -
-        game->config.size.window.width);
-    f32 min_y = -(game->tilemap.get_height() * game->config.size.tile * game->config.scale.scene -
-        game->config.size.window.height);
-    // Make sure min values are less than max values
-    min_x = std::min(min_x, max_x);
-    min_y = std::min(min_y, max_y);
+    Vec2f max = {0.0f, 0.0f};
+    Vec2f min = {0.0f, 0.0f};
 
-    node.x = std::clamp(smoothed_x, min_x, max_x) + offset.x;
-    node.y = std::clamp(smoothed_y, min_y, max_y) + offset.y;
+    // As we are moving the scene to the opposite direction of the camera max and min are "inverted"
+    min.x -= game->tilemap.get_width() * game->config.size.tile * game->config.scale.scene -
+        window.width;
+    min.y -= game->tilemap.get_height() * game->config.size.tile * game->config.scale.scene +
+        window.height;
+
+    // Make sure min values are less than max values
+    min.x = std::min(min.x, max.x);
+    min.y = std::min(min.y, max.y);
+
+    node.x = std::clamp(target.x, min.x, max.x);
+    node.y = std::clamp(target.y, min.y, max.y);
 }
 
 } // namespace jmp
