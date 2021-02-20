@@ -8,6 +8,7 @@
 #include <ncine/FileSystem.h>
 #include <ncine/Vector2.h>
 #include <ncine/common_macros.h>
+#include <ncine/imgui.h>
 #include <nctl/Array.h>
 #include <nctl/StaticArray.h>
 
@@ -124,6 +125,6 @@ static std::string to_str(DirectionFlags a)
 
 inline bool closef(const f32 a, const f32 b)
 {
-    const f32 eps = 1.0f;
+    const f32 eps = 0.9f;
     return fabsf(a - b) < eps;
 }
