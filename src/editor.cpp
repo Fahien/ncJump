@@ -150,6 +150,7 @@ void Editor::update_config(Config& config)
     }
 
     if (ImGui::CollapsingHeader("Scene")) {
+        ImGui::Text("x: %.0f, y: %.0f", game.scene.x, game.scene.y);
         ImGui::PushID(&config.scale.scene);
         if (ImGui::SliderFloat("Scale", &config.scale.scene, 1.0f, 4.0f, "%.0f")) {
             game.scene.setScale(config.scale.scene);
@@ -160,7 +161,8 @@ void Editor::update_config(Config& config)
         u32 tile_max = 64;
         ImGui::SliderScalarN("Tile", ImGuiDataType_U32, &config.size.tile, 1, &tile_min, &tile_max);
 
-        ImGui::SliderFloat2("Offset", game.camera.offset.data(), -960.0f, 960.0f, "%.0f");
+        f32 map_len = game.tilemap.get_width() * game.config.size.tile * game.config.scale.scene;
+        ImGui::SliderFloat2("Offset", game.camera.offset.data(), -map_len, map_len, "%.0f");
     }
 
     if (ImGui::CollapsingHeader("Gui")) {
@@ -182,9 +184,12 @@ void Editor::update_config(Config& config)
 void Editor::update_camera(Camera& camera, Config& config)
 {
     ImGui::Begin("Camera");
-    ImGui::Text("offset: { %f, %f }", camera.offset.x, camera.offset.y);
-    auto screen = config.scene_to_screen(camera.get_position());
+    ImGui::Text("offset: { %.2f, %.2f }", camera.offset.x, camera.offset.y);
+    auto pos = camera.get_position();
+    ImGui::Text("pos: { %.2f, %.2f }", pos.x, pos.y);
+    auto screen = config.scene_to_screen(pos);
     ImGui::Text("screen: { %d, %d }", screen.x, screen.y);
+    ImGui::Text("target: { %.2f, %.2f }", camera.target.x, camera.target.y);
     ImGui::End();
 }
 
@@ -227,6 +232,9 @@ void Editor::update_physics(PhysicsComponent& physics)
 void Editor::update_player(Entity& entity)
 {
     ImGui::Begin("Player");
+
+    auto pos = entity.get_position();
+    ImGui::Text("pos: { %.2f, %.2f }", pos.x, pos.y);
 
     if (entity.state) {
         update_state(*entity.state);
@@ -373,23 +381,24 @@ void Editor::update_entities(EntityFactory& factory)
     ImGui::End();
 }
 
+/// @brief Place selected tile on the map at clicked position
 void Editor::place_selected_tile()
 {
-    // Place selected tile on the map at clicked position
-    i32 tile_size = game.config.size.tile * game.config.scale.scene * game.config.scale.global;
-
-    auto camera_pos = game.config.scene_to_screen(game.camera.get_position());
+    auto mouse_scene_pos = game.config.screen_to_scene(game.input.mouse.pos);
+    auto camera_scene_pos = game.camera.get_position();
 
     if (mode == Mode::TILE) {
-        Vec2i tile_target = (game.input.mouse.pos - camera_pos) / tile_size;
+        // Adjust mouse position to get center of tile
+        mouse_scene_pos.x += game.config.size.tile / 2.0f;
+        mouse_scene_pos.y += game.config.size.tile / 2.0f;
+        auto tile_index = into<Vec2i>((mouse_scene_pos + camera_scene_pos) / f32(game.config.size.tile));
 
-        if (tile_target.x < game.tilemap.get_width() && tile_target.y < game.tilemap.get_height()) {
-            game.tilemap.set_tile(tile_target, game.tileset, game.tileset.tiles[*selected_tile]);
+        if (tile_index.x < i32(game.tilemap.get_width()) && tile_index.y < i32(game.tilemap.get_height())) {
+            game.tilemap.set_tile(tile_index, game.tileset, game.tileset.tiles[*selected_tile]);
         }
     } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
         // Place an object only on mouse left just down
-        auto entity_position = Vec2f {f32((game.input.mouse.pos.x - camera_pos.x) / tile_size),
-            f32((game.input.mouse.pos.y - camera_pos.y) / tile_size)};
+        auto entity_position = mouse_scene_pos + camera_scene_pos;
         game.tilemap.set_entity(entity_position, game.tileset, game.tileset.tiles[*selected_tile]);
     }
 }
@@ -397,36 +406,83 @@ void Editor::place_selected_tile()
 void Editor::place_selected_entity()
 {
     auto entity = game.entity_factory.entities[*selected_entity]->clone();
-    auto pos = game.input.mouse.pos - game.config.scene_to_screen(game.camera.get_position());
-    entity->set_position(Vec2f(
-        f32(pos.x / (game.config.size.tile * game.config.scale.scene * game.config.scale.global)),
-        f32(pos.y / (game.config.size.tile * game.config.scale.scene * game.config.scale.global))));
+    auto pos = game.config.screen_to_scene(game.input.mouse.pos) + game.camera.get_position();
+    entity->set_position(pos, game.config);
     game.tilemap.add_entity(MV(entity));
 }
 
-void Editor::update_tilemap()
+void Editor::update_collisions(Tilemap& tilemap)
+{
+    ImGuiWindowFlags full_flags = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize;
+    ImGui::SetNextWindowPos(ImVec2());
+    ImGui::Begin("Full", nullptr, full_flags);
+    auto win = game.config.get_real_window_size();
+    auto size = ImVec2(f32(win.width), f32(win.height));
+    ImGui::InvisibleButton("canvas", size);
+    ImVec2 p0 = ImGui::GetItemRectMin();
+    ImVec2 p1 = ImGui::GetItemRectMax();
+    auto draw_list = ImGui::GetWindowDrawList();
+    draw_list->PushClipRect(p0, p1);
+
+    // Draw debug shapes for physics objects
+    for (auto& entity : tilemap.entities) {
+        if (auto& physics = entity->get_physics()) {
+            auto fixture_list = physics->body->GetFixtureList();
+            for (auto fixture = fixture_list; fixture; fixture = fixture->GetNext()) {
+                auto shape = fixture->GetShape();
+                assert(shape);
+                auto entity_pos = entity->get_position();
+                auto pos = game.config.scene_to_gui(entity_pos);
+                auto scene_pos = game.config.scene_to_screen(game.camera.get_position());
+                auto htile = game.config.size.tile * game.config.scale.scene *
+                    game.config.scale.global / 2.0f;
+                pos.x -= scene_pos.x - htile;
+                pos.y += scene_pos.y - htile;
+
+                // Draw a circle at entity position
+                if (shape->GetType() == shape->e_circle) {
+                    draw_list->AddCircle(pos, htile, IM_COL32_WHITE);
+                } else {
+                    auto p2 = ImVec2(pos.x + htile, pos.y - htile);
+                    pos.x -= htile;
+                    pos.y += htile;
+                    draw_list->AddRect(pos, p2, IM_COL32_WHITE);
+                }
+            }
+        }
+    }
+
+    draw_list->PopClipRect();
+    ImGui::End(); // Full
+}
+
+void Editor::update_tilemap(Tilemap& tilemap)
 {
     ImGui::Begin("Tilemap");
+    ImGui::Text("x: %.0f, y: %.0f", tilemap.node->x, tilemap.node->y);
 
-    i32 dimensions[2] = {i32(game.tilemap.get_width()), i32(game.tilemap.get_height())};
+    i32 dimensions[2] = {i32(tilemap.get_width()), i32(tilemap.get_height())};
     if (ImGui::DragInt2("Size", dimensions, 1.0f, 0, 64)) {
-        game.tilemap.set_dimensions(dimensions[0], dimensions[1]);
+        tilemap.set_dimensions(dimensions[0], dimensions[1]);
     }
     if (ImGui::TreeNode("entities:")) {
         i32 del_num = -1;
-        for (i32 i = 0; i < game.tilemap.entities.size(); ++i) {
+        for (i32 i = 0; i < tilemap.entities.size(); ++i) {
             std::string entity_num = "Delete " + std::to_string(i);
             if (ImGui::Button(entity_num.c_str())) {
                 del_num = i;
             }
         }
         if (del_num >= 0) {
-            game.tilemap.entities.erase(std::begin(game.tilemap.entities) + del_num);
+            tilemap.entities.erase(std::begin(tilemap.entities) + del_num);
         }
         ImGui::TreePop();
     }
 
     ImGui::End();
+
+    update_collisions(tilemap);
 
     // Do not place any tile if mouse is hovering ImGui
     bool gui_hovered =
@@ -448,6 +504,11 @@ void Editor::update()
         }
 
         update_menu();
+
+        if (game.config.toggle.gui_demo) {
+            ImGui::ShowDemoWindow();
+        }
+
         update_config(game.config);
         update_camera(game.camera, game.config);
         update_player(game.entity);
@@ -455,7 +516,7 @@ void Editor::update()
         update_tileset(game.tileset);
         update_selected_tile(game.tileset);
         update_entities(game.entity_factory);
-        update_tilemap();
+        update_tilemap(game.tilemap);
     }
 }
 

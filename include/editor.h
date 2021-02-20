@@ -45,7 +45,8 @@ private:
     void update_tileset(Tileset& tileset);
     void update_selected_tile(Tileset& tileset);
     void update_entities(EntityFactory& factory);
-    void update_tilemap();
+    void update_tilemap(Tilemap& tilemap);
+    void update_collisions(Tilemap& tilemap);
 
     void place_selected_tile();
     void place_selected_entity();

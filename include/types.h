@@ -128,3 +128,9 @@ inline bool closef(const f32 a, const f32 b)
     const f32 eps = 0.9f;
     return fabsf(a - b) < eps;
 }
+
+/// @todo Move this function to `types.h`
+template<typename T> T into(const Vec2f& o)
+{
+    return T(o.x, o.y);
+}
