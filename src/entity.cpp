@@ -4,8 +4,9 @@
 #include <ncine/FileSystem.h>
 
 #include "command/command.h"
-#include "input.h"
 #include "component/script.h"
+#include "config.h"
+#include "input.h"
 
 namespace nc = ncine;
 
@@ -49,11 +50,11 @@ UNIQUE<Entity> Entity::clone()
     return ret;
 }
 
-void Entity::set_position(const Vec2f& pos)
+void Entity::set_position(const Vec2f& pos, const Config& config)
 {
     transform.node->setPosition(pos);
     if (physics) {
-        auto bpos = b2Vec2(pos.x, pos.y);
+        auto bpos = b2Vec2(pos.x / config.size.tile, pos.y / config.size.tile);
         physics->body->SetTransform(bpos, 0);
     }
 }
