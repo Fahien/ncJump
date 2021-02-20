@@ -25,25 +25,12 @@ Tilemap create_tilemap(Game& game)
     return ret;
 }
 
-Game::Game(Config& config)
-    : config {config}
-    , root {nc::theApplication().rootNode()}
-    , scene {&root}
-    , resource {PATH("img/tile/tileset.png")}
-    , physics {*this}
-    , graphics_factory {}
-    , entity_factory {*this}
-    , tileset {create_tileset(resource)}
-    , tilemap {create_tilemap(*this)}
-    , entity {*tilemap.node}
-    , camera {*this, entity.transform.node.get()}
-    , editor {*this}
+Entity create_player(nc::SceneNode& parent, Physics& physics, GraphicsFactory& graphics_factory)
 {
-    resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
-    root.setScale(config.scale.global);
-    scene.setScale(config.scale.scene);
+    auto entity = Entity(parent);
 
-    // @todo Refactor that
+    entity.type = Entity::Type::PLAYER;
+
     entity.set_physics(
         PhysicsComponent::character(physics.world, entity.transform.node->position()));
 
@@ -60,8 +47,29 @@ Game::Game(Config& config)
     graphics->pull =
         graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
     entity.set_graphics(MV(graphics));
+
     entity.state = MK<CharacterStateComponent>();
-    entity.name = "player";
+
+    return entity;
+}
+
+Game::Game(Config& config)
+    : config {config}
+    , root {nc::theApplication().rootNode()}
+    , scene {&root}
+    , resource {PATH("img/tile/tileset.png")}
+    , physics {*this}
+    , graphics_factory {}
+    , entity_factory {*this}
+    , tileset {create_tileset(resource)}
+    , tilemap {create_tilemap(*this)}
+    , entity {create_player(*tilemap.node, physics, graphics_factory)}
+    , camera {*this, entity.transform.node.get()}
+    , editor {*this}
+{
+    resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
+    root.setScale(config.scale.global);
+    scene.setScale(config.scale.scene);
 }
 
 Game::~Game()

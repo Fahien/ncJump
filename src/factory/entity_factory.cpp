@@ -13,7 +13,7 @@ UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
 {
     auto mushroom = MK<Entity>();
 
-    mushroom->name = "Mushroom";
+    mushroom->type = Entity::Type::ENEMY;
 
     mushroom->set_physics(
         OPTION(PhysicsComponent::character(world, mushroom->transform.node->position())));

@@ -20,7 +20,15 @@ class Config;
 class Entity
 {
 public:
-    static bool is_player(const Entity& e);
+    enum class Type {
+        NONE = 0,
+        TILE,
+        PLAYER,
+        ENEMY
+    };
+
+    static inline bool is_player(const Entity& e);
+    static inline bool is_enemy(const Entity& e);
     static inline Entity& from(b2Fixture& fixture);
 
     Entity() = default;
@@ -47,7 +55,7 @@ public:
 
     void update(f32 dt, const Input& input);
 
-    nctl::String name = "tile";
+    Type type = Type::NONE;
 
     TransformComponent transform;
 
@@ -68,6 +76,16 @@ Entity& Entity::from(b2Fixture& fixture)
 #else
     return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData().pointer);
 #endif
+}
+
+bool Entity::is_player(const Entity& e)
+{
+    return e.type == Type::PLAYER;
+}
+
+bool Entity::is_enemy(const Entity& e)
+{
+    return e.type == Type::ENEMY;
 }
 
 inline Vec2f Entity::get_position() const
