@@ -110,25 +110,22 @@ UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
     const bool dynamic)
 {
     auto entity = tileset.create_entity(tile, *game, dynamic);
-
-    auto& graphics = SingleGraphicsComponent::into(*entity->get_graphics());
-    entity->transform.node->x = pos.x * graphics.sprite->texRect().w;
-    entity->transform.node->y = pos.y * graphics.sprite->texRect().h;
-    if (auto& physics = entity->get_physics()) {
-        physics->body->SetTransform({f32(pos.x), f32(pos.y)}, 0);
-    }
-
+    entity->set_position(pos, game->config);
     return entity;
 }
 
-void Tilemap::set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& tile)
+void Tilemap::set_tile(const Vec2i& index, const Tileset& tileset, const Tile& tile)
 {
-    if (pos.x < width && pos.y < height) {
-        auto entity = create_entity(Vec2f(pos.x, pos.y), tileset, tile, false);
-        entity->transform.node->setParent(tiles_root.get());
-        tile_descs[pos.x][pos.y] = tile;
-        tiles[pos.x][pos.y] = MV(entity);
+    if (index.x < 0 || index.y < 0 || index.x >= width || index.y >= height) {
+        LOGE_X("Attempting to place tile out of boundaries: (%d, %d)", index.x, index.y);
+        return;
     }
+
+    auto posf = Vec2f(index.x * game->config.size.tile, index.y * game->config.size.tile);
+    auto entity = create_entity(posf, tileset, tile, false);
+    entity->transform.node->setParent(tiles_root.get());
+    tile_descs[index.x][index.y] = tile;
+    tiles[index.x][index.y] = MV(entity);
 }
 
 void Tilemap::set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile)
