@@ -31,8 +31,12 @@ public:
 
     void set_game(Game& game);
 
-    void set_tile(const Vec2i& pos, const Tileset& tileset, const Tile& tile);
+    /// @param index Cell index, where x is the column and y is the row
+    void set_tile(const Vec2i& index, const Tileset& tileset, const Tile& tile);
+
+    /// @param pos Position where to put the entity in scene space
     void set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile);
+
     void add_entity(UNIQUE<Entity> entity);
 
     Game* game = nullptr;
