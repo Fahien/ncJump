@@ -15,6 +15,7 @@ namespace jmp
 struct Input;
 class Command;
 class Script;
+class Config;
 
 class Entity
 {
@@ -29,7 +30,11 @@ public:
     UNIQUE<Entity> clone();
 
     /// @brief Propagates this position to required components
-    void set_position(const Vec2f& position);
+    /// @param position Coordinates in scene space
+    void set_position(const Vec2f& position, const Config& config);
+
+    /// @return Position of this entity, convenient method
+    inline Vec2f get_position() const;
 
     inline UNIQUE<GraphicsComponent>& get_graphics();
     OPTION<PhysicsComponent>& get_physics();
@@ -63,6 +68,11 @@ Entity& Entity::from(b2Fixture& fixture)
 #else
     return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData().pointer);
 #endif
+}
+
+inline Vec2f Entity::get_position() const
+{
+    return transform.node->position();
 }
 
 inline UNIQUE<GraphicsComponent>& Entity::get_graphics()
