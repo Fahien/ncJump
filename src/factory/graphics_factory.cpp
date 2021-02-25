@@ -5,7 +5,8 @@
 
 namespace jmp
 {
-nc::AnimatedSprite GraphicsFactory::create_animation(const nctl::String& path)
+nc::AnimatedSprite GraphicsFactory::create_animation(const nctl::String& path,
+    nc::RectAnimation::LoopMode loop)
 {
     // @todo Cache texture
     auto texture = MK<nc::Texture>(PATH(path));
@@ -14,8 +15,7 @@ nc::AnimatedSprite GraphicsFactory::create_animation(const nctl::String& path)
     assert(texture->width() >= texture->height());
     i32 count = texture->width() / texture->height();
 
-    auto anim = nc::RectAnimation(
-        0.125f, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
+    auto anim = nc::RectAnimation(0.125f, loop, nc::RectAnimation::RewindMode::FROM_START);
     auto sprite_size = Vec2i(texture->width() / count, texture->height());
     for (i32 i = 0; i < count; ++i) {
         anim.addRect(nc::Recti(i * sprite_size.x, 0, sprite_size.x, sprite_size.y));
