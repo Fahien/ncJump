@@ -46,6 +46,8 @@ Entity create_player(nc::SceneNode& parent, Physics& physics, GraphicsFactory& g
         graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
     graphics->pull =
         graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
+    graphics->dying = graphics_factory.create_animation(
+        "img/hero/herochar_death_anim_strip_8.png", nc::RectAnimation::LoopMode::DISABLED);
     entity.set_graphics(MV(graphics));
 
     entity.state = MK<CharacterStateComponent>();

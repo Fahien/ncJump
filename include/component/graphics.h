@@ -74,6 +74,7 @@ public:
     nc::AnimatedSprite jump_down;
     nc::AnimatedSprite push;
     nc::AnimatedSprite pull;
+    nc::AnimatedSprite dying;
 };
 
 inline Direction::Value CharacterGraphicsComponent::get_direction() const

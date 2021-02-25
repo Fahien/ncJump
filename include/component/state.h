@@ -30,7 +30,7 @@ public:
 class State
 {
 public:
-    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH, PULL };
+    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH, PULL, DYING };
 
     static UNIQUE<State> create(State::Value state);
 
