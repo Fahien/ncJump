@@ -21,7 +21,9 @@ public:
 
     void emit_particles(Entity& entity);
 
-    void check_destruction(b2Fixture& fixture);
+    /// @brief Checks whether one has been killed by the other
+    void check_kill(const b2Contact& contact, Entity& player, Entity& enemy);
+    void check_destruction(Entity& entity);
 
     /// @brief To be called after physics update
     /// @param tilemap This is responsible for destroying tiles
@@ -29,7 +31,11 @@ public:
 
     Config& config;
 
+    /// List of tiles to destroy
     VECTOR<Entity*> to_destroy;
+
+    /// List of entities to kill
+    VECTOR<Entity*> to_kill;
 
     nc::ParticleSystem particles;
 };
