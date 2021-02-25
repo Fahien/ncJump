@@ -42,6 +42,7 @@ UNIQUE<GraphicsComponent> CharacterGraphicsComponent::clone()
     ret->jump_down = jump_down.clone();
     ret->push = push.clone();
     ret->pull = pull.clone();
+    ret->dying = dying.clone();
 
     return ret;
 }

@@ -76,6 +76,16 @@ public:
     b2Joint* joint = nullptr;
 };
 
+class DyingState : public State
+{
+public:
+    DyingState();
+    void enter(Entity& entity, const MoveCommand* move = nullptr) override;
+    void handle(Entity& entity, const MoveCommand& move) override;
+    void update(Entity& entity) override;
+    void exit(Entity& entity) override;
+};
+
 UNIQUE<State> State::create(State::Value state)
 {
     switch (state) {
@@ -91,6 +101,8 @@ UNIQUE<State> State::create(State::Value state)
         return MK<PushState>();
     case State::PULL:
         return MK<PullState>();
+    case State::DYING:
+        return MK<DyingState>();
     default:
         ASSERT_MSG(false, "Failed to get state");
         return UNIQUE<State>();
@@ -470,6 +482,36 @@ void PullState::exit(Entity& entity)
 {
     destroy_joint(*entity.get_physics()->body->GetWorld());
     entity.transform.node->removeChildNode(&CHAR_GFX(entity).pull);
+}
+
+DyingState::DyingState()
+{
+    name = "Dying";
+    value = Value::DYING;
+}
+
+void DyingState::enter(Entity& entity, const MoveCommand* move)
+{
+    auto& dying_anim = CHAR_GFX(entity).dying;
+    entity.transform.node->addChildNode(&dying_anim);
+}
+
+void DyingState::handle(Entity& entity, const MoveCommand& move)
+{
+}
+
+void DyingState::update(Entity& entity)
+{
+    auto& gfx = CHAR_GFX(entity);
+    if (gfx.dying.animations()[0].isPaused()) {
+        entity.transform.node->removeChildNode(&gfx.dying);
+        entity.transform.node->setParent(nullptr);
+    }
+}
+
+void DyingState::exit(Entity& entity)
+{
+    entity.transform.node->removeChildNode(&CHAR_GFX(entity).dying);
 }
 
 const char* to_str(State& state)

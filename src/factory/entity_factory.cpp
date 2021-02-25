@@ -27,6 +27,8 @@ UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
         factory.create_animation("img/enemy/mushroom/mushroom_walk_anim_strip_8.png");
     graphics->jump_down =
         factory.create_animation("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
+    graphics->dying = factory.create_animation("img/enemy/mushroom/mushroom_death_anim_strip_6.png",
+        nc::RectAnimation::LoopMode::DISABLED);
     mushroom->set_graphics(MV(graphics));
 
     mushroom->state = MK<CharacterStateComponent>();

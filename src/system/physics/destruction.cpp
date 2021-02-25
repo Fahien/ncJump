@@ -35,6 +35,7 @@ void DestructionListener::check_kill(const b2Contact& contact, Entity& player, E
         to_destroy.pushBack(&enemy);
     } else {
         // @todo Kill player
+        to_destroy.pushBack(&player);
     }
 }
 
@@ -136,6 +137,13 @@ void DestructionListener::update(Tilemap& tilemap)
                     break;
                 }
             }
+        }
+
+        // Check if it is an enemy or the player
+        if (Entity::is_enemy(*entity) || Entity::is_player(*entity)) {
+            auto& char_state = CharacterStateComponent::into(*entity->state);
+            char_state.set_state(State::DYING, *entity);
+            continue;
         }
 
         // Look within free entities
