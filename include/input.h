@@ -11,6 +11,7 @@ struct Button {
 
 struct Key {
     Button esc = {};
+    Button f12 = {};
 };
 
 struct Mouse {

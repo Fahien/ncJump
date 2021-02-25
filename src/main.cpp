@@ -89,6 +89,9 @@ void JumpHandler::onKeyPressed(const nc::KeyboardEvent& event)
     case nc::KeySym::ESCAPE:
         game->input.key.esc.down = game->input.key.esc.just_down = true;
         break;
+    case nc::KeySym::F12:
+        game->input.key.f12.down = game->input.key.f12.just_down = true;
+        break;
     default:
         break;
     }
@@ -114,6 +117,9 @@ void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
         break;
     case nc::KeySym::ESCAPE:
         game->input.key.esc.down = false;
+        break;
+    case nc::KeySym::F12:
+        game->input.key.f12.down = false;
         break;
     default:
         break;

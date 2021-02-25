@@ -498,6 +498,10 @@ void Editor::update_tilemap(Tilemap& tilemap)
 
 void Editor::update()
 {
+    if (game.input.key.f12.just_down) {
+        game.config.toggle.editor = !game.config.toggle.editor;
+    }
+
     if (game.config.toggle.editor) {
         if (game.input.key.esc.just_down) {
             reset();
