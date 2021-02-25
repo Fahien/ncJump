@@ -14,7 +14,8 @@ namespace jmp
 class GraphicsFactory
 {
 public:
-    nc::AnimatedSprite create_animation(const nctl::String& path);
+    nc::AnimatedSprite create_animation(const nctl::String& path,
+        nc::RectAnimation::LoopMode loop = nc::RectAnimation::LoopMode::ENABLED);
 
 private:
     VECTOR<UNIQUE<nc::Texture>> textures;
