@@ -480,9 +480,13 @@ void Editor::update_tilemap(Tilemap& tilemap)
         ImGui::TreePop();
     }
 
+    ImGui::Checkbox("Show bodies", &show_bodies);
+
     ImGui::End();
 
-    update_collisions(tilemap);
+    if (show_bodies) {
+        update_collisions(tilemap);
+    }
 
     // Do not place any tile if mouse is hovering ImGui
     bool gui_hovered =
