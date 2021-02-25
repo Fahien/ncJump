@@ -19,41 +19,82 @@ DestructionListener::DestructionListener(Config& config, nc::SceneNode& scene, n
     particles.setInLocalSpace(true);
 }
 
-void DestructionListener::check_destruction(b2Fixture& fixture)
+inline b2WorldManifold get_world_manifold(const b2Contact& contact)
 {
-    auto& entity = Entity::from(fixture);
+    b2WorldManifold wm;
+    contact.GetWorldManifold(&wm);
+    return wm;
+}
+
+void DestructionListener::check_kill(const b2Contact& contact, Entity& player, Entity& enemy)
+{
+    auto normal = -get_world_manifold(contact).normal;
+    if (normal.x < 0.5 && normal.y > 0.5) {
+        // Kill enemy
+        CharacterStateComponent::get(player).set_state(State::JUMP_UP, player);
+        to_destroy.pushBack(&enemy);
+    } else {
+        // @todo Kill player
+    }
+}
+
+void DestructionListener::check_destruction(Entity& entity)
+{
     if (entity.get_physics()->destructible) {
         to_destroy.pushBack(&entity);
     }
 }
 
-Entity* get_player_or_null(b2Contact& contact)
+b2Fixture* get_entity_or_null_if(b2Contact& contact, bool (*check)(const Entity&))
 {
-    auto& a = Entity::from(*contact.GetFixtureA());
-    auto& b = Entity::from(*contact.GetFixtureB());
+    auto a = contact.GetFixtureA();
+    if (check(Entity::from(*a))) {
+        return a;
+    }
 
-    if (Entity::is_player(a)) {
-        return &a;
-    } else if (Entity::is_player(b)) {
-        return &b;
+    auto b = contact.GetFixtureB();
+    if (check(Entity::from(*b))) {
+        return b;
     }
 
     return nullptr;
+}
+
+b2Fixture* get_player_or_null(b2Contact& contact)
+{
+    return get_entity_or_null_if(contact, Entity::is_player);
+}
+
+b2Fixture* get_enemy_or_null(b2Contact& contact)
+{
+    return get_entity_or_null_if(contact, Entity::is_enemy);
 }
 
 void DestructionListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
 {
     float impulse_factor = 1.0f;
 
-    if (auto player = get_player_or_null(*contact)) {
-        bool jumping =
-            CharacterStateComponent::get(*player).state->value == State::JUMP_UP;
-        impulse_factor = jumping ? 3.0f : 1.0f;
+    if (auto player_fixture = get_player_or_null(*contact)) {
+        auto& player = Entity::from(*player_fixture);
+
+        if (auto enemy_fixture = get_enemy_or_null(*contact)) {
+            // Check if we need to kill the enemy or the player
+            auto& enemy = Entity::from(*enemy_fixture);
+            check_kill(*contact, player, enemy);
+            return;
+        }
+
+        // If the player is jumping, impulse is scaled up!
+        if (CharacterStateComponent::get(player).state->value == State::JUMP_UP) {
+            impulse_factor = 3.0f;
+        }
     }
 
     if (impulse->normalImpulses[0] * impulse_factor > 200.0f) {
-        check_destruction(*contact->GetFixtureA());
-        check_destruction(*contact->GetFixtureB());
+        auto& entity_a = Entity::from(*contact->GetFixtureA());
+        check_destruction(entity_a);
+        auto& entity_b = Entity::from(*contact->GetFixtureB());
+        check_destruction(entity_b);
     }
 }
 
@@ -102,7 +143,9 @@ void DestructionListener::update(Tilemap& tilemap)
             std::end(tilemap.entities),
             [entity](UNIQUE<Entity>& e) { return e.get() == entity; });
         if (it != std::end(tilemap.entities)) {
-            emit_particles(*entity);
+            if (entity->type == Entity::Type::TILE) {
+                emit_particles(*entity);
+            }
             tilemap.entities.erase(it);
         }
     }
