@@ -58,6 +58,9 @@ private:
 
     OPTION<u32> selected_tile = None;
     OPTION<u32> selected_entity = None;
+
+    /// Whether to draw debug shapes for physics bodies
+    bool show_bodies = false;
 };
 
 } // namespace jmp
