@@ -15,7 +15,7 @@ public:
     static Tilemap from_json(const char* path);
 
     /// @brief Creates a tilemap in a uninitialized state.
-    /// In order to initialize it, the method `set_game` should be called.
+    /// In order to initialize it, the method `set_game()` should be called.
     Tilemap() = default;
 
     /// @brief Creates and initializes a tilemap
@@ -24,18 +24,24 @@ public:
     u32 get_width() const noexcept;
     u32 get_height() const noexcept;
 
-    /// @brief Resize the tilemap. If new dimensions are greater than old ones, it populates new
+    /// @brief Resizes the tilemap. If new dimensions are greater than old ones, it populates new
     /// tiles and entities with default ones. If tilemap is half-initialized, entities will be half
     /// initialized as well. Calling `set_game()` will initialize them.
     void set_dimensions(u32 width, u32 height);
 
+    /// @brief. At the moment it sets the tilemap's root node and background node as a child of the
+    /// game scene node. Sets an offset according to the configured tile size, and creates tile from
+    /// their definitions using the game's tileset.
+    /// @todo This function can be improved to be more specific
     void set_game(Game& game);
 
     /// @param index Cell index, where x is the column and y is the row
     void set_tile(const Vec2i& index, const Tileset& tileset, const Tile& tile);
 
     /// @param pos Position where to put the entity in scene space
-    void set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile);
+    /// @param tileset Tileset to use for the graphics of the tile
+    /// @param tile Tile description to use when creating the new entity
+    void add_entity_from_tile(const Vec2f& pos, const Tileset& tileset, const Tile& tile);
 
     void add_entity(UNIQUE<Entity> entity);
 
