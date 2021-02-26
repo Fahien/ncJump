@@ -403,15 +403,15 @@ void Editor::place_selected_tile()
 
     if (mode == Mode::TILE) {
         // Adjust mouse position to get center of tile
-        mouse_scene_pos.x += game.config.size.tile / 2.0f;
-        mouse_scene_pos.y += game.config.size.tile / 2.0f;
         auto tile_index = into<Vec2i>((mouse_scene_pos + camera_scene_pos) / f32(game.config.size.tile));
 
         if (tile_index.x < i32(game.tilemap.get_width()) && tile_index.y < i32(game.tilemap.get_height())) {
             game.tilemap.set_tile(tile_index, game.tileset, game.tileset.tiles[*selected_tile]);
         }
     } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
-        // Place an object only on mouse left just down
+        // Center of entity will be at mouse pos
+        mouse_scene_pos.x -= game.config.size.tile / 2.0f;
+        mouse_scene_pos.y -= game.config.size.tile / 2.0f;
         auto entity_position = mouse_scene_pos + camera_scene_pos;
         game.tilemap.add_entity_from_tile(
             entity_position, game.tileset, game.tileset.tiles[*selected_tile]);
