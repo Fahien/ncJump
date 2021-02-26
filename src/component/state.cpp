@@ -480,6 +480,11 @@ DyingState::DyingState()
 
 void DyingState::enter(Entity& entity, const MoveCommand* move)
 {
+    // Disable physics body while the animation finishes
+    if (auto& physics = entity.get_physics()) {
+        physics->set_enabled(false);
+    }
+
     auto& dying_anim = CHAR_GFX(entity).dying;
     entity.transform.node->addChildNode(&dying_anim);
 }

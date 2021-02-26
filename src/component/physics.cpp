@@ -85,6 +85,16 @@ PhysicsComponent::~PhysicsComponent()
     }
 }
 
+void PhysicsComponent::set_enabled(const bool e)
+{
+    enabled = e;
+#ifdef BOX2D_PRE241
+    body->SetActive(enabled);
+#else
+    body->SetEnabled(enabled);
+#endif
+}
+
 void PhysicsComponent::update()
 {
     assert(body && "Physics component has no body");

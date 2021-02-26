@@ -52,7 +52,7 @@ void Entity::set_enabled(const bool e)
     transform.node->setEnabled(enabled);
 
     if (physics) {
-        physics->body->SetActive(e);
+        physics->set_enabled(enabled);
     }
 
     if (state) {
