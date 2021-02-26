@@ -413,7 +413,8 @@ void Editor::place_selected_tile()
     } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
         // Place an object only on mouse left just down
         auto entity_position = mouse_scene_pos + camera_scene_pos;
-        game.tilemap.set_entity(entity_position, game.tileset, game.tileset.tiles[*selected_tile]);
+        game.tilemap.add_entity_from_tile(
+            entity_position, game.tileset, game.tileset.tiles[*selected_tile]);
     }
 }
 

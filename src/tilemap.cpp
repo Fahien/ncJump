@@ -128,11 +128,10 @@ void Tilemap::set_tile(const Vec2i& index, const Tileset& tileset, const Tile& t
     tiles[index.x][index.y] = MV(entity);
 }
 
-void Tilemap::set_entity(const Vec2f& pos, const Tileset& tileset, const Tile& tile)
+void Tilemap::add_entity_from_tile(const Vec2f& pos, const Tileset& tileset, const Tile& tile)
 {
     auto entity = create_entity(pos, tileset, tile, true);
-    entity->transform.node->setParent(entities_root.get());
-    entities.emplace_back(MV(entity));
+    add_entity(MV(entity));
 }
 
 void Tilemap::add_entity(UNIQUE<Entity> entity)
