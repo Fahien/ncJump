@@ -26,11 +26,10 @@ PhysicsComponent PhysicsComponent::tile(b2World& world, const Vec2f& pos, const 
     return ret;
 }
 
-PhysicsComponent PhysicsComponent::character(b2World& world, const Vec2f& pos)
+PhysicsComponent PhysicsComponent::character(b2World& world)
 {
     auto hero_def = b2BodyDef();
     hero_def.type = b2_dynamicBody;
-    hero_def.position.Set(pos.x, pos.y);
     hero_def.angularDamping = 1024.0f;
 
     auto body = world.CreateBody(&hero_def);

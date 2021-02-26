@@ -15,8 +15,7 @@ UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
 
     mushroom->type = Entity::Type::ENEMY;
 
-    mushroom->set_physics(
-        OPTION(PhysicsComponent::character(world, mushroom->transform.node->position())));
+    mushroom->set_physics(PhysicsComponent::character(world));
 
     auto idle_texture = nc::Texture(PATH("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png"));
 
