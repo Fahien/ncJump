@@ -86,27 +86,10 @@ public:
     void exit(Entity& entity) override;
 };
 
-UNIQUE<State> State::create(State::Value state)
+State& CharacterStateComponent::find_state(State::Value value)
 {
-    switch (state) {
-    case State::IDLE:
-        return MK<IdleState>();
-    case State::MOVE:
-        return MK<MoveState>();
-    case State::JUMP_UP:
-        return MK<JumpUpState>();
-    case State::JUMP_DOWN:
-        return MK<JumpDownState>();
-    case State::PUSH:
-        return MK<PushState>();
-    case State::PULL:
-        return MK<PullState>();
-    case State::DYING:
-        return MK<DyingState>();
-    default:
-        ASSERT_MSG(false, "Failed to get state");
-        return UNIQUE<State>();
-    };
+    ASSERT_MSG_X(value >= 0 && value < State::MAX, "Invalid state value: %d", value);
+    return *states[value];
 }
 
 IdleState::IdleState()
@@ -181,10 +164,10 @@ bool check_pull(Entity& entity, const std::vector<b2Body*>& obstacles)
 
         CharacterStateComponent::get(entity).set_state(State::PULL, entity);
         auto pull_state =
-            reinterpret_cast<PullState*>(CharacterStateComponent::get(entity).state.get());
+            reinterpret_cast<PullState&>(CharacterStateComponent::get(entity).get_state());
 
-        pull_state->destroy_joint(*body->GetWorld());
-        pull_state->joint = other->GetWorld()->CreateJoint(&joint);
+        pull_state.destroy_joint(*body->GetWorld());
+        pull_state.joint = other->GetWorld()->CreateJoint(&joint);
 
         return true;
     }
@@ -237,6 +220,7 @@ MoveState::MoveState()
 void MoveState::enter(Entity& entity, const MoveCommand* move)
 {
     entity.transform.node->addChildNode(&CHAR_GFX(entity).movement);
+    moving = true;
 }
 
 void can_push(const MoveCommand& move, Entity& entity)
@@ -352,6 +336,7 @@ JumpDownState::JumpDownState()
 
 void JumpDownState::enter(Entity& entity, const MoveCommand* move)
 {
+    landed = false;
     entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
     entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_down);
 }
@@ -401,6 +386,7 @@ PushState::PushState()
 
 void PushState::enter(Entity& entity, const MoveCommand* move)
 {
+    moving = true;
     entity.transform.node->addChildNode(&CHAR_GFX(entity).push);
 }
 
@@ -446,6 +432,8 @@ void PullState::destroy_joint(b2World& world)
 
 void PullState::enter(Entity& entity, const MoveCommand* move)
 {
+    pulling = true;
+
     auto& idle_anim = CHAR_GFX(entity).idle;
     auto& pull_anim = CHAR_GFX(entity).pull;
     pull_anim.setFlippedX(idle_anim.isFlippedX());
@@ -504,14 +492,17 @@ void DyingState::update(Entity& entity)
 {
     auto& gfx = CHAR_GFX(entity);
     if (gfx.dying.animations()[0].isPaused()) {
-        entity.transform.node->removeChildNode(&gfx.dying);
-        entity.transform.node->setParent(nullptr);
+        exit(entity);
+        entity.set_enabled(false);
     }
 }
 
 void DyingState::exit(Entity& entity)
 {
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).dying);
+    auto& anim = CHAR_GFX(entity).dying;
+    anim.setFrame(0);
+    anim.setPaused(false);
+    entity.transform.node->removeChildNode(&anim);
 }
 
 const char* to_str(State& state)
@@ -529,13 +520,28 @@ CharacterStateComponent& CharacterStateComponent::get(Entity& e)
     return into(*e.state);
 }
 
-CharacterStateComponent::CharacterStateComponent()
-    : state {State::create(State::IDLE)}
+ARRAY<UNIQUE<State>, State::MAX> create_states()
 {
+    auto ret = ARRAY<UNIQUE<State>, State::MAX>();
+    ret.pushBack(MK<IdleState>());
+    ret.pushBack(MK<MoveState>());
+    ret.pushBack(MK<JumpUpState>());
+    ret.pushBack(MK<JumpDownState>());
+    ret.pushBack(MK<PushState>());
+    ret.pushBack(MK<PullState>());
+    ret.pushBack(MK<DyingState>());
+    return ret;
+}
+
+CharacterStateComponent::CharacterStateComponent()
+    : states {create_states()}
+{
+    reset();
 }
 
 void CharacterStateComponent::reset()
 {
+    state = &find_state(State::IDLE);
 }
 
 /// @todo Nothing special to clone even though PullState keeps track of a physics joint which
@@ -559,15 +565,19 @@ void CharacterStateComponent::update(Entity& entity)
 
 void CharacterStateComponent::set_state(State::Value value, Entity& entity, const MoveCommand* move)
 {
-    if (state->value == value) {
-        return;
+    if (state) {
+        if (state->value == value) {
+            return;
+        }
+
+        LOGI_X("Exiting state %s", to_str(*state));
+        state->exit(entity);
     }
 
-    auto new_state = State::create(value);
-    state->exit(entity);
-    new_state->enter(entity, move);
-
-    state = MV(new_state);
+    auto& new_state = find_state(value);
+    LOGI_X("Entering state %s", to_str(new_state));
+    new_state.enter(entity, move);
+    state = &new_state;
 }
 
 } // namespace jmp

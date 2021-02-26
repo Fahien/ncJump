@@ -22,7 +22,7 @@ public:
     void emit_particles(Entity& entity);
 
     /// @brief Checks whether one has been killed by the other
-    void check_kill(const b2Contact& contact, Entity& player, Entity& enemy);
+    void check_kill(const b2Contact& contact, b2Fixture& a, b2Fixture& b);
     void check_destruction(Entity& entity);
 
     /// @brief To be called after physics update
