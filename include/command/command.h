@@ -11,6 +11,7 @@ class Command
 public:
     virtual ~Command() = default;
 
+    virtual nctl::String to_str() const = 0;
     virtual void execute(Entity& entity) = 0;
 };
 
@@ -23,6 +24,7 @@ public:
     MoveCommand() = default;
     inline MoveCommand(f32 x, f32 y);
 
+    inline nctl::String to_str() const override;
     void execute(Entity& entity) override;
 
     f32 x = 0.0f;
@@ -49,6 +51,12 @@ inline MoveCommand MoveCommand::Pull()
     auto ret = MoveCommand();
     ret.pull = true;
     return ret;
+}
+
+inline nctl::String MoveCommand::to_str() const
+{
+    return nctl::String(64).format(
+        "Move {%.2f, %.2f, j %s, p %s}", x, y, jump ? "t" : "f", pull ? "t" : "f");
 }
 
 } // namespace jmp

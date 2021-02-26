@@ -20,12 +20,7 @@ class Config;
 class Entity
 {
 public:
-    enum class Type {
-        NONE = 0,
-        TILE,
-        PLAYER,
-        ENEMY
-    };
+    enum class Type { NONE = 0, TILE, PLAYER, ENEMY };
 
     static inline bool is_player(const Entity& e);
     static inline bool is_enemy(const Entity& e);
@@ -36,6 +31,12 @@ public:
     Entity(nc::SceneNode& scene);
 
     UNIQUE<Entity> clone();
+
+    /// @return Whether this entity is enabled or not
+    inline bool is_enabled() const;
+
+    /// @brief Enable or disable this entity
+    void set_enabled(bool e);
 
     /// @brief Propagates this position to required components
     /// @param position Coordinates in scene space
@@ -50,10 +51,11 @@ public:
     void set_graphics(UNIQUE<GraphicsComponent> graphics);
     void set_physics(OPTION<PhysicsComponent> physics);
 
+    inline const VECTOR<UNIQUE<Command>>& get_commands() const;
     inline void add_command(UNIQUE<Command> command);
     inline void add_script(UNIQUE<Script> script);
 
-    void update(f32 dt, const Input& input);
+    void update(f32 dt);
 
     Type type = Type::NONE;
 
@@ -62,6 +64,8 @@ public:
     UNIQUE<StateComponent> state;
 
 private:
+    bool enabled = true;
+
     UNIQUE<GraphicsComponent> graphics;
     OPTION<PhysicsComponent> physics;
 
@@ -88,6 +92,11 @@ bool Entity::is_enemy(const Entity& e)
     return e.type == Type::ENEMY;
 }
 
+inline bool Entity::is_enabled() const
+{
+    return enabled;
+}
+
 inline Vec2f Entity::get_position() const
 {
     return transform.node->position();
@@ -96,6 +105,11 @@ inline Vec2f Entity::get_position() const
 inline UNIQUE<GraphicsComponent>& Entity::get_graphics()
 {
     return graphics;
+}
+
+inline const VECTOR<UNIQUE<Command>>& Entity::get_commands() const
+{
+    return commands;
 }
 
 inline void Entity::add_command(UNIQUE<Command> command)

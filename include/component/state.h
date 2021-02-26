@@ -13,6 +13,7 @@ class StateComponent {
 public:
     virtual ~StateComponent() = default;
 
+    virtual void reset() = 0;
     virtual UNIQUE<StateComponent> clone() = 0;
 
     virtual void handle(Entity& entity, const MoveCommand& move) = 0;
@@ -21,6 +22,7 @@ public:
 
 class SingleStateComponent : public StateComponent {
 public:
+    void reset() override;
     UNIQUE<StateComponent> clone() override;
 
     void handle(Entity& entity, const MoveCommand& move) override;
@@ -52,6 +54,7 @@ public:
 
     CharacterStateComponent();
 
+    void reset() override;
     UNIQUE<StateComponent> clone() override;
 
     void handle(Entity& entity, const MoveCommand& move) override;

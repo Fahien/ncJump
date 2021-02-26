@@ -45,6 +45,21 @@ UNIQUE<Entity> Entity::clone()
     return ret;
 }
 
+void Entity::set_enabled(const bool e)
+{
+    enabled = e;
+
+    transform.node->setEnabled(enabled);
+
+    if (physics) {
+        physics->body->SetActive(e);
+    }
+
+    if (state) {
+        state->reset();
+    }
+}
+
 void Entity::set_position(const Vec2f& pos, const Config& config)
 {
     transform.node->setPosition(pos);
@@ -77,9 +92,10 @@ void Entity::set_physics(OPTION<PhysicsComponent> ph)
 #endif
 }
 
-/// @todo Do we still need input as a parameter here?
-void Entity::update(const f32 dt, const Input& input)
+void Entity::update(const f32 dt)
 {
+    assert(enabled);
+
     for (auto& command : commands) {
         command->execute(*this);
     }
