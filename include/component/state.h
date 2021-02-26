@@ -32,7 +32,7 @@ public:
 class State
 {
 public:
-    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH, PULL, DYING };
+    enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH, PULL, DYING, MAX };
 
     static UNIQUE<State> create(State::Value state);
 
@@ -60,10 +60,23 @@ public:
     void handle(Entity& entity, const MoveCommand& move) override;
     void update(Entity& entity) override;
 
+    State& find_state(State::Value state);
+
+    inline State& get_state();
+
     /// @param move Optional as a state change is not necessarily triggered by a command
     void set_state(State::Value state, Entity& entity, const MoveCommand* move = nullptr);
 
-    UNIQUE<State> state;
+private:
+    State* state = nullptr;
+
+    ARRAY<UNIQUE<State>, State::MAX> states;
 };
+
+inline State& CharacterStateComponent::get_state()
+{
+    ASSERT(state);
+    return *state;
+}
 
 } // namespace jmp

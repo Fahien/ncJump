@@ -26,16 +26,29 @@ inline b2WorldManifold get_world_manifold(const b2Contact& contact)
     return wm;
 }
 
-void DestructionListener::check_kill(const b2Contact& contact, Entity& player, Entity& enemy)
+void DestructionListener::check_kill(const b2Contact& contact, b2Fixture& a, b2Fixture& b)
 {
-    auto normal = -get_world_manifold(contact).normal;
-    if (normal.x < 0.5 && normal.y > 0.5) {
-        // Kill enemy
-        CharacterStateComponent::get(player).set_state(State::JUMP_UP, player);
-        to_destroy.pushBack(&enemy);
+    Entity* player = nullptr;
+    Entity* enemy = nullptr;
+
+    auto normal = get_world_manifold(contact).normal;
+
+    if (Entity::is_player(Entity::from(a))) {
+        normal = -normal;
+        player = &Entity::from(a);
+        enemy = &Entity::from(b);
     } else {
-        // @todo Kill player
-        to_destroy.pushBack(&player);
+        player = &Entity::from(b);
+        enemy = &Entity::from(a);
+    }
+
+    if (normal.y > 0.2f) {
+        // Kill enemy
+        CharacterStateComponent::get(*player).set_state(State::JUMP_UP, *player);
+        to_destroy.pushBack(enemy);
+    } else {
+        // Kill player
+        to_destroy.pushBack(player);
     }
 }
 
@@ -81,12 +94,12 @@ void DestructionListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
         if (auto enemy_fixture = get_enemy_or_null(*contact)) {
             // Check if we need to kill the enemy or the player
             auto& enemy = Entity::from(*enemy_fixture);
-            check_kill(*contact, player, enemy);
+            check_kill(*contact, *contact->GetFixtureA(), *contact->GetFixtureB());
             return;
         }
 
         // If the player is jumping, impulse is scaled up!
-        if (CharacterStateComponent::get(player).state->value == State::JUMP_UP) {
+        if (CharacterStateComponent::get(player).get_state().value == State::JUMP_UP) {
             impulse_factor = 3.0f;
         }
     }
@@ -151,9 +164,7 @@ void DestructionListener::update(Tilemap& tilemap)
             std::end(tilemap.entities),
             [entity](UNIQUE<Entity>& e) { return e.get() == entity; });
         if (it != std::end(tilemap.entities)) {
-            if (entity->type == Entity::Type::TILE) {
-                emit_particles(*entity);
-            }
+            emit_particles(*entity);
             tilemap.entities.erase(it);
         }
     }

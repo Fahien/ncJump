@@ -196,7 +196,7 @@ void Editor::update_camera(Camera& camera, Config& config)
 
 void Editor::update_state(StateComponent& state)
 {
-    ImGui::Text("state: %s", to_str(*CharacterStateComponent::into(state).state));
+    ImGui::Text("state: %s", to_str(CharacterStateComponent::into(state).get_state()));
 }
 
 void Editor::update_physics(PhysicsComponent& physics)
