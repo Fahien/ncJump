@@ -19,9 +19,13 @@ public:
 
     ~PhysicsComponent();
 
+    void set_enabled(bool e);
+
     void update();
 
     b2Body* body = nullptr;
+
+    bool enabled = true;
 
     DirectionFlags obstacle;
 
