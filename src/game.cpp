@@ -102,20 +102,32 @@ void Game::update(const f32 dt)
     // Update game state
     physics.update(dt, tilemap);
 
-    handle_input(input, entity);
-    entity.update(dt, input);
-    entity.get_graphics()->update(*entity.get_physics(), &input);
+    if (entity.is_enabled()) {
+        handle_input(input, entity);
+    }
 
     editor.update();
 
-    // @todo Move this somewhere else? Possibly PhysicsSystem?
-    // Update entity from body
-    auto& pos = entity.get_physics()->body->GetPosition();
-    entity.transform.node->x = config.size.tile * pos.x;
-    entity.transform.node->y = config.size.tile * pos.y;
+    if (entity.is_enabled()) {
+        entity.update(dt);
+
+        // Only for the controlled character, we change its graphics according to the input
+        entity.get_graphics()->update(*entity.get_physics(), &input);
+
+        // @todo Move this somewhere else? Possibly PhysicsSystem?
+        // Update entity from body
+        auto& pos = entity.get_physics()->body->GetPosition();
+        entity.transform.node->x = config.size.tile * pos.x;
+        entity.transform.node->y = config.size.tile * pos.y;
+    }
+
     // Update tilemap entities from their bodies
     for (auto& entity : tilemap.entities) {
-        entity->update(dt, input);
+        if (!entity->is_enabled()) {
+            continue;
+        }
+
+        entity->update(dt);
 
         if (auto& physics = entity->get_physics()) {
             auto& pos = physics->body->GetPosition();

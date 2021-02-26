@@ -4,6 +4,7 @@
 #include <ncine/Application.h>
 #include <ncine/imgui.h>
 
+#include "command/command.h"
 #include "component/graphics.h"
 #include "game.h"
 
@@ -233,8 +234,21 @@ void Editor::update_player(Entity& entity)
 {
     ImGui::Begin("Player");
 
+    bool enabled = entity.is_enabled();
+    if (ImGui::Checkbox("enabled:", &enabled)) {
+        entity.set_enabled(enabled);
+    }
+
+    for (const auto& command : entity.get_commands()) {
+        ImGui::Text("%s", command->to_str().data());
+    }
+
     auto pos = entity.get_position();
-    ImGui::Text("pos: { %.2f, %.2f }", pos.x, pos.y);
+
+    f32 max = f32(game.tilemap.get_width() * game.config.size.tile);
+    if (ImGui::DragFloat2("pos:", &pos.x, 1.0f, 0.0f, max, "%.2f")) {
+        entity.set_position(pos, game.config);
+    }
 
     if (entity.state) {
         update_state(*entity.state);
