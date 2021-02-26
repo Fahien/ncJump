@@ -33,8 +33,7 @@ UNIQUE<Entity> Entity::clone()
     }
 
     if (physics) {
-        auto new_physics = PhysicsComponent::character(
-            *physics->body->GetWorld(), ret->transform.node->position());
+        auto new_physics = PhysicsComponent::character(*physics->body->GetWorld());
         ret->set_physics(OPTION<PhysicsComponent>(MV(new_physics)));
     }
 

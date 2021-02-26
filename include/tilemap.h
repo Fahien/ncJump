@@ -47,6 +47,8 @@ public:
 
     Game* game = nullptr;
 
+    Vec2f initial_position = Vec2f(0.0f, 0.0f);
+
     /// Root node of the tilemap. The whole tilemap can be transformed using this.
     UNIQUE<nc::SceneNode> node;
     UNIQUE<nc::SceneNode> tiles_root;

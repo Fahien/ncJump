@@ -25,14 +25,16 @@ Tilemap create_tilemap(Game& game)
     return ret;
 }
 
-Entity create_player(nc::SceneNode& parent, Physics& physics, GraphicsFactory& graphics_factory)
+Entity
+create_player(Config& config, Tilemap& tilemap, Physics& physics, GraphicsFactory& graphics_factory)
 {
-    auto entity = Entity(parent);
+    auto entity = Entity(*tilemap.node);
 
     entity.type = Entity::Type::PLAYER;
 
-    entity.set_physics(
-        PhysicsComponent::character(physics.world, entity.transform.node->position()));
+    entity.transform.node->setPosition(tilemap.initial_position);
+
+    entity.set_physics(PhysicsComponent::character(physics.world));
 
     auto graphics = MK<CharacterGraphicsComponent>();
     graphics->idle = graphics_factory.create_animation("img/hero/herochar_idle_anim_strip_4.png");
@@ -52,6 +54,8 @@ Entity create_player(nc::SceneNode& parent, Physics& physics, GraphicsFactory& g
 
     entity.state = MK<CharacterStateComponent>();
 
+    entity.set_position(tilemap.initial_position, config);
+
     return entity;
 }
 
@@ -65,7 +69,7 @@ Game::Game(Config& config)
     , entity_factory {*this}
     , tileset {create_tileset(resource)}
     , tilemap {create_tilemap(*this)}
-    , entity {create_player(*tilemap.node, physics, graphics_factory)}
+    , entity {create_player(config, tilemap, physics, graphics_factory)}
     , camera {*this, entity.transform.node.get()}
     , editor {*this}
 {

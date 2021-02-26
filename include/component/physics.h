@@ -10,7 +10,7 @@ namespace jmp
 class PhysicsComponent {
 public:
     static PhysicsComponent tile(b2World& world, const Vec2f& pos, bool dynamic);
-    static PhysicsComponent character(b2World& world, const Vec2f& pos);
+    static PhysicsComponent character(b2World& world);
 
     PhysicsComponent() = default;
 

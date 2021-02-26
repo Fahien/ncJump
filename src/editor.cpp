@@ -475,7 +475,11 @@ void Editor::update_collisions(Tilemap& tilemap)
 void Editor::update_tilemap(Tilemap& tilemap)
 {
     ImGui::Begin("Tilemap");
-    ImGui::Text("x: %.0f, y: %.0f", tilemap.node->x, tilemap.node->y);
+
+    f32 max = f32(tilemap.get_width() * game.config.size.tile);
+    ImGui::DragFloat2("initial pos: ", tilemap.initial_position.data(), 1.0f, 0.0f, max, "%.0f");
+
+    ImGui::Text("pos { x: %.0f, y: %.0f }", tilemap.node->x, tilemap.node->y);
 
     i32 dimensions[2] = {i32(tilemap.get_width()), i32(tilemap.get_height())};
     if (ImGui::DragInt2("Size", dimensions, 1.0f, 0, 64)) {
