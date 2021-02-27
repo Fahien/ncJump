@@ -32,7 +32,7 @@ void Tileset::set_texture(nc::Texture& t)
     }
 
     sprites.clear();
-    for (usize i = 0; i < width * height; ++i) {
+    for (u32 i = 0; i < width * height; ++i) {
         sprites.emplaceBack(create_sprite(i));
     }
 }
@@ -61,17 +61,17 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
 {
     auto entity = MK<Entity>();
 
-    usize row = tile.id / width;
-    usize col = tile.id % width;
+    u32 row = tile.id / width;
+    u32 col = tile.id % width;
 
-    entity->transform.node->x = col * tile_size;
-    entity->transform.node->y = row * tile_size;
+    entity->transform.node->x = f32(col * tile_size);
+    entity->transform.node->y = f32(row * tile_size);
 
     nc::Recti tex_rect;
-    tex_rect.x = col * tile_size;
-    tex_rect.y = row * tile_size;
-    tex_rect.w = tile_size;
-    tex_rect.h = tile_size;
+    tex_rect.x = i32(col * tile_size);
+    tex_rect.y = i32(row * tile_size);
+    tex_rect.w = i32(tile_size);
+    tex_rect.h = i32(tile_size);
 
     auto graphics = MK<SingleGraphicsComponent>(entity->transform, *texture);
     graphics->sprite->setTexture(texture);

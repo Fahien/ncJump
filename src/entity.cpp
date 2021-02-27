@@ -12,6 +12,11 @@ namespace nc = ncine;
 
 namespace jmp
 {
+
+Entity::~Entity()
+{
+}
+
 Entity::Entity(nc::SceneNode& scene)
     : transform {scene}
 {

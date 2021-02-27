@@ -28,6 +28,16 @@ public:
 
     Entity() = default;
 
+    Entity(const Entity&) = default;
+    Entity& operator=(const Entity&) = default;
+
+    Entity(Entity&&) = default;
+    Entity& operator=(Entity&&) = default;
+
+    /// @brief Destructs the entity
+    /// Needs to be in the source to destroy forward declared members
+    ~Entity();
+
     Entity(nc::SceneNode& scene);
 
     UNIQUE<Entity> clone();

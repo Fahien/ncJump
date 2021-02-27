@@ -26,7 +26,7 @@ template<typename T> void to_json(nl::json& j, const nctl::Array<T>& t)
 template<typename T> void from_json(const nl::json& j, nctl::Array<T>& t)
 {
     ASSERT(j.is_array());
-    t.setCapacity(j.size());
+    t.setCapacity(u32(j.size()));
 
     for (auto& e : j) {
         t.emplaceBack(e.get<T>());
