@@ -65,6 +65,7 @@ target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:${PACK
 target_compile_definitions(${PACKAGE_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCINE_ASSERT_BREAK>")
 
 if(MSVC)
+	set_property(TARGET ${PACKAGE_EXE_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${PACKAGE_EXE_NAME}>")
 	target_compile_options(${PACKAGE_EXE_NAME} PRIVATE /MP)
 endif()
 
