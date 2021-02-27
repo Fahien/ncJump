@@ -472,6 +472,46 @@ void Editor::update_collisions(Tilemap& tilemap)
     ImGui::End(); // Full
 }
 
+void update_size(Tilemap& tilemap)
+{
+    // When trying to shrink the tilemap, show a warning before losing data
+    static bool show_modal_warning = false;
+    static u32 new_dimensions[2] = {0, 0};
+
+    const u32 width = tilemap.get_width();
+    const u32 height = tilemap.get_height();
+    u32 dimensions[2] = {width, height};
+    const u32 min = 16;
+    const u32 max = 256;
+    if (ImGui::DragScalarN("Size", ImGuiDataType_U32, dimensions, 2, 1.0f, &min, &max, "%u")) {
+        if (dimensions[0] < width || dimensions[1] < height) {
+            new_dimensions[0] = dimensions[0];
+            new_dimensions[1] = dimensions[1];
+            show_modal_warning = true;
+        } else {
+            tilemap.set_dimensions(dimensions[0], dimensions[1]);
+        }
+    }
+
+    if (show_modal_warning) {
+        ImGui::OpenPopup("Warning");
+        if (ImGui::BeginPopupModal("Warning", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text(
+                "Shrinking the tilemap will destroy some tiles.\n"
+                "Are you sure you want to continue?");
+            if (ImGui::Button("Yes")) {
+                tilemap.set_dimensions(new_dimensions[0], new_dimensions[1]);
+                show_modal_warning = false;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("No")) {
+                show_modal_warning = false;
+            }
+            ImGui::EndPopup();
+        }
+    }
+}
+
 void Editor::update_tilemap(Tilemap& tilemap)
 {
     ImGui::Begin("Tilemap");
@@ -481,10 +521,8 @@ void Editor::update_tilemap(Tilemap& tilemap)
 
     ImGui::Text("pos { x: %.0f, y: %.0f }", tilemap.node->x, tilemap.node->y);
 
-    i32 dimensions[2] = {i32(tilemap.get_width()), i32(tilemap.get_height())};
-    if (ImGui::DragInt2("Size", dimensions, 1.0f, 0, 64)) {
-        tilemap.set_dimensions(dimensions[0], dimensions[1]);
-    }
+    update_size(tilemap);
+
     if (ImGui::TreeNode("entities:")) {
         i32 del_num = -1;
         for (i32 i = 0; i < tilemap.entities.size(); ++i) {
