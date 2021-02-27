@@ -23,8 +23,8 @@ u32 Tilemap::get_height() const noexcept
 
 void Tilemap::set_dimensions(u32 w, u32 h)
 {
-    auto old_width = i32(width);
-    auto old_height = i32(height);
+    u32 old_width = width;
+    u32 old_height = height;
 
     width = w;
     height = h;
@@ -33,16 +33,17 @@ void Tilemap::set_dimensions(u32 w, u32 h)
     tile_descs.resize(width);
     tiles.resize(width);
 
-    for (i32 i = 0; i < old_width; ++i) {
+    for (u32 i = 0; i < old_width; ++i) {
         // Resize old columns
         tile_descs[i].resize(height);
         tiles[i].resize(height);
 
         // Initialize new tiles in old columns
         if (height > old_height) {
-            for (i32 j = old_height; j < height; ++j) {
+            for (u32 j = old_height; j < height; ++j) {
                 if (game) {
-                    set_tile({i, j}, game->tileset, tile_descs[i][j]);
+                    auto index = Vec2i(i32(i), i32(j));
+                    set_tile(index, game->tileset, tile_descs[i][j]);
                 }
             }
         }
@@ -50,14 +51,15 @@ void Tilemap::set_dimensions(u32 w, u32 h)
 
     // Initialize all new tiles in new columns
     if (width > old_width) {
-        for (i32 i = old_width; i < width; ++i) {
+        for (u32 i = old_width; i < width; ++i) {
             // Resize new columns
             tile_descs[i].resize(height);
             tiles[i].resize(height);
 
-            for (i32 j = 0; j < height; ++j) {
+            for (u32 j = 0; j < height; ++j) {
                 if (game) {
-                    set_tile({i, j}, game->tileset, tile_descs[i][j]);
+                    auto index = Vec2i(i32(i), i32(j));
+                    set_tile(index, game->tileset, tile_descs[i][j]);
                 }
             }
         }
@@ -95,11 +97,12 @@ void Tilemap::set_game(Game& g)
     }
 
     // Create tiles from tile prototypes
-    tiles.resize(width);
-    for (i32 i = 0; i < width; ++i) {
+    tiles.resize(usize(width));
+    for (u32 i = 0; i < width; ++i) {
         tiles[i].resize(height);
-        for (i32 j = 0; j < height; ++j) {
-            set_tile({i, j}, game->tileset, tile_descs[i][j]);
+        for (u32 j = 0; j < height; ++j) {
+            auto index = Vec2i(i32(i), i32(j));
+            set_tile(index, game->tileset, tile_descs[i][j]);
         }
     }
 }
@@ -116,12 +119,12 @@ UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
 
 void Tilemap::set_tile(const Vec2i& index, const Tileset& tileset, const Tile& tile)
 {
-    if (index.x < 0 || index.y < 0 || index.x >= width || index.y >= height) {
+    if (index.x < 0 || index.y < 0 || index.x >= i32(width) || index.y >= i32(height)) {
         LOGE_X("Attempting to place tile out of boundaries: (%d, %d)", index.x, index.y);
         return;
     }
 
-    auto posf = Vec2f(index.x * game->config.size.tile, index.y * game->config.size.tile);
+    auto posf = Vec2f(f32(index.x * game->config.size.tile), f32(index.y * game->config.size.tile));
     auto entity = create_entity(posf, tileset, tile, false);
     entity->transform.node->setParent(tiles_root.get());
     tile_descs[index.x][index.y] = tile;

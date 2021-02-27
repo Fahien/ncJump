@@ -117,7 +117,8 @@ bool close(const b2Vec2& a, const b2Vec2& b)
 /// @return Wether the entity is moving now or not
 bool can_stop(const bool moving, Entity& entity)
 {
-    bool moving_now = !close(entity.get_physics()->body->GetLinearVelocity(), b2Vec2_zero);
+    const auto zero = b2Vec2(0.0f, 0.0f);
+    bool moving_now = !close(entity.get_physics()->body->GetLinearVelocity(), zero);
     if (!moving && !moving_now) {
         CharacterStateComponent::get(entity).set_state(State::IDLE, entity);
     }
