@@ -2,7 +2,6 @@ name: 'CodeQL'
 
 env:
   LIBRARIES_BRANCH: libraries-OS-COMPILER
-  NCINE_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
   NCINE_SOURCE_BRANCH: master
 
 on: [push, workflow_dispatch]
@@ -27,7 +26,11 @@ jobs:
         languages: ${{ matrix.language }}
 
     - run: |
-        # Download nCine-libraries, nCine Artifacts, and package data
+        # Install nCine Build Dependencies
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev
+
+        # Download nCine-libraries and package data
         export OS=linux
         export CC=gcc
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
@@ -41,34 +44,33 @@ jobs:
         git checkout $LIBRARIES_BRANCH
         LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
         mv nCine-external ..
-
         cd ..
         rm -rf nCine-libraries-artifacts
 
-        export NCINE_SOURCE_BRANCH=`echo $NCINE_SOURCE_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
-        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/BRANCH_NAME/'"$NCINE_SOURCE_BRANCH"'/'`
-        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/OS/'"$OS"'/'`
-        export NCINE_BRANCH=`echo $NCINE_BRANCH | sed 's/COMPILER/'"$CC"'/'`
-        git clone https://github.com/nCine/nCine-artifacts.git
-        cd nCine-artifacts
-        git checkout $NCINE_BRANCH
-
-        NCINE_FILE=$(ls -t | head -n 1)
-        tar xpzf $NCINE_FILE
-        mv "${NCINE_FILE/.tar.gz/}" ../nCine
-
-        cd ..
-        rm -rf nCine-artifacts
-
         git clone https://github.com/$GITHUB_REPOSITORY-data.git
+
+        # Download nCine source and data
+        export BuildType=Debug
+        export NCINE_SOURCE_BRANCH=`echo $NCINE_SOURCE_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
+
+        git clone https://github.com/nCine/nCine-data.git
+        git clone https://github.com/nCine/nCine.git --branch $NCINE_SOURCE_BRANCH
+
+        # CMake Configuration and Make of nCine with docking ImGui
+        cd nCine
+        export CMAKE_ARGS="-B ../nCine-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D IMGUI_VERSION_TAG=docking -D NCINE_BUILD_TESTS=OFF"
+
+        export CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
+
+        cmake $CMAKE_ARGS
+        cd ..
+        make -j2 -C nCine-build-Debug
 
         # CMake Configuration and Make
         export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
-        export NCINE_DIRECTORY=$(pwd)/nCine/lib/cmake/nCine
-        export BuildType=Debug
 
         cd $PACKAGE_NAME
-        cmake -B ../$PACKAGE_NAME-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D nCine_DIR=$NCINE_DIRECTORY -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external
+        cmake -B ../$PACKAGE_NAME-build-$BuildType -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external -D CMAKE_BUILD_TYPE=$BuildType -D nCine_DIR=$(pwd)/../nCine-build-$BuildType
 
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/../nCine-external/lib
         make -j2 -C ../$PACKAGE_NAME-build-$BuildType
