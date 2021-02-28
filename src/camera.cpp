@@ -40,7 +40,7 @@ void Camera::update()
     const f32 smooth_factor = 0.125f;
 
     // Window in game space
-    auto window = game->config.get_real_window_size() / game->config.scale.global;
+    auto window = game->config.get_real_window_size();
 
     // Target needs to be in game space as well
     auto hard_target = Vec2f(-follow->x * game->config.scale.scene + window.width / 2.0f,
@@ -58,7 +58,7 @@ void Camera::update()
     // As we are moving the scene to the opposite direction of the camera max and min are "inverted"
     min.x -= game->tilemap.get_width() * game->config.size.tile * game->config.scale.scene -
         window.width;
-    min.y -= game->tilemap.get_height() * game->config.size.tile * game->config.scale.scene +
+    min.y -= game->tilemap.get_height() * game->config.size.tile * game->config.scale.scene -
         window.height;
 
     // Make sure min values are less than max values

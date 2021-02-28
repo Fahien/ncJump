@@ -6,7 +6,6 @@ namespace jmp
 {
 struct Scale {
     f32 window = 1.0f;
-    f32 global = 4.0f;
     f32 gui = 1.0f;
     f32 scene = 1.0f;
 };
@@ -37,7 +36,8 @@ struct Toggle {
 };
 
 /// @brief Game configuration
-class Config {
+class Config
+{
 public:
     /// @return A new config from a json file, or a default instance if such a file does not exist
     static Config from_json(const char* path);
@@ -67,23 +67,22 @@ inline Extent Config::get_real_window_size() const
 
 inline Extent Config::get_scene_window_size() const
 {
-    return get_real_window_size() / (scale.global * scale.scene);
+    return get_real_window_size() / scale.scene;
 }
 
 inline Vec2f Config::screen_to_scene(const Vec2i& p) const
 {
-    return Vec2f(p.x / (scale.global * scale.scene), p.y / (scale.global * scale.scene));
+    return Vec2f(p.x / scale.scene, p.y / scale.scene);
 }
 
 inline Vec2i Config::scene_to_screen(const Vec2f& p) const
 {
-    return Vec2i(i32(p.x * scale.global * scale.scene), i32(p.y * scale.global * scale.scene));
+    return Vec2i(i32(p.x * scale.scene), i32(p.y * scale.scene));
 }
 
 inline ImVec2 Config::scene_to_gui(const Vec2f& p) const
 {
-    return ImVec2(p.x * scale.global * scale.scene,
-        size.window.height * scale.window - p.y * scale.global * scale.scene);
+    return ImVec2(p.x * scale.scene, size.window.height * scale.window - p.y * scale.scene);
 }
 
 } // namespace jmp
