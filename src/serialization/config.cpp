@@ -11,7 +11,6 @@ namespace jmp
 void to_json(nl::json& j, const Scale& s)
 {
     j["window"] = s.window;
-    j["global"] = s.global;
     j["gui"] = s.gui;
     j["scene"] = s.scene;
 }
@@ -44,7 +43,6 @@ void to_json(nl::json& j, const Config& c)
 void from_json(const nl::json& j, Scale& s)
 {
     j["window"].get_to(s.window);
-    j["global"].get_to(s.global);
     j["gui"].get_to(s.gui);
     j["scene"].get_to(s.scene);
 }

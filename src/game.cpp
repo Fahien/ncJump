@@ -74,7 +74,6 @@ Game::Game(Config& config)
     , editor {*this}
 {
     resource.setMagFiltering(nc::Texture::Filtering::NEAREST);
-    root.setScale(config.scale.global);
     scene.setScale(config.scale.scene);
 }
 

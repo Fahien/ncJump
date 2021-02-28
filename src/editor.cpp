@@ -403,9 +403,11 @@ void Editor::place_selected_tile()
 
     if (mode == Mode::TILE) {
         // Adjust mouse position to get center of tile
-        auto tile_index = into<Vec2i>((mouse_scene_pos + camera_scene_pos) / f32(game.config.size.tile));
+        auto tile_index =
+            into<Vec2i>((mouse_scene_pos + camera_scene_pos) / f32(game.config.size.tile));
 
-        if (tile_index.x < i32(game.tilemap.get_width()) && tile_index.y < i32(game.tilemap.get_height())) {
+        if (tile_index.x < i32(game.tilemap.get_width()) &&
+            tile_index.y < i32(game.tilemap.get_height())) {
             game.tilemap.set_tile(tile_index, game.tileset, game.tileset.tiles[*selected_tile]);
         }
     } else if (mode == Mode::ENTITY && game.input.mouse.left.just_down) {
@@ -450,8 +452,7 @@ void Editor::update_collisions(Tilemap& tilemap)
                 auto entity_pos = entity->get_position();
                 auto pos = game.config.scene_to_gui(entity_pos);
                 auto scene_pos = game.config.scene_to_screen(game.camera.get_position());
-                auto htile = game.config.size.tile * game.config.scale.scene *
-                    game.config.scale.global / 2.0f;
+                auto htile = game.config.size.tile * game.config.scale.scene / 2.0f;
                 pos.x -= scene_pos.x - htile;
                 pos.y += scene_pos.y - htile;
 
