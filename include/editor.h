@@ -46,6 +46,7 @@ private:
     void update_selected_tile(Tileset& tileset);
     void update_entities(EntityFactory& factory);
     void update_tilemap(Tilemap& tilemap);
+    OPTION<usize> update_entity(usize i, Entity& entity);
     void update_collisions(Tilemap& tilemap);
 
     void place_selected_tile();
