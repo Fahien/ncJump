@@ -5,15 +5,15 @@
 namespace jmp
 {
 struct Scale {
-    f32 window = 4.0f;
+    f32 window = 1.0f;
     f32 global = 4.0f;
-    f32 gui = 2.0f;
-    f32 scene = 2.0f;
+    f32 gui = 1.0f;
+    f32 scene = 1.0f;
 };
 
 struct Extent {
-    u32 width = 480;
-    u32 height = 320;
+    u32 width = 480 * 4;
+    u32 height = 320 * 4;
 };
 
 inline Extent operator*(const Extent& e, const f32 f)
