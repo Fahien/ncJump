@@ -62,7 +62,7 @@ jobs:
         # Temporary hack to restore the `data` subdirectory
         cd ncJump-data
         mkdir data
-        mv *.png *.json img data/
+        mv *.png *.json *.ini img data/
 
     - name: 'Download nCine source and data'
       run: |

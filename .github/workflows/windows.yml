@@ -62,6 +62,7 @@ jobs:
         New-Item -ItemType directory -Path data
         Move-Item -Path .\*.png -Destination data
         Move-Item -Path .\*.json -Destination data
+        Move-Item -Path .\*.ini -Destination data
         Move-Item -Path img -Destination data
 
     - name: 'Download nCine source and data'
