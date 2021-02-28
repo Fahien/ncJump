@@ -10,33 +10,46 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
     return nctl::makeUnique<JumpHandler>();
 }
 
-void JumpHandler::onPreInit(nc::AppConfiguration& config)
+void JumpHandler::onPreInit(nc::AppConfiguration& ncfg)
 {
 #if defined(__ANDROID__)
-    config.dataPath() = "asset::";
+    ncfg.dataPath() = "asset::";
 #elif defined(__EMSCRIPTEN__)
-    config.dataPath() = "/";
+    ncfg.dataPath() = "/";
 #else
 #ifdef PACKAGE_DEFAULT_DATA_DIR
-    config.dataPath() = PACKAGE_DEFAULT_DATA_DIR;
+    ncfg.dataPath() = PACKAGE_DEFAULT_DATA_DIR;
 #else
-    config.dataPath() = "data/";
+    ncfg.dataPath() = "data/";
 #endif
 #endif
 
-    auto jmp_config = jmp::Config::from_json(PATH("config.json"));
+    ncfg.consoleLogLevel = nc::ILogger::LogLevel::INFO;
 
-    config.consoleLogLevel = nc::ILogger::LogLevel::INFO;
+    ncfg.windowTitle = "ncJump";
+    ncfg.windowIconFilename = "jump48.png";
 
-    config.windowTitle = "ncJump";
-    config.windowIconFilename = "jump48.png";
-    config.resolution.x = i32(jmp_config.scale.window) * i32(jmp_config.size.window.width);
-    config.resolution.y = i32(jmp_config.scale.window) * i32(jmp_config.size.window.height);
+#ifndef __EMSCRIPTEN__
+    // Try setting resolution from config
+    auto config = jmp::Config::from_json(PATH("config.json"));
+    ncfg.resolution.x = i32(config.scale.window) * i32(config.size.window.width);
+    ncfg.resolution.y = i32(config.scale.window) * i32(config.size.window.height);
+#endif
 }
 
 void JumpHandler::onInit()
 {
     auto config = jmp::Config::from_json(PATH("config.json"));
+    auto window = config.get_real_window_size();
+
+#ifdef __EMSCRIPTEN__
+    // Override config window if resolution failed to set
+    auto ncfg = nc::theApplication().appConfiguration();
+    config.scale.window = 1.0f;
+    config.size.window.width = u32(ncfg.resolution.x);
+    config.size.window.height = u32(ncfg.resolution.y);
+#endif
+
     game = MK<jmp::Game>(config);
 }
 

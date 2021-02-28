@@ -77,11 +77,13 @@ void from_json(const nl::json& j, Config& c)
 Config Config::from_json(const char* path)
 {
     if (nc::fs::exists(path)) {
+        LOGI_X("Loading %s", path);
         auto data = read_file(path);
         auto j = nl::json::parse(data.data(), data.data() + data.size());
         return j.get<Config>();
     }
 
+    LOGI_X("Default config");
     return {};
 }
 
