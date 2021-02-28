@@ -55,17 +55,16 @@ CharacterGraphicsComponent& CharacterGraphicsComponent::into(GraphicsComponent& 
 
 UNIQUE<GraphicsComponent> CharacterGraphicsComponent::clone() const
 {
-    auto ret = UNIQUE<CharacterGraphicsComponent>(new CharacterGraphicsComponent());
+    auto ret = MK<CharacterGraphicsComponent>();
 
     ret->direction = direction;
-    ret->idle = idle.clone();
-    ret->idle.setFrame(0);
-    ret->movement = movement.clone();
-    ret->jump_up = jump_up.clone();
-    ret->jump_down = jump_down.clone();
-    ret->push = push.clone();
-    ret->pull = pull.clone();
-    ret->dying = dying.clone();
+    ret->idle = clone_sprite(idle);
+    ret->movement = clone_sprite(movement);
+    ret->jump_up = clone_sprite(jump_up);
+    ret->jump_down = clone_sprite(jump_down);
+    ret->push = clone_sprite(push);
+    ret->pull = clone_sprite(pull);
+    ret->dying = clone_sprite(dying);
 
     return ret;
 }

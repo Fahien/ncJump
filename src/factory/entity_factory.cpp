@@ -17,8 +17,6 @@ UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
 
     mushroom->set_physics(PhysicsComponent::character(world));
 
-    auto idle_texture = nc::Texture(PATH("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png"));
-
     auto graphics = MK<CharacterGraphicsComponent>();
     graphics->idle =
         factory.create_animation("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");

@@ -513,6 +513,21 @@ void update_size(Tilemap& tilemap)
     }
 }
 
+OPTION<usize> Editor::update_entity(usize i, Entity& entity)
+{
+    OPTION<usize> ret = None;
+
+    auto name = nctl::String().format("%zu", i);
+    if (ImGui::TreeNode(name.data())) {
+        if (ImGui::Button("Delete")) {
+            ret = i;
+        }
+        ImGui::TreePop();
+    }
+
+    return ret;
+}
+
 void Editor::update_tilemap(Tilemap& tilemap)
 {
     ImGui::Begin("Tilemap");
@@ -525,15 +540,14 @@ void Editor::update_tilemap(Tilemap& tilemap)
     update_size(tilemap);
 
     if (ImGui::TreeNode("entities:")) {
-        i32 del_num = -1;
-        for (i32 i = 0; i < tilemap.entities.size(); ++i) {
-            std::string entity_num = "Delete " + std::to_string(i);
-            if (ImGui::Button(entity_num.c_str())) {
-                del_num = i;
+        OPTION<usize> to_delete = None;
+        for (usize i = 0; i < tilemap.entities.size(); ++i) {
+            if (auto del = update_entity(i, *tilemap.entities[i])) {
+                to_delete = del;
             }
         }
-        if (del_num >= 0) {
-            tilemap.entities.erase(std::begin(tilemap.entities) + del_num);
+        if (to_delete) {
+            tilemap.entities.erase(std::begin(tilemap.entities) + *to_delete);
         }
         ImGui::TreePop();
     }
