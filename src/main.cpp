@@ -5,6 +5,8 @@
 #include <ncine/FileSystem.h>
 #include <nctl/algorithms.h>
 
+#include "serialization/file.h"
+
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
     return nctl::makeUnique<JumpHandler>();
@@ -39,9 +41,10 @@ void JumpHandler::onPreInit(nc::AppConfiguration& ncfg)
 
 void JumpHandler::onInit()
 {
-    auto config = jmp::Config::from_json(PATH("config.json"));
-    auto window = config.get_real_window_size();
+    auto imini = jmp::read_file(PATH("imgui.ini"));
+    ImGui::LoadIniSettingsFromMemory(imini.data(), imini.size());
 
+    auto config = jmp::Config::from_json(PATH("config.json"));
 #ifdef __EMSCRIPTEN__
     // Override config window if resolution failed to set
     auto ncfg = nc::theApplication().appConfiguration();
