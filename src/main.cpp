@@ -88,16 +88,16 @@ void JumpHandler::onKeyPressed(const nc::KeyboardEvent& event)
 {
     switch (event.sym) {
     case nc::KeySym::W:
-        game->input.joystick.move.y += 1.0;
+        game->input.joystick.move.y += 1.0f;
         break;
     case nc::KeySym::S:
-        game->input.joystick.move.y += -1.0;
+        game->input.joystick.move.y += -1.0f;
         break;
     case nc::KeySym::A:
-        game->input.joystick.move.x += -1.0;
+        game->input.joystick.move.x += -1.0f;
         break;
     case nc::KeySym::D:
-        game->input.joystick.move.x += 1.0;
+        game->input.joystick.move.x += 1.0f;
         break;
     case nc::KeySym::SPACE:
         game->input.joystick.a.down = game->input.joystick.a.just_down = true;
@@ -111,6 +111,10 @@ void JumpHandler::onKeyPressed(const nc::KeyboardEvent& event)
     default:
         break;
     }
+
+    // Make sure move vector has valid values
+    game->input.joystick.move.x = nctl::clamp(game->input.joystick.move.x, -1.0f, 1.0f);
+    game->input.joystick.move.y = nctl::clamp(game->input.joystick.move.y, -1.0f, 1.0f);
 }
 
 void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
@@ -140,6 +144,10 @@ void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
     default:
         break;
     }
+
+    // Make sure move vector has valid values
+    game->input.joystick.move.x = nctl::clamp(game->input.joystick.move.x, -1.0f, 1.0f);
+    game->input.joystick.move.y = nctl::clamp(game->input.joystick.move.y, -1.0f, 1.0f);
 }
 
 void JumpHandler::onJoyAxisMoved(const nc::JoyAxisEvent& event)
