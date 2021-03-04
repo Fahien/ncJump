@@ -1,10 +1,11 @@
-#include "component/graphics.h"
+#include "component/graphics_component.h"
 
 #include <ncine/FileSystem.h>
 
 #include "component/transform.h"
 #include "config.h"
 #include "entity.h"
+#include "factory/graphics_factory.h"
 #include "input.h"
 
 namespace jmp
@@ -28,6 +29,14 @@ nc::AnimatedSprite clone_sprite(const nc::AnimatedSprite& sprite)
 SingleGraphicsComponent& SingleGraphicsComponent::into(GraphicsComponent& g)
 {
     return reinterpret_cast<SingleGraphicsComponent&>(g);
+}
+
+SingleGraphicsComponent::SingleGraphicsComponent(const GraphicsDef& def, GraphicsFactory& factory)
+    : sprite {&factory.get_or_create(def.path)}
+{
+    sprite.setLayer(1);
+    ASSERT(def.rects.size() > 0);
+    sprite.setTexRect(def.rects[0]);
 }
 
 SingleGraphicsComponent::SingleGraphicsComponent(TransformComponent& transform,
@@ -70,6 +79,12 @@ GuiTexture SingleGraphicsComponent::get_guitex(const Config& config) const
 CharacterGraphicsComponent& CharacterGraphicsComponent::into(GraphicsComponent& g)
 {
     return reinterpret_cast<CharacterGraphicsComponent&>(g);
+}
+
+CharacterGraphicsComponent::CharacterGraphicsComponent(const GraphicsDef& def,
+    GraphicsFactory& factory)
+    : idle {factory.create_anim(def)}
+{
 }
 
 UNIQUE<GraphicsComponent> CharacterGraphicsComponent::clone() const

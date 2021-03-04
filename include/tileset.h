@@ -41,10 +41,10 @@ public:
     UNIQUE<Entity> create_entity(const Tile& tile, Game& game, bool dynamic = false) const;
 
     /// @return A sprite for the tile at position passed as a parameter
-    UNIQUE<nc::Sprite> create_sprite(u32 i) const;
+    UNIQUE<nc::Sprite> create_sprite(u32 i, nc::Texture& texture) const;
 
-    // @todo Do not use pointers
-    nc::Texture* texture;
+    /// Path to the tileset texture
+    String path = "img/tile/tileset.png";
 
     u32 tile_size = 16;
 

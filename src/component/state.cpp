@@ -102,7 +102,7 @@ IdleState::IdleState()
 
 void IdleState::enter(Entity& entity, const MoveCommand* move)
 {
-    entity.transform.node->addChildNode(&CHAR_GFX(entity).idle);
+    entity.get_graphics()->set_current(State::IDLE);
 }
 
 bool close(const b2Vec2& a, const b2Vec2& b)
@@ -185,12 +185,12 @@ void can_pull(const MoveCommand& move, Entity& entity)
     auto& obstacles_dir = entity.get_physics()->obstacles_dir;
 
     if (check_pull(entity, obstacles_dir[Direction::LEFT])) {
-        CHAR_GFX(entity).pull.setFlippedX(true);
+        entity.get_graphics()->get_current_mut()->get_sprite_mut().setFlippedX(true);
         return;
     }
 
     if (check_pull(entity, obstacles_dir[Direction::RIGHT])) {
-        CHAR_GFX(entity).pull.setFlippedX(false);
+        entity.get_graphics()->get_current_mut()->get_sprite_mut().setFlippedX(false);
         return;
     }
 }
@@ -209,7 +209,6 @@ void IdleState::update(Entity& entity)
 
 void IdleState::exit(Entity& entity)
 {
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).idle);
 }
 
 MoveState::MoveState()
@@ -220,7 +219,7 @@ MoveState::MoveState()
 
 void MoveState::enter(Entity& entity, const MoveCommand* move)
 {
-    entity.transform.node->addChildNode(&CHAR_GFX(entity).movement);
+    entity.get_graphics()->set_current(State::MOVE);
     moving = true;
 }
 
@@ -271,7 +270,6 @@ void MoveState::update(Entity& entity)
 
 void MoveState::exit(Entity& entity)
 {
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).movement);
 }
 
 JumpUpState::JumpUpState()
@@ -302,7 +300,7 @@ void JumpUpState::enter(Entity& entity, const MoveCommand* move)
 {
     entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
 
-    entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_up);
+    entity.get_graphics()->set_current(State::JUMP_UP);
 
     auto force = b2Vec2(0.0f, entity.get_physics()->jump_y_factor);
     entity.get_physics()->body->ApplyLinearImpulse(
@@ -326,7 +324,6 @@ void JumpUpState::update(Entity& entity)
 void JumpUpState::exit(Entity& entity)
 {
     entity.get_physics()->body->GetFixtureList()->SetFriction(3.0f);
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).jump_up);
 }
 
 JumpDownState::JumpDownState()
@@ -339,7 +336,7 @@ void JumpDownState::enter(Entity& entity, const MoveCommand* move)
 {
     landed = false;
     entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
-    entity.transform.node->addChildNode(&CHAR_GFX(entity).jump_down);
+    entity.get_graphics()->set_current(State::JUMP_DOWN);
 }
 
 void JumpDownState::handle(Entity& entity, const MoveCommand& move)
@@ -375,8 +372,6 @@ void JumpDownState::exit(Entity& entity)
     for (auto edge = entity.get_physics()->body->GetContactList(); edge; edge = edge->next) {
         edge->contact->ResetFriction();
     }
-
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).jump_down);
 }
 
 PushState::PushState()
@@ -388,7 +383,7 @@ PushState::PushState()
 void PushState::enter(Entity& entity, const MoveCommand* move)
 {
     moving = true;
-    entity.transform.node->addChildNode(&CHAR_GFX(entity).push);
+    entity.get_graphics()->set_current(State::PUSH);
 }
 
 void can_stop_pushing(Entity& entity)
@@ -414,7 +409,6 @@ void PushState::update(Entity& entity)
 
 void PushState::exit(Entity& entity)
 {
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).push);
 }
 
 PullState::PullState()
@@ -435,10 +429,13 @@ void PullState::enter(Entity& entity, const MoveCommand* move)
 {
     pulling = true;
 
-    auto& idle_anim = CHAR_GFX(entity).idle;
-    auto& pull_anim = CHAR_GFX(entity).pull;
+    // @todo Comment
+    auto& gfx = entity.get_graphics();
+    auto& idle_anim = gfx->subs[State::IDLE]->get_sprite();
+    auto& pull_anim = gfx->subs[State::PULL]->get_sprite_mut();
     pull_anim.setFlippedX(idle_anim.isFlippedX());
-    entity.transform.node->addChildNode(&pull_anim);
+
+    gfx->set_current(State::PULL);
 }
 
 void can_stop_pulling(const bool pulling, Entity& entity)
@@ -470,7 +467,6 @@ void PullState::update(Entity& entity)
 void PullState::exit(Entity& entity)
 {
     destroy_joint(*entity.get_physics()->body->GetWorld());
-    entity.transform.node->removeChildNode(&CHAR_GFX(entity).pull);
 }
 
 DyingState::DyingState()
@@ -486,8 +482,7 @@ void DyingState::enter(Entity& entity, const MoveCommand* move)
         physics->set_enabled(false);
     }
 
-    auto& dying_anim = CHAR_GFX(entity).dying;
-    entity.transform.node->addChildNode(&dying_anim);
+    entity.get_graphics()->set_current(State::DYING);
 }
 
 void DyingState::handle(Entity& entity, const MoveCommand& move)
@@ -496,8 +491,8 @@ void DyingState::handle(Entity& entity, const MoveCommand& move)
 
 void DyingState::update(Entity& entity)
 {
-    auto& gfx = CHAR_GFX(entity);
-    if (gfx.dying.animations()[0].isPaused()) {
+    auto& gfx = AnimSubGraphics::into(*entity.get_graphics()->get_current_mut());
+    if (gfx.anim.animations()[0].isPaused()) {
         exit(entity);
         entity.set_enabled(false);
     }
@@ -505,10 +500,10 @@ void DyingState::update(Entity& entity)
 
 void DyingState::exit(Entity& entity)
 {
-    auto& anim = CHAR_GFX(entity).dying;
-    anim.setFrame(0);
-    anim.setPaused(false);
-    entity.transform.node->removeChildNode(&anim);
+    auto& gfx = AnimSubGraphics::into(*entity.get_graphics()->get_current_mut());
+    gfx.anim.setFrame(0);
+    gfx.anim.setPaused(false);
+    entity.get_graphics()->set_current(None);
 }
 
 const char* to_str(State& state)

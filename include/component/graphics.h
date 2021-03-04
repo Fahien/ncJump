@@ -3,6 +3,7 @@
 #include <ncine/AnimatedSprite.h>
 #include <ncine/Texture.h>
 
+#include "model/defs.h"
 #include "types.h"
 
 namespace jmp
@@ -12,6 +13,7 @@ struct Input;
 class TransformComponent;
 class PhysicsComponent;
 class Entity;
+class GraphicsFactory;
 
 /// @brief Texture values that can be used by the GUI
 class GuiTexture
@@ -48,11 +50,13 @@ inline Direction::Value GraphicsComponent::get_direction() const
 }
 
 // Graphics component with a single static image which never changes
-class SingleGraphicsComponent : public GraphicsComponent {
+class SingleGraphicsComponent : public GraphicsComponent
+{
 public:
     static SingleGraphicsComponent& into(GraphicsComponent& g);
 
     SingleGraphicsComponent() = default;
+    SingleGraphicsComponent(const GraphicsDef& def, GraphicsFactory& factory);
     SingleGraphicsComponent(TransformComponent& t, nc::Texture& texture);
 
     UNIQUE<GraphicsComponent> clone() const override;
@@ -81,6 +85,7 @@ class CharacterGraphicsComponent : public GraphicsComponent {
 public:
     static CharacterGraphicsComponent& into(GraphicsComponent& g);
 
+    CharacterGraphicsComponent(const GraphicsDef& def, GraphicsFactory& factory);
     CharacterGraphicsComponent() = default;
 
     UNIQUE<GraphicsComponent> clone() const override;

@@ -20,8 +20,9 @@ set(PACKAGE_SOURCES
 	include/editor.h
 	include/physics.h
 	include/camera.h
+	include/model/defs.h
 	include/component/transform.h
-	include/component/graphics.h
+	include/component/graphics_component.h
 	include/component/physics.h
 	include/component/state.h
 	include/component/script.h
@@ -42,8 +43,9 @@ set(PACKAGE_SOURCES
 	src/editor.cpp
 	src/physics.cpp
 	src/camera.cpp
+	src/model/defs.cpp
 	src/component/transform.cpp
-	src/component/graphics.cpp
+	src/component/graphics_component.cpp
 	src/component/physics.cpp
 	src/component/state.cpp
 	src/component/script.cpp

@@ -3,8 +3,36 @@
 #include <ncine/AnimatedSprite.h>
 #include <ncine/Texture.h>
 
+#include "component/graphics_component.h"
+
 namespace jmp
 {
+nc::Texture& GraphicsFactory::get_or_create(const String& path)
+{
+    if (auto texture = textures.find(path)) {
+        return **texture;
+    }
+
+    auto texture = MK<nc::Texture>(PATH(path));
+    // Pixel perfect
+    texture->setMagFiltering(nc::Texture::Filtering::NEAREST);
+
+    textures.insert(path, MV(texture));
+    return **textures.find(path);
+}
+
+UNIQUE<SubGraphics> GraphicsFactory::create(const SubGraphicsDef& def)
+{
+    switch (def.type) {
+    case GraphicsType::TILE:
+        return MK<StaticSubGraphics>(def, *this);
+    case GraphicsType::ANIM:
+        return MK<AnimSubGraphics>(def, *this);
+    default:
+        return {};
+    }
+}
+
 nc::AnimatedSprite GraphicsFactory::create_animation(const nctl::String& path,
     nc::RectAnimation::LoopMode loop)
 {
@@ -26,8 +54,26 @@ nc::AnimatedSprite GraphicsFactory::create_animation(const nctl::String& path,
     sprite.setPaused(false);
     sprite.setLayer(2);
 
-    textures.pushBack(MV(texture));
+    textures.insert(path, MV(texture));
     return sprite;
 }
 
+nc::AnimatedSprite GraphicsFactory::create_anim(const SubGraphicsDef& def)
+{
+    auto& texture = get_or_create(def.path);
+
+    nc::RectAnimation::LoopMode loop =
+        def.loop ? nc::RectAnimation::LoopMode::ENABLED : nc::RectAnimation::LoopMode::DISABLED;
+    auto anim = nc::RectAnimation(0.125f, loop, nc::RectAnimation::RewindMode::FROM_START);
+    for (auto& rect : def.rects) {
+        anim.addRect(rect);
+    }
+
+    auto sprite = nc::AnimatedSprite(&texture);
+    sprite.addAnimation(MV(anim));
+    sprite.setPaused(false);
+    sprite.setLayer(2);
+
+    return sprite;
+}
 } // namespace jmp

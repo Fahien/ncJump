@@ -6,11 +6,14 @@
 #include <string>
 
 #include <ncine/FileSystem.h>
+#include <ncine/Rect.h>
 #include <ncine/Vector2.h>
 #include <ncine/common_macros.h>
 #include <ncine/imgui.h>
 #include <nctl/Array.h>
+#include <nctl/HashMap.h>
 #include <nctl/StaticArray.h>
+#include <nctl/String.h>
 
 namespace nc = ncine;
 
@@ -25,9 +28,13 @@ using Vec2i = nc::Vector2<i32>;
 using Vec2u = nc::Vector2<u32>;
 using Vec2f = nc::Vector2<f32>;
 constexpr auto None = std::nullopt;
+using String = nctl::String;
+using Recti = nc::Recti;
+using Rectf = nc::Rectf;
 
 #define ARRAY nctl::StaticArray
 #define VECTOR nctl::Array
+#define HASHMAP nctl::HashMap
 #define OPTION std::optional
 #define UNIQUE nctl::UniquePtr
 #define MK nctl::makeUnique

@@ -30,27 +30,55 @@ create_player(Config& config, Tilemap& tilemap, Physics& physics, GraphicsFactor
 {
     auto entity = Entity(*tilemap.node);
 
-    entity.type = Entity::Type::PLAYER;
+    entity.type = EntityType::PLAYER;
 
     entity.transform.node->setPosition(tilemap.initial_position);
 
     entity.set_physics(PhysicsComponent::character(physics.world));
 
-    auto graphics = MK<CharacterGraphicsComponent>();
-    graphics->idle = graphics_factory.create_animation("img/hero/herochar_idle_anim_strip_4.png");
-    graphics->movement =
-        graphics_factory.create_animation("img/hero/herochar_run_anim_strip_6.png");
-    graphics->jump_up =
-        graphics_factory.create_animation("img/hero/herochar_jump_up_anim_strip_3.png");
-    graphics->jump_down =
-        graphics_factory.create_animation("img/hero/herochar_jump_down_anim_strip_3.png");
-    graphics->push =
-        graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
-    graphics->pull =
-        graphics_factory.create_animation("img/hero/herochar_pushing_foward_anim_strip_6.png");
-    graphics->dying = graphics_factory.create_animation(
-        "img/hero/herochar_death_anim_strip_8.png", nc::RectAnimation::LoopMode::DISABLED);
-    entity.set_graphics(MV(graphics));
+    auto gfx_def = GraphicsDef();
+    gfx_def.subs.setSize(State::MAX);
+
+    SubGraphicsDef* sub_def = nullptr;
+
+    sub_def = &gfx_def.subs[State::IDLE];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_idle_anim_strip_4.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+
+    sub_def = &gfx_def.subs[State::MOVE];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_run_anim_strip_6.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+
+    sub_def = &gfx_def.subs[State::JUMP_UP];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_jump_up_anim_strip_3.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+
+    sub_def = &gfx_def.subs[State::JUMP_DOWN];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_jump_down_anim_strip_3.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+
+    sub_def = &gfx_def.subs[State::PUSH];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_pushing_foward_anim_strip_6.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+
+    sub_def = &gfx_def.subs[State::PULL];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_idle_anim_strip_4.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+
+    sub_def = &gfx_def.subs[State::DYING];
+    sub_def->type = GraphicsType::ANIM;
+    sub_def->path = String("img/hero/herochar_pushing_foward_anim_strip_6.png");
+    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->loop = false;
+
+    auto gfx = GraphicsComponent(gfx_def, graphics_factory);
+    entity.set_graphics(MV(gfx));
 
     entity.state = MK<CharacterStateComponent>();
 

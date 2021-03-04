@@ -5,7 +5,7 @@
 #include <ncine/imgui.h>
 
 #include "command/command.h"
-#include "component/graphics.h"
+#include "component/graphics_component.h"
 #include "game.h"
 
 namespace jmp
@@ -286,11 +286,12 @@ ImVec2 get_tile_size(Config& config)
     return {size, size};
 }
 
-ARRAY<ImVec2, 2> get_tile_uvs(Tileset& tileset, u32 index)
+ARRAY<ImVec2, 2> get_tile_uvs(GraphicsFactory& factory, Tileset& tileset, u32 index)
 {
     auto& sprite = tileset.sprites[index];
-    f32 width = tileset.texture->width();
-    f32 height = tileset.texture->height();
+    auto& texture = factory.get_or_create(tileset.path);
+    f32 width = texture.width();
+    f32 height = texture.height();
 
     auto uvs = ARRAY<ImVec2, 2>(nctl::StaticArrayMode::EXTEND_SIZE);
     uvs[0] = {sprite->texRect().x / width, sprite->texRect().y / height};
@@ -312,14 +313,15 @@ void Editor::update_tileset(Tileset& tileset)
 
     // Draw selectable tiles using image buttons
     for (u32 i = 0; i < tileset.sprites.size(); ++i) {
-        auto uvs = get_tile_uvs(tileset, i);
+        auto uvs = get_tile_uvs(game.graphics_factory, tileset, i);
 
         ImGui::PushID(i);
         bool selected = selected_tile == i;
         if (selected) {
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
         }
-        if (ImGui::ImageButton(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1])) {
+        auto& texture = game.graphics_factory.get_or_create(tileset.path);
+        if (ImGui::ImageButton(texture.guiTexId(), tile_size, uvs[0], uvs[1])) {
             set_selected_tile(i);
         }
         if (selected) {
@@ -345,9 +347,10 @@ void Editor::update_selected_tile(Tileset& tileset)
     ImGui::Begin("Tile");
 
     auto tile_size = get_tile_size(game.config);
-    auto uvs = get_tile_uvs(tileset, *selected_tile);
+    auto uvs = get_tile_uvs(game.graphics_factory, tileset, *selected_tile);
 
-    ImGui::Image(tileset.texture->guiTexId(), tile_size, uvs[0], uvs[1]);
+    auto& texture = game.graphics_factory.get_or_create(tileset.path);
+    ImGui::Image(texture.guiTexId(), tile_size, uvs[0], uvs[1]);
 
     auto& tile = tileset.tiles[*selected_tile];
     ImGui::Text("id: %u", tile.id);
@@ -362,24 +365,24 @@ void Editor::update_entities(EntityFactory& factory)
     ImGui::Begin("Entities");
 
     for (u32 i = 0; i < factory.entities.size(); ++i) {
-        auto& entity = factory.entities[i];
-        if (auto& gfx = entity->get_graphics()) {
-            gfx->update_sprite(ncine::theApplication().interval());
-            auto guitex = gfx->get_guitex(game.config);
+        auto& gfx = factory.graphics[i];
+        gfx->update_sprite(ncine::theApplication().interval());
+        auto guitex = gfx->get_guitex(game.config);
 
-            bool selected = selected_entity == i;
-            if (selected) {
-                ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
-            }
+        bool selected = selected_entity == i;
+        if (selected) {
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
+        }
 
-            if (ImGui::ImageButton(guitex.id, guitex.size, guitex.uvs[0], guitex.uvs[1])) {
-                set_selected_entity(i);
-                set_mode(Mode::ENTITY);
-            }
+        ImGui::PushID(i);
+        if (ImGui::ImageButton(guitex.id, guitex.size, guitex.uvs[0], guitex.uvs[1])) {
+            set_selected_entity(i);
+            set_mode(Mode::ENTITY);
+        }
+        ImGui::PopID();
 
-            if (selected) {
-                ImGui::PopStyleColor();
-            }
+        if (selected) {
+            ImGui::PopStyleColor();
         }
     }
 
@@ -417,7 +420,8 @@ void Editor::place_selected_tile()
 
 void Editor::place_selected_entity()
 {
-    auto entity = game.entity_factory.entities[*selected_entity]->clone();
+    auto& entity_def = game.entity_factory.entities[*selected_entity];
+    auto entity = game.entity_factory.create(entity_def, game.config, game.graphics_factory);
     auto pos = game.config.screen_to_scene(game.input.mouse.pos) + game.camera.get_position();
     entity->set_position(pos, game.config);
     game.tilemap.add_entity(MV(entity));

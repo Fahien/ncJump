@@ -15,15 +15,13 @@ Tileset::Tileset(nc::Texture& texture, u32 tile_size)
     set_texture(texture);
 }
 
-void Tileset::set_texture(nc::Texture& t)
+void Tileset::set_texture(nc::Texture& texture)
 {
-    texture = &t;
+    ASSERT_MSG(texture.width() % tile_size == 0, "Wrong texture and tile size");
+    ASSERT_MSG(texture.height() % tile_size == 0, "Wrong texture and tile size");
 
-    ASSERT_MSG(texture->width() % tile_size == 0, "Wrong texture and tile size");
-    ASSERT_MSG(texture->height() % tile_size == 0, "Wrong texture and tile size");
-
-    width = texture->width() / tile_size;
-    height = texture->height() / tile_size;
+    width = texture.width() / tile_size;
+    height = texture.height() / tile_size;
 
     if (tiles.isEmpty()) {
         for (u32 i = 0; i < width * height; ++i) {
@@ -33,11 +31,11 @@ void Tileset::set_texture(nc::Texture& t)
 
     sprites.clear();
     for (u32 i = 0; i < width * height; ++i) {
-        sprites.emplaceBack(create_sprite(i));
+        sprites.emplaceBack(create_sprite(i, texture));
     }
 }
 
-UNIQUE<nc::Sprite> Tileset::create_sprite(u32 i) const
+UNIQUE<nc::Sprite> Tileset::create_sprite(u32 i, nc::Texture& texture) const
 {
     u32 row = i / width;
     u32 col = i % width;
@@ -51,7 +49,7 @@ UNIQUE<nc::Sprite> Tileset::create_sprite(u32 i) const
     tex_rect.w = tile_size;
     tex_rect.h = tile_size;
 
-    auto sprite = MK<nc::Sprite>(texture);
+    auto sprite = MK<nc::Sprite>(&texture);
     sprite->setTexRect(MV(tex_rect));
 
     return sprite;
@@ -73,10 +71,12 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
     tex_rect.w = i32(tile_size);
     tex_rect.h = i32(tile_size);
 
-    auto graphics = MK<SingleGraphicsComponent>(entity->transform, *texture);
-    graphics->sprite.setTexture(texture);
-    graphics->sprite.setTexRect(MV(tex_rect));
-    entity->set_graphics(MV(graphics));
+    auto gfx_def = GraphicsDef();
+    gfx_def.subs[0].path = path;
+    gfx_def.subs[0].rects[0] = tex_rect;
+    gfx_def.subs[0].type = GraphicsType::TILE;
+
+    entity->set_graphics(GraphicsComponent(gfx_def, game.graphics_factory));
 
     if (!tile.passable) {
         auto physics =

@@ -5,10 +5,11 @@
 #include <ncine/Texture.h>
 #include <nctl/String.h>
 
-#include "component/graphics.h"
+#include "component/graphics_component.h"
 #include "component/physics.h"
 #include "component/state.h"
 #include "component/transform.h"
+#include "model/defs.h"
 
 namespace jmp
 {
@@ -20,8 +21,6 @@ class Config;
 class Entity
 {
 public:
-    enum class Type { NONE = 0, TILE, PLAYER, ENEMY };
-
     static inline bool is_player(const Entity& e);
     static inline bool is_enemy(const Entity& e);
     static inline Entity& from(b2Fixture& fixture);
@@ -55,10 +54,10 @@ public:
     /// @return Position of this entity, convenient method
     inline Vec2f get_position() const;
 
-    inline UNIQUE<GraphicsComponent>& get_graphics();
+    inline OPTION<GraphicsComponent>& get_graphics();
     OPTION<PhysicsComponent>& get_physics();
 
-    void set_graphics(UNIQUE<GraphicsComponent> graphics);
+    void set_graphics(OPTION<GraphicsComponent> graphics);
     void set_physics(OPTION<PhysicsComponent> physics);
 
     inline const VECTOR<UNIQUE<Command>>& get_commands() const;
@@ -67,7 +66,7 @@ public:
 
     void update(f32 dt);
 
-    Type type = Type::NONE;
+    EntityType type = EntityType::NONE;
 
     TransformComponent transform;
 
@@ -76,7 +75,7 @@ public:
 private:
     bool enabled = true;
 
-    UNIQUE<GraphicsComponent> graphics;
+    OPTION<GraphicsComponent> graphics;
     OPTION<PhysicsComponent> physics;
 
     VECTOR<UNIQUE<Command>> commands;
@@ -94,12 +93,12 @@ Entity& Entity::from(b2Fixture& fixture)
 
 bool Entity::is_player(const Entity& e)
 {
-    return e.type == Type::PLAYER;
+    return e.type == EntityType::PLAYER;
 }
 
 bool Entity::is_enemy(const Entity& e)
 {
-    return e.type == Type::ENEMY;
+    return e.type == EntityType::ENEMY;
 }
 
 inline bool Entity::is_enabled() const
@@ -112,7 +111,7 @@ inline Vec2f Entity::get_position() const
     return transform.node->position();
 }
 
-inline UNIQUE<GraphicsComponent>& Entity::get_graphics()
+inline OPTION<GraphicsComponent>& Entity::get_graphics()
 {
     return graphics;
 }

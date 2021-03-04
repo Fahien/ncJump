@@ -29,9 +29,7 @@ UNIQUE<Entity> Entity::clone()
     ret->type = type;
     ret->transform = transform.clone();
 
-    if (graphics) {
-        ret->set_graphics(graphics->clone());
-    }
+    ret->graphics = graphics;
 
     if (state) {
         ret->state = state->clone();
@@ -78,9 +76,9 @@ OPTION<PhysicsComponent>& Entity::get_physics()
     return physics;
 }
 
-void Entity::set_graphics(UNIQUE<GraphicsComponent> gfx)
+void Entity::set_graphics(OPTION<GraphicsComponent> gfx)
 {
-    graphics = MV(gfx);
+    graphics = gfx;
     if (graphics) {
         graphics->set(*this);
     }
@@ -109,7 +107,7 @@ void Entity::update(const f32 dt)
         script->update(*this);
     }
 
-    if (graphics) {
+    if (graphics && physics) {
         graphics->update(*physics, nullptr);
     }
 
