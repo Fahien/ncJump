@@ -363,28 +363,23 @@ void Editor::update_entities(EntityFactory& factory)
 
     for (u32 i = 0; i < factory.entities.size(); ++i) {
         auto& entity = factory.entities[i];
-        auto& graphics = CharacterGraphicsComponent::into(*entity->get_graphics());
-        graphics.idle.update(ncine::theApplication().interval());
-        auto& frame = graphics.idle.animations()[graphics.idle.animationIndex()];
-        auto& rect = frame.rect();
-        auto size = ImVec2(rect.w * game.config.scale.gui, rect.h * game.config.scale.gui);
-        auto texture = const_cast<nc::Texture*>(graphics.idle.texture());
-        ImVec2 uv[2] = {ImVec2(rect.x / float(texture->width()), rect.y / float(texture->height())),
-            ImVec2((rect.x + rect.w) / float(texture->width()),
-                (rect.y + rect.h) / float(texture->height()))};
+        if (auto& gfx = entity->get_graphics()) {
+            gfx->update_sprite(ncine::theApplication().interval());
+            auto guitex = gfx->get_guitex(game.config);
 
-        bool selected = selected_entity == i;
-        if (selected) {
-            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
-        }
+            bool selected = selected_entity == i;
+            if (selected) {
+                ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
+            }
 
-        if (ImGui::ImageButton(texture->guiTexId(), size, uv[0], uv[1])) {
-            set_selected_entity(i);
-            set_mode(Mode::ENTITY);
-        }
+            if (ImGui::ImageButton(guitex.id, guitex.size, guitex.uvs[0], guitex.uvs[1])) {
+                set_selected_entity(i);
+                set_mode(Mode::ENTITY);
+            }
 
-        if (selected) {
-            ImGui::PopStyleColor();
+            if (selected) {
+                ImGui::PopStyleColor();
+            }
         }
     }
 

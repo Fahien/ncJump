@@ -3,6 +3,7 @@
 #include <ncine/FileSystem.h>
 
 #include "component/transform.h"
+#include "config.h"
 #include "entity.h"
 #include "input.h"
 
@@ -48,6 +49,24 @@ void SingleGraphicsComponent::set(Entity& entity)
     sprite.setParent(entity.transform.node.get());
 }
 
+GuiTexture SingleGraphicsComponent::get_guitex(const Config& config) const
+{
+    GuiTexture tex;
+
+    auto texture = const_cast<nc::Texture*>(sprite.texture());
+    tex.id = texture->guiTexId();
+
+    auto rect = sprite.texRect();
+    tex.size = ImVec2(rect.w * config.scale.gui, rect.h * config.scale.gui);
+
+    f32 tw = texture->width();
+    f32 th = texture->height();
+    tex.uvs[0] = ImVec2(rect.x / tw, rect.y / th);
+    tex.uvs[1] = ImVec2((rect.x + rect.w) / tw, (rect.y + rect.h) / th);
+
+    return tex;
+}
+
 CharacterGraphicsComponent& CharacterGraphicsComponent::into(GraphicsComponent& g)
 {
     return reinterpret_cast<CharacterGraphicsComponent&>(g);
@@ -72,6 +91,25 @@ UNIQUE<GraphicsComponent> CharacterGraphicsComponent::clone() const
 void CharacterGraphicsComponent::set(Entity& entity)
 {
     idle.setParent(entity.transform.node.get());
+}
+
+GuiTexture CharacterGraphicsComponent::get_guitex(const Config& config) const
+{
+    GuiTexture tex;
+
+    auto texture = const_cast<nc::Texture*>(idle.texture());
+    tex.id = texture->guiTexId();
+
+    auto& frame = idle.animations()[idle.animationIndex()];
+    auto& rect = frame.rect();
+    tex.size = ImVec2(rect.w * config.scale.gui, rect.h * config.scale.gui);
+
+    f32 tw = texture->width();
+    f32 th = texture->height();
+    tex.uvs[0] = ImVec2(rect.x / tw, rect.y / th);
+    tex.uvs[1] = ImVec2((rect.x + rect.w) / tw, (rect.y + rect.h) / th);
+
+    return tex;
 }
 
 void CharacterGraphicsComponent::update(const PhysicsComponent& physics, const Input* input)
