@@ -145,7 +145,7 @@ jobs:
         git push --force || git push --set-upstream origin $DEPLOY_BRANCH
 
     - name: 'Deploy'
-      if: matrix.BuildType == 'BinDist'
+      if: matrix.BuildType == 'BinDist' && github.ref == 'refs/heads/main'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
