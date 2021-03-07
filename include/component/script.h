@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "model/defs.h"
 
 namespace jmp
 {
@@ -9,6 +9,8 @@ class Entity;
 class Script
 {
 public:
+    static UNIQUE<Script> from(const ScriptDef& def);
+
     virtual ~Script() = default;
 
     virtual void update(Entity& entity) = 0;

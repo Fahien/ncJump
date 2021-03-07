@@ -21,6 +21,8 @@ enum class PhysicsType {
     CHAR,
 };
 
+enum class ScriptType { WANDERING };
+
 /// @return A default vector of rects for a `nc::RectAnimation`
 inline VECTOR<Recti> default_rects()
 {
@@ -65,8 +67,19 @@ struct PhysicsDef {
 
 /// @brief Definition of a state component
 struct StateDef {
-
 };
+
+/// @brief Definition of a script component
+struct ScriptDef {
+    inline ScriptDef(ScriptType type);
+
+    ScriptType type = ScriptType::WANDERING;
+};
+
+inline ScriptDef::ScriptDef(ScriptType type)
+    : type {type}
+{
+}
 
 /// @brief An Entity definitions describes everything needed to create a concrete entity.
 /// This is also useful for serialization as it would be easier than trying to serialize
@@ -82,6 +95,7 @@ struct EntityDef {
     GraphicsDef graphics = {};
     OPTION<PhysicsDef> physics = {};
     OPTION<StateDef> state = {};
+    VECTOR<ScriptDef> scripts = {};
 };
 
 } // namespace jmp

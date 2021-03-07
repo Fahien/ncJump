@@ -4,26 +4,23 @@
 
 #include "component/graphics_component.h"
 #include "component/script.h"
-#include "model/defs.h"
 #include "entity.h"
 #include "game.h"
+#include "model/defs.h"
 
 namespace jmp
 {
 UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
 {
     auto mushroom = MK<Entity>();
-
-    mushroom->type = EntityType::ENEMY;
-
-    mushroom->set_state(StateComponent());
-
     mushroom->add_script(MK<WanderingScript>());
-
     return mushroom;
 }
 
-UNIQUE<Entity> EntityFactory::create(const EntityDef& def, const Config& config, GraphicsFactory& graphics_factory, PhysicsSystem& physics_system)
+UNIQUE<Entity> EntityFactory::create(const EntityDef& def,
+    const Config& config,
+    GraphicsFactory& graphics_factory,
+    PhysicsSystem& physics_system)
 {
     auto ret = MK<Entity>();
     ret->type = def.type;
@@ -37,6 +34,10 @@ UNIQUE<Entity> EntityFactory::create(const EntityDef& def, const Config& config,
 
     if (def.state) {
         ret->set_state(StateComponent());
+    }
+
+    for (auto& script : def.scripts) {
+        ret->add_script(Script::from(script));
     }
 
     ret->set_position(def.pos);
@@ -66,7 +67,7 @@ EntityDef create_mushroom_def(const Config& config, GraphicsFactory& gf)
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
-    
+
     sub_def = &def.graphics.subs[State::DYING];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_death_anim_strip_6.png");
@@ -81,6 +82,8 @@ EntityDef create_mushroom_def(const Config& config, GraphicsFactory& gf)
     def.physics = phy_def;
 
     def.state = StateDef();
+
+    def.scripts.pushBack(ScriptDef(ScriptType::WANDERING));
 
     return def;
 }

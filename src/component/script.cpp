@@ -37,6 +37,16 @@ inline DirectionFlags to_flags(Direction::Value direction)
     }
 }
 
+UNIQUE<Script> Script::from(const ScriptDef& def)
+{
+    switch (def.type) {
+    case ScriptType::WANDERING:
+        return MK<WanderingScript>();
+    default:
+        return {};
+    }
+}
+
 void WanderingScript::update(Entity& entity)
 {
     auto& physics = entity.get_physics();
