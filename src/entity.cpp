@@ -36,7 +36,7 @@ UNIQUE<Entity> Entity::clone()
     }
 
     if (physics) {
-        auto new_physics = PhysicsComponent::character(*physics->body->GetWorld());
+        auto new_physics = physics;
         ret->set_physics(OPTION<PhysicsComponent>(MV(new_physics)));
     }
 
@@ -62,12 +62,11 @@ void Entity::set_enabled(const bool e)
     }
 }
 
-void Entity::set_position(const Vec2f& pos, const Config& config)
+void Entity::set_position(const Vec2f& pos)
 {
     transform.node->setPosition(pos);
     if (physics) {
-        auto bpos = b2Vec2(pos.x / config.size.tile, pos.y / config.size.tile);
-        physics->body->SetTransform(bpos, 0);
+        physics->set_position(pos);
     }
 }
 
@@ -87,11 +86,15 @@ void Entity::set_graphics(OPTION<GraphicsComponent> gfx)
 void Entity::set_physics(OPTION<PhysicsComponent> ph)
 {
     physics = MV(ph);
+    if (physics) {
+        physics->set_position(transform.node->position());
+
 #ifdef BOX2D_PRE241
-    physics->body->SetUserData(this);
+        physics->body->SetUserData(this);
 #else
-    physics->body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
+        physics->body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
 #endif
+    }
 }
 
 void Entity::update(const f32 dt)

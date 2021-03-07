@@ -19,4 +19,9 @@ VECTOR<Recti> rects_from_stripe(const nc::Texture& texture)
     return rects;
 }
 
+EntityDef::EntityDef(EntityType type)
+: type {type}
+{
+}
+
 } // namespace jmp

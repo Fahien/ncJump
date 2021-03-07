@@ -154,6 +154,7 @@ void DestructionListener::update(Tilemap& tilemap)
 
         // Check if it is an enemy or the player
         if (Entity::is_enemy(*entity) || Entity::is_player(*entity)) {
+            ASSERT_MSG(entity->state, "Entity does not have a state component");
             auto& char_state = CharacterStateComponent::into(*entity->state);
             char_state.set_state(State::DYING, *entity);
             continue;

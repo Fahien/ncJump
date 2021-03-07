@@ -113,7 +113,7 @@ UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
     const bool dynamic)
 {
     auto entity = tileset.create_entity(tile, *game, dynamic);
-    entity->set_position(pos, game->config);
+    entity->set_position(pos);
     return entity;
 }
 

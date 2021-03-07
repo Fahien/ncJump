@@ -503,7 +503,6 @@ void DyingState::exit(Entity& entity)
     auto& gfx = AnimSubGraphics::into(*entity.get_graphics()->get_current_mut());
     gfx.anim.setFrame(0);
     gfx.anim.setPaused(false);
-    entity.get_graphics()->set_current(None);
 }
 
 const char* to_str(State& state)

@@ -1,11 +1,13 @@
 #include "component/physics.h"
 
+#include "config.h"
+#include "physics.h"
+
 namespace jmp
 {
-PhysicsComponent PhysicsComponent::tile(b2World& world, const Vec2f& pos, const bool dynamic)
+b2Body* tile_body(b2World& world, const bool dynamic)
 {
     auto def = b2BodyDef();
-    def.position.Set(pos.x, pos.y);
     def.type = dynamic ? b2_dynamicBody : b2_staticBody;
     def.fixedRotation = true;
 
@@ -20,16 +22,13 @@ PhysicsComponent PhysicsComponent::tile(b2World& world, const Vec2f& pos, const 
     fixture_def.friction = 2.0f;
     body->CreateFixture(&fixture_def);
 
-    auto ret = PhysicsComponent();
-    ret.body = body;
-
-    return ret;
+    return body;
 }
 
-PhysicsComponent PhysicsComponent::character(b2World& world)
+b2Body* character_body(b2World& world, const bool dynamic)
 {
     auto hero_def = b2BodyDef();
-    hero_def.type = b2_dynamicBody;
+    hero_def.type = dynamic ? b2_dynamicBody : b2_staticBody;
     hero_def.angularDamping = 1024.0f;
 
     auto body = world.CreateBody(&hero_def);
@@ -43,15 +42,57 @@ PhysicsComponent PhysicsComponent::character(b2World& world)
     hero_fixture_def.friction = 30.0f;
 
     body->CreateFixture(&hero_fixture_def);
+    return body;
+}
 
-    auto ret = PhysicsComponent();
-    ret.body = body;
+b2Body* create_body(const PhysicsDef& def, b2World& world)
+{
+    switch (def.type) {
+    case PhysicsType::TILE:
+        return tile_body(world, def.dynamic);
+    case PhysicsType::CHAR:
+        return character_body(world, def.dynamic);
+    default:
+        ASSERT_MSG(false, "Unknown body type");
+        return nullptr;
+    }
+}
 
-    return ret;
+PhysicsComponent::PhysicsComponent(const PhysicsDef& def, PhysicsSystem& system)
+    : def {def}
+    , body {create_body(def, system.world)}
+{
+}
+
+PhysicsComponent::PhysicsComponent(const PhysicsComponent& o)
+    : def {o.def}
+    , body {create_body(def, *o.body->GetWorld())}
+    , air_factor {o.air_factor}
+    , velocity_factor {o.velocity_factor}
+    , jump_y_factor {o.jump_y_factor}
+    , jump_x_factor {o.jump_x_factor}
+    , max_x_speed {o.max_x_speed}
+    , destructible {o.destructible}
+{
+}
+
+PhysicsComponent& PhysicsComponent::operator=(const PhysicsComponent& o)
+{
+    def = o.def;
+    body = create_body(def, *o.body->GetWorld());
+    air_factor = o.air_factor;
+    velocity_factor = o.velocity_factor;
+    jump_y_factor = o.jump_y_factor;
+    jump_x_factor = o.jump_x_factor;
+    max_x_speed = o.max_x_speed;
+    destructible = o.destructible;
+
+    return *this;
 }
 
 PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
-    : body {o.body}
+    : def {o.def}
+    , body {o.body}
     , obstacle {o.obstacle}
     , air_factor {o.air_factor}
     , velocity_factor {o.velocity_factor}
@@ -65,6 +106,7 @@ PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
 
 PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
 {
+    std::swap(def, o.def);
     std::swap(body, o.body);
     std::swap(obstacle, o.obstacle);
     std::swap(air_factor, o.air_factor);
@@ -82,6 +124,18 @@ PhysicsComponent::~PhysicsComponent()
     if (body) {
         body->GetWorld()->DestroyBody(body);
     }
+}
+
+Vec2f PhysicsComponent::get_position() const
+{
+    auto bpos = body->GetPosition();
+    return Vec2f(bpos.x / def.scale, bpos.y / def.scale);
+}
+
+void PhysicsComponent::set_position(const Vec2f& pos)
+{
+    auto bpos = b2Vec2(pos.x * def.scale, pos.y * def.scale);
+    body->SetTransform(bpos, 0);
 }
 
 void PhysicsComponent::set_enabled(const bool e)

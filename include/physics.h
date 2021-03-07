@@ -10,10 +10,10 @@ class Game;
 class Tilemap;
 
 /// @brief Physics system
-class Physics
+class PhysicsSystem
 {
 public:
-    Physics(Game& game);
+    PhysicsSystem(Game& game);
 
     /// @param tilemap Tiles can be destroyed on collisions with a high impact
     void update(const f32 delta, Tilemap& tilemap);

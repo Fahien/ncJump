@@ -9,11 +9,16 @@ class Texture;
 
 namespace jmp
 {
-enum class EntityType { NONE = 0, TILE, PLAYER, ENEMY };
+enum class EntityType { TILE, PLAYER, ENEMY };
 
 enum class GraphicsType {
     TILE,
     ANIM,
+};
+
+enum class PhysicsType {
+    TILE,
+    CHAR,
 };
 
 /// @return A default vector of rects for a `nc::RectAnimation`
@@ -49,14 +54,28 @@ struct GraphicsDef {
     VECTOR<SubGraphicsDef> subs = default_subgraphics();
 };
 
+/// @brief Definition of a physics component
+struct PhysicsDef {
+    PhysicsType type = PhysicsType::TILE;
+
+    /// The physics body may use a different scale for its calculations
+    float scale = 1.0f;
+    bool dynamic = false;
+};
+
 /// @brief An Entity definitions describes everything needed to create a concrete entity.
 /// This is also useful for serialization as it would be easier than trying to serialize
 /// an entity with all its components.
 struct EntityDef {
+    EntityDef(EntityType type);
+
+    EntityType type = EntityType::TILE;
+
     /// Position of the entity
     Vec2f pos = {0.0f, 0.0f};
 
     GraphicsDef graphics = {};
+    OPTION<PhysicsDef> physics = {};
 };
 
 } // namespace jmp

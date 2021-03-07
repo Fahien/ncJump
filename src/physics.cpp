@@ -6,7 +6,7 @@
 
 namespace jmp
 {
-Physics::Physics(Game& game)
+PhysicsSystem::PhysicsSystem(Game& game)
     : gravity {0.0, -30.0f}
     , world {gravity}
     , destruction {game.config, game.scene, game.resource}
@@ -14,7 +14,7 @@ Physics::Physics(Game& game)
     world.SetContactListener(&destruction);
 }
 
-void Physics::update(const f32 delta, Tilemap& tilemap)
+void PhysicsSystem::update(const f32 delta, Tilemap& tilemap)
 {
     world.Step(delta, velocity_iterations, position_iterations);
 

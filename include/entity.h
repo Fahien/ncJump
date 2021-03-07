@@ -49,7 +49,7 @@ public:
 
     /// @brief Propagates this position to required components
     /// @param position Coordinates in scene space
-    void set_position(const Vec2f& position, const Config& config);
+    void set_position(const Vec2f& position);
 
     /// @return Position of this entity, convenient method
     inline Vec2f get_position() const;
@@ -66,7 +66,7 @@ public:
 
     void update(f32 dt);
 
-    EntityType type = EntityType::NONE;
+    EntityType type = EntityType::TILE;
 
     TransformComponent transform;
 

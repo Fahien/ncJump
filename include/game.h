@@ -35,7 +35,7 @@ public:
     /// Generic shared assets
     nc::Texture resource;
 
-    Physics physics;
+    PhysicsSystem physics;
 
     GraphicsFactory graphics_factory;
     EntityFactory entity_factory;

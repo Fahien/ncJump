@@ -1,27 +1,36 @@
 #pragma once
 
-#include <vector>
 #include <box2d/box2d.h>
+#include <vector>
 
-#include "types.h"
+#include "model/defs.h"
 
 namespace jmp
 {
-class PhysicsComponent {
-public:
-    static PhysicsComponent tile(b2World& world, const Vec2f& pos, bool dynamic);
-    static PhysicsComponent character(b2World& world);
+class PhysicsSystem;
 
+class PhysicsComponent
+{
+public:
     PhysicsComponent() = default;
+    PhysicsComponent(const PhysicsDef& def, PhysicsSystem& physics);
+
+    PhysicsComponent(const PhysicsComponent& o);
+    PhysicsComponent& operator=(const PhysicsComponent& o);
 
     PhysicsComponent(PhysicsComponent&& o);
     PhysicsComponent& operator=(PhysicsComponent&& o) noexcept;
 
     ~PhysicsComponent();
 
+    Vec2f get_position() const;
+    void set_position(const Vec2f& pos);
+
     void set_enabled(bool e);
 
     void update();
+
+    PhysicsDef def = {};
 
     b2Body* body = nullptr;
 

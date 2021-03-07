@@ -25,8 +25,10 @@ Tilemap create_tilemap(Game& game)
     return ret;
 }
 
-Entity
-create_player(Config& config, Tilemap& tilemap, Physics& physics, GraphicsFactory& graphics_factory)
+Entity create_player(Config& config,
+    Tilemap& tilemap,
+    PhysicsSystem& physics,
+    GraphicsFactory& graphics_factory)
 {
     auto entity = Entity(*tilemap.node);
 
@@ -34,7 +36,11 @@ create_player(Config& config, Tilemap& tilemap, Physics& physics, GraphicsFactor
 
     entity.transform.node->setPosition(tilemap.initial_position);
 
-    entity.set_physics(PhysicsComponent::character(physics.world));
+    auto phy_def = PhysicsDef();
+    phy_def.type = PhysicsType::CHAR;
+    phy_def.scale = 1.0f / config.size.tile;
+    phy_def.dynamic = true;
+    entity.set_physics(PhysicsComponent(phy_def, physics));
 
     auto gfx_def = GraphicsDef();
     gfx_def.subs.setSize(State::MAX);
@@ -73,7 +79,7 @@ create_player(Config& config, Tilemap& tilemap, Physics& physics, GraphicsFactor
 
     sub_def = &gfx_def.subs[State::DYING];
     sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_pushing_foward_anim_strip_6.png");
+    sub_def->path = String("img/hero/herochar_death_anim_strip_8.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
     sub_def->loop = false;
 
@@ -82,7 +88,7 @@ create_player(Config& config, Tilemap& tilemap, Physics& physics, GraphicsFactor
 
     entity.state = MK<CharacterStateComponent>();
 
-    entity.set_position(tilemap.initial_position, config);
+    entity.set_position(tilemap.initial_position);
 
     return entity;
 }
@@ -147,9 +153,7 @@ void Game::update(const f32 dt)
 
         // @todo Move this somewhere else? Possibly PhysicsSystem?
         // Update entity from body
-        auto& pos = entity.get_physics()->body->GetPosition();
-        entity.transform.node->x = config.size.tile * pos.x;
-        entity.transform.node->y = config.size.tile * pos.y;
+        entity.transform.node->setPosition(entity.get_physics()->get_position());
     }
 
     // Update tilemap entities from their bodies
@@ -161,9 +165,7 @@ void Game::update(const f32 dt)
         entity->update(dt);
 
         if (auto& physics = entity->get_physics()) {
-            auto& pos = physics->body->GetPosition();
-            entity->transform.node->x = config.size.tile * pos.x;
-            entity->transform.node->y = config.size.tile * pos.y;
+            entity->transform.node->setPosition(physics->get_position());
         }
     }
 

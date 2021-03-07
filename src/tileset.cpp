@@ -79,8 +79,11 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
     entity->set_graphics(GraphicsComponent(gfx_def, game.graphics_factory));
 
     if (!tile.passable) {
-        auto physics =
-            PhysicsComponent::tile(game.physics.world, entity->transform.node->position(), dynamic);
+        auto phy_def = PhysicsDef();
+        phy_def.type = PhysicsType::TILE;
+        phy_def.scale = 1.0f / game.config.size.tile;
+        phy_def.dynamic = dynamic;
+        auto physics = PhysicsComponent(phy_def, game.physics);
         physics.destructible = tile.destructible;
         entity->set_physics(MV(physics));
     }

@@ -10,6 +10,7 @@ class Game;
 class Entity;
 class Config;
 class GraphicsFactory;
+class PhysicsSystem;
 
 class EntityFactory
 {
@@ -18,7 +19,8 @@ public:
 
     /// @return A unique Entity. Heap allocated because a pointer to it is stored in the physics
     /// component.
-    UNIQUE<Entity> create(const EntityDef& def, const Config& config, GraphicsFactory& gf);
+    UNIQUE<Entity>
+    create(const EntityDef& def, const Config& config, GraphicsFactory& gf, PhysicsSystem& ph);
 
     void add(EntityDef def, GraphicsFactory& gf);
 
