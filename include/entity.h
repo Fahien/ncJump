@@ -56,9 +56,11 @@ public:
 
     inline OPTION<GraphicsComponent>& get_graphics();
     OPTION<PhysicsComponent>& get_physics();
+    inline OPTION<StateComponent>& get_state();
 
     void set_graphics(OPTION<GraphicsComponent> graphics);
     void set_physics(OPTION<PhysicsComponent> physics);
+    void set_state(OPTION<StateComponent> state);
 
     inline const VECTOR<UNIQUE<Command>>& get_commands() const;
     inline void add_command(UNIQUE<Command> command);
@@ -70,13 +72,12 @@ public:
 
     TransformComponent transform;
 
-    UNIQUE<StateComponent> state;
-
 private:
     bool enabled = true;
 
     OPTION<GraphicsComponent> graphics;
     OPTION<PhysicsComponent> physics;
+    OPTION<StateComponent> state;
 
     VECTOR<UNIQUE<Command>> commands;
     VECTOR<UNIQUE<Script>> scripts;
@@ -114,6 +115,11 @@ inline Vec2f Entity::get_position() const
 inline OPTION<GraphicsComponent>& Entity::get_graphics()
 {
     return graphics;
+}
+
+inline OPTION<StateComponent>& Entity::get_state()
+{
+    return state;
 }
 
 inline const VECTOR<UNIQUE<Command>>& Entity::get_commands() const

@@ -44,7 +44,7 @@ void DestructionListener::check_kill(const b2Contact& contact, b2Fixture& a, b2F
 
     if (normal.y > 0.2f) {
         // Kill enemy
-        CharacterStateComponent::get(*player).set_state(State::JUMP_UP, *player);
+        player->get_state()->set_state(State::JUMP_UP, *player);
         to_destroy.pushBack(enemy);
     } else {
         // Kill player
@@ -99,7 +99,7 @@ void DestructionListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
         }
 
         // If the player is jumping, impulse is scaled up!
-        if (CharacterStateComponent::get(player).get_state().value == State::JUMP_UP) {
+        if (player.get_state()->get_state().value == State::JUMP_UP) {
             impulse_factor = 3.0f;
         }
     }
@@ -154,9 +154,7 @@ void DestructionListener::update(Tilemap& tilemap)
 
         // Check if it is an enemy or the player
         if (Entity::is_enemy(*entity) || Entity::is_player(*entity)) {
-            ASSERT_MSG(entity->state, "Entity does not have a state component");
-            auto& char_state = CharacterStateComponent::into(*entity->state);
-            char_state.set_state(State::DYING, *entity);
+            entity->get_state()->set_state(State::DYING, *entity);
             continue;
         }
 

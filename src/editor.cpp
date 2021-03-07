@@ -196,7 +196,7 @@ void Editor::update_camera(Camera& camera, Config& config)
 
 void Editor::update_state(StateComponent& state)
 {
-    ImGui::Text("state: %s", to_str(CharacterStateComponent::into(state).get_state()));
+    ImGui::Text("state: %s", to_str(state.get_state()));
 }
 
 void Editor::update_physics(PhysicsComponent& physics)
@@ -250,8 +250,8 @@ void Editor::update_player(Entity& entity)
         entity.set_position(pos);
     }
 
-    if (entity.state) {
-        update_state(*entity.state);
+    if (auto& state = entity.get_state()) {
+        update_state(*state);
     }
 
     if (auto& physics = entity.get_physics()) {

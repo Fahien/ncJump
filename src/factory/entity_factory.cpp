@@ -16,7 +16,7 @@ UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
 
     mushroom->type = EntityType::ENEMY;
 
-    mushroom->state = MK<CharacterStateComponent>();
+    mushroom->set_state(StateComponent());
 
     mushroom->add_script(MK<WanderingScript>());
 
@@ -33,6 +33,10 @@ UNIQUE<Entity> EntityFactory::create(const EntityDef& def, const Config& config,
 
     if (def.physics) {
         ret->set_physics(PhysicsComponent(*def.physics, physics_system));
+    }
+
+    if (def.state) {
+        ret->set_state(StateComponent());
     }
 
     ret->set_position(def.pos);
@@ -75,6 +79,8 @@ EntityDef create_mushroom_def(const Config& config, GraphicsFactory& gf)
     phy_def.dynamic = true;
 
     def.physics = phy_def;
+
+    def.state = StateDef();
 
     return def;
 }

@@ -6,8 +6,8 @@ namespace jmp
 {
 void MoveCommand::execute(Entity& entity)
 {
-    if (entity.state) {
-        entity.state->handle(entity, *this);
+    if (auto& state = entity.get_state()) {
+        state->handle(entity, *this);
     }
 }
 

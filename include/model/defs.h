@@ -63,6 +63,11 @@ struct PhysicsDef {
     bool dynamic = false;
 };
 
+/// @brief Definition of a state component
+struct StateDef {
+
+};
+
 /// @brief An Entity definitions describes everything needed to create a concrete entity.
 /// This is also useful for serialization as it would be easier than trying to serialize
 /// an entity with all its components.
@@ -76,6 +81,7 @@ struct EntityDef {
 
     GraphicsDef graphics = {};
     OPTION<PhysicsDef> physics = {};
+    OPTION<StateDef> state = {};
 };
 
 } // namespace jmp

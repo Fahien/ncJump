@@ -30,10 +30,7 @@ UNIQUE<Entity> Entity::clone()
     ret->transform = transform.clone();
 
     ret->graphics = graphics;
-
-    if (state) {
-        ret->state = state->clone();
-    }
+    ret->state = state;
 
     if (physics) {
         auto new_physics = physics;
@@ -95,6 +92,11 @@ void Entity::set_physics(OPTION<PhysicsComponent> ph)
         physics->body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
 #endif
     }
+}
+
+void Entity::set_state(OPTION<StateComponent> st)
+{
+    state = st;
 }
 
 void Entity::update(const f32 dt)

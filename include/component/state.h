@@ -9,26 +9,6 @@ namespace jmp
 class Entity;
 class MoveCommand;
 
-class StateComponent {
-public:
-    virtual ~StateComponent() = default;
-
-    virtual void reset() = 0;
-    virtual UNIQUE<StateComponent> clone() = 0;
-
-    virtual void handle(Entity& entity, const MoveCommand& move) = 0;
-    virtual void update(Entity& entity) = 0;
-};
-
-class SingleStateComponent : public StateComponent {
-public:
-    void reset() override;
-    UNIQUE<StateComponent> clone() override;
-
-    void handle(Entity& entity, const MoveCommand& move) override;
-    void update(Entity& entity) override;
-};
-
 class State
 {
 public:
@@ -47,18 +27,21 @@ public:
 
 const char* to_str(State& state);
 
-class CharacterStateComponent : public StateComponent {
+class StateComponent
+{
 public:
-    static CharacterStateComponent& into(StateComponent& s);
-    static CharacterStateComponent& get(Entity& e);
+    StateComponent();
 
-    CharacterStateComponent();
+    StateComponent(const StateComponent&);
+    StateComponent& operator=(const StateComponent&);
 
-    void reset() override;
-    UNIQUE<StateComponent> clone() override;
+    StateComponent(StateComponent&&) = default;
+    StateComponent& operator=(StateComponent&&) = default;
 
-    void handle(Entity& entity, const MoveCommand& move) override;
-    void update(Entity& entity) override;
+    void reset();
+
+    void handle(Entity& entity, const MoveCommand& move);
+    void update(Entity& entity);
 
     State& find_state(State::Value state);
 
@@ -68,15 +51,15 @@ public:
     void set_state(State::Value state, Entity& entity, const MoveCommand* move = nullptr);
 
 private:
-    State* state = nullptr;
+    OPTION<u32> state_index = 0;
 
     ARRAY<UNIQUE<State>, State::MAX> states;
 };
 
-inline State& CharacterStateComponent::get_state()
+State& StateComponent::get_state()
 {
-    ASSERT(state);
-    return *state;
+    ASSERT(state_index.has_value() && *state_index < states.size());
+    return *states[*state_index];
 }
 
 } // namespace jmp

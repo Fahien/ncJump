@@ -86,7 +86,7 @@ public:
     void exit(Entity& entity) override;
 };
 
-State& CharacterStateComponent::find_state(State::Value value)
+State& StateComponent::find_state(State::Value value)
 {
     ASSERT_MSG_X(value >= 0 && value < State::MAX, "Invalid state value: %d", value);
     return *states[value];
@@ -120,7 +120,7 @@ bool can_stop(const bool moving, Entity& entity)
     const auto zero = b2Vec2(0.0f, 0.0f);
     bool moving_now = !close(entity.get_physics()->body->GetLinearVelocity(), zero);
     if (!moving && !moving_now) {
-        CharacterStateComponent::get(entity).set_state(State::IDLE, entity);
+        entity.get_state()->set_state(State::IDLE, entity);
     }
     return moving_now;
 }
@@ -128,14 +128,14 @@ bool can_stop(const bool moving, Entity& entity)
 void can_move(const MoveCommand& move, Entity& entity)
 {
     if (!closef(move.x, 0.0f)) {
-        CharacterStateComponent::get(entity).set_state(State::MOVE, entity, &move);
+        entity.get_state()->set_state(State::MOVE, entity, &move);
     }
 }
 
 void can_jump(const MoveCommand& move, Entity& entity)
 {
     if (move.jump) {
-        CharacterStateComponent::get(entity).set_state(State::JUMP_UP, entity, &move);
+        entity.get_state()->set_state(State::JUMP_UP, entity, &move);
     }
 }
 
@@ -147,7 +147,7 @@ void can_fall(Entity& entity)
     bool should_fall = no_obstacle_down && falling;
 
     if (should_fall) {
-        CharacterStateComponent::get(entity).set_state(State::JUMP_DOWN, entity);
+        entity.get_state()->set_state(State::JUMP_DOWN, entity);
     }
 }
 
@@ -163,9 +163,8 @@ bool check_pull(Entity& entity, const std::vector<b2Body*>& obstacles)
         joint.Initialize(body, other, body->GetPosition(), other->GetPosition());
         joint.collideConnected = true;
 
-        CharacterStateComponent::get(entity).set_state(State::PULL, entity);
-        auto pull_state =
-            reinterpret_cast<PullState&>(CharacterStateComponent::get(entity).get_state());
+        entity.get_state()->set_state(State::PULL, entity);
+        auto pull_state = reinterpret_cast<PullState&>(entity.get_state()->get_state());
 
         pull_state.destroy_joint(*body->GetWorld());
         pull_state.joint = other->GetWorld()->CreateJoint(&joint);
@@ -233,7 +232,7 @@ void can_push(const MoveCommand& move, Entity& entity)
     bool right_push = move.x > 0.0f;
 
     if ((left_obstacle && left_push) || (right_obstacle && right_push)) {
-        CharacterStateComponent::get(entity).set_state(State::PUSH, entity, &move);
+        entity.get_state()->set_state(State::PUSH, entity, &move);
     }
 }
 
@@ -311,7 +310,7 @@ void can_stop_jumping(Entity& entity)
 {
     bool going_down = entity.get_physics()->body->GetLinearVelocity().y <= 0.0f;
     if (going_down) {
-        CharacterStateComponent::get(entity).set_state(State::JUMP_DOWN, entity);
+        entity.get_state()->set_state(State::JUMP_DOWN, entity);
     }
 }
 
@@ -352,7 +351,7 @@ void JumpDownState::update(Entity& entity)
     bool still_landed = landed && landed_now;
 
     if (still_landed) {
-        CharacterStateComponent::get(entity).set_state(State::MOVE, entity);
+        entity.get_state()->set_state(State::MOVE, entity);
         return;
     }
 
@@ -389,7 +388,7 @@ void PushState::enter(Entity& entity, const MoveCommand* move)
 void can_stop_pushing(Entity& entity)
 {
     if (!any(entity.get_physics()->obstacle & (DirectionFlags::LEFT | DirectionFlags::RIGHT))) {
-        CharacterStateComponent::get(entity).set_state(State::MOVE, entity);
+        entity.get_state()->set_state(State::MOVE, entity);
     }
 }
 
@@ -441,7 +440,7 @@ void PullState::enter(Entity& entity, const MoveCommand* move)
 void can_stop_pulling(const bool pulling, Entity& entity)
 {
     if (!pulling) {
-        CharacterStateComponent::get(entity).set_state(State::IDLE, entity);
+        entity.get_state()->set_state(State::IDLE, entity);
     }
 }
 
@@ -510,16 +509,6 @@ const char* to_str(State& state)
     return state.name.data();
 }
 
-CharacterStateComponent& CharacterStateComponent::into(StateComponent& s)
-{
-    return reinterpret_cast<CharacterStateComponent&>(s);
-}
-
-CharacterStateComponent& CharacterStateComponent::get(Entity& e)
-{
-    return into(*e.state);
-}
-
 ARRAY<UNIQUE<State>, State::MAX> create_states()
 {
     auto ret = ARRAY<UNIQUE<State>, State::MAX>();
@@ -533,50 +522,54 @@ ARRAY<UNIQUE<State>, State::MAX> create_states()
     return ret;
 }
 
-CharacterStateComponent::CharacterStateComponent()
+StateComponent::StateComponent()
     : states {create_states()}
 {
     reset();
 }
 
-void CharacterStateComponent::reset()
+void StateComponent::reset()
 {
-    state = &find_state(State::IDLE);
+    state_index = State::IDLE;
 }
 
 /// @todo Nothing special to clone even though PullState keeps track of a physics joint which
 /// is for a specific interaction. That forces a different approach for state objects which
 /// would not involve singletons as we do now with the `get_state` function.
-UNIQUE<StateComponent> CharacterStateComponent::clone()
+StateComponent::StateComponent(const StateComponent&)
+    : StateComponent()
 {
-    auto ret = MK<CharacterStateComponent>();
-    return ret;
 }
 
-void CharacterStateComponent::handle(Entity& entity, const MoveCommand& command)
+StateComponent& StateComponent::operator=(const StateComponent&)
 {
-    state->handle(entity, command);
+    return *this;
 }
 
-void CharacterStateComponent::update(Entity& entity)
+void StateComponent::handle(Entity& entity, const MoveCommand& command)
 {
-    state->update(entity);
+    get_state().handle(entity, command);
 }
 
-void CharacterStateComponent::set_state(State::Value value, Entity& entity, const MoveCommand* move)
+void StateComponent::update(Entity& entity)
 {
-    if (state) {
-        if (state->value == value) {
+    get_state().update(entity);
+}
+
+void StateComponent::set_state(State::Value value, Entity& entity, const MoveCommand* move)
+{
+    if (state_index) {
+        if (*state_index == value) {
             return;
         }
 
-        LOGI_X("Exiting state %s", to_str(*state));
-        state->exit(entity);
+        auto& state = get_state();
+        state.exit(entity);
     }
 
     auto& new_state = find_state(value);
     new_state.enter(entity, move);
-    state = &new_state;
+    state_index = value;
 }
 
 } // namespace jmp

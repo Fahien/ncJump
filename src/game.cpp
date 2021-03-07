@@ -86,7 +86,7 @@ Entity create_player(Config& config,
     auto gfx = GraphicsComponent(gfx_def, graphics_factory);
     entity.set_graphics(MV(gfx));
 
-    entity.state = MK<CharacterStateComponent>();
+    entity.set_state(StateComponent());
 
     entity.set_position(tilemap.initial_position);
 
