@@ -15,12 +15,13 @@ class PhysicsSystem;
 class EntityFactory
 {
 public:
+    static EntityDef create_player_def(const Config& config, GraphicsFactory& graphics_factory);
+
     EntityFactory(Game& game);
 
     /// @return A unique Entity. Heap allocated because a pointer to it is stored in the physics
     /// component.
-    UNIQUE<Entity>
-    create(const EntityDef& def, const Config& config, GraphicsFactory& gf, PhysicsSystem& ph);
+    UNIQUE<Entity> create(const EntityDef& def, GraphicsFactory& gf, PhysicsSystem& ph);
 
     void add(EntityDef def, GraphicsFactory& gf);
 

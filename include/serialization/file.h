@@ -43,6 +43,8 @@ void from_json(const nl::json& j, String& v);
 
 template<typename T> void to_json(nl::json& j, const VECTOR<T>& t)
 {
+    j = nl::json::array();
+
     for (auto& e : t) {
         j.emplace_back(e);
     }

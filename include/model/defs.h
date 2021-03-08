@@ -23,22 +23,17 @@ enum class PhysicsType {
 
 enum class ScriptType { WANDERING };
 
-/// @return A default vector of rects for a `nc::RectAnimation`
-inline VECTOR<Recti> default_rects()
-{
-    auto ret = VECTOR<Recti>();
-    ret.pushBack(Recti(0, 0, 16, 16));
-    return ret;
-}
-
 /// @return A vector of rects for a `nc::RectAnimation` from a Texture stripe
 VECTOR<Recti> rects_from_stripe(const nc::Texture& texture);
 
 /// @brief Sub-graphics definition, probably associated to a state of the entity
 struct SubGraphicsDef {
+    /// @return A sub-graphics definition with a placeholder graphics
+    static SubGraphicsDef dummy();
+
     GraphicsType type = GraphicsType::TILE;
     String path = "img/tile/placeholder.png";
-    VECTOR<Recti> rects = default_rects();
+    VECTOR<Recti> rects = {};
     bool loop = true;
 };
 
@@ -53,7 +48,7 @@ inline VECTOR<SubGraphicsDef> default_subgraphics()
 struct GraphicsDef {
     /// A graphics component may have multiple sub-graphics
     /// each one related to a different entity state.
-    VECTOR<SubGraphicsDef> subs = default_subgraphics();
+    VECTOR<SubGraphicsDef> subs = {};
 };
 
 /// @brief Definition of a physics component
@@ -86,6 +81,12 @@ inline ScriptDef::ScriptDef(ScriptType type)
 /// This is also useful for serialization as it would be easier than trying to serialize
 /// an entity with all its components.
 struct EntityDef {
+    /// @return A definition for a dummy entity
+    static EntityDef dummy();
+
+    /// @return An entity definition loaded from a json file, or None if there is no such file
+    static OPTION<EntityDef> from_json(const char* path);
+
     EntityDef(EntityType type = EntityType::TILE);
 
     EntityType type = EntityType::TILE;

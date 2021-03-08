@@ -12,4 +12,6 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StateDef, dummy);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ScriptDef, type);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EntityDef, type, pos, graphics, physics, state, scripts);
 
+void save(const EntityDef& def, const char* path);
+
 } // namespace jmp

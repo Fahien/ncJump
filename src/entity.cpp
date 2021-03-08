@@ -12,7 +12,6 @@ namespace nc = ncine;
 
 namespace jmp
 {
-
 Entity::~Entity()
 {
 }
@@ -26,7 +25,7 @@ UNIQUE<Entity> Entity::clone()
 {
     auto ret = MK<Entity>();
 
-    ret->type = type;
+    ret->def = def;
     ret->transform = transform.clone();
 
     ret->graphics = graphics;

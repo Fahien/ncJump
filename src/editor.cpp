@@ -421,7 +421,7 @@ void Editor::place_selected_tile()
 void Editor::place_selected_entity()
 {
     auto& entity_def = game.entity_factory.entities[*selected_entity];
-    auto entity = game.entity_factory.create(entity_def, game.config, game.graphics_factory, game.physics);
+    auto entity = game.entity_factory.create(entity_def, game.graphics_factory, game.physics);
     auto pos = game.config.screen_to_scene(game.input.mouse.pos) + game.camera.get_position();
     entity->set_position(pos);
     game.tilemap.add_entity(MV(entity));

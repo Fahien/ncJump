@@ -17,6 +17,8 @@ struct Input;
 class Command;
 class Script;
 class Config;
+class GraphicsFactory;
+class PhysicsSystem;
 
 class Entity
 {
@@ -26,6 +28,7 @@ public:
     static inline Entity& from(b2Fixture& fixture);
 
     Entity() = default;
+    Entity(const EntityDef& def, GraphicsFactory& graphics_factory, PhysicsSystem& physics_system);
 
     Entity(const Entity&) = default;
     Entity& operator=(const Entity&) = default;
@@ -68,7 +71,7 @@ public:
 
     void update(f32 dt);
 
-    EntityType type = EntityType::TILE;
+    EntityDef def = {};
 
     TransformComponent transform;
 
@@ -94,12 +97,12 @@ Entity& Entity::from(b2Fixture& fixture)
 
 bool Entity::is_player(const Entity& e)
 {
-    return e.type == EntityType::PLAYER;
+    return e.def.type == EntityType::PLAYER;
 }
 
 bool Entity::is_enemy(const Entity& e)
 {
-    return e.type == EntityType::ENEMY;
+    return e.def.type == EntityType::ENEMY;
 }
 
 inline bool Entity::is_enabled() const

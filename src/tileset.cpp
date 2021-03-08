@@ -72,8 +72,9 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
     tex_rect.h = i32(tile_size);
 
     auto gfx_def = GraphicsDef();
+    gfx_def.subs.emplaceBack(SubGraphicsDef());
     gfx_def.subs[0].path = path;
-    gfx_def.subs[0].rects[0] = tex_rect;
+    gfx_def.subs[0].rects.emplaceBack(tex_rect);
     gfx_def.subs[0].type = GraphicsType::TILE;
 
     entity->set_graphics(GraphicsComponent(gfx_def, game.graphics_factory));

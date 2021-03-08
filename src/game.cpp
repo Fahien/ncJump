@@ -5,6 +5,7 @@
 
 #include "command/command.h"
 #include "serialization/config.h"
+#include "serialization/defs_serialization.h"
 #include "serialization/tilemap.h"
 #include "serialization/tileset.h"
 
@@ -27,68 +28,17 @@ Tilemap create_tilemap(Game& game)
 
 Entity create_player(Config& config,
     Tilemap& tilemap,
-    PhysicsSystem& physics,
+    PhysicsSystem& physics_system,
     GraphicsFactory& graphics_factory)
 {
-    auto entity = Entity(*tilemap.node);
+    auto def = EntityDef::from_json("player.json");
+    if (!def) {
+        def = EntityFactory::create_player_def(config, graphics_factory);
+    }
 
-    entity.type = EntityType::PLAYER;
-
-    entity.transform.node->setPosition(tilemap.initial_position);
-
-    auto phy_def = PhysicsDef();
-    phy_def.type = PhysicsType::CHAR;
-    phy_def.scale = 1.0f / config.size.tile;
-    phy_def.dynamic = true;
-    entity.set_physics(PhysicsComponent(phy_def, physics));
-
-    auto gfx_def = GraphicsDef();
-    gfx_def.subs.setSize(State::MAX);
-
-    SubGraphicsDef* sub_def = nullptr;
-
-    sub_def = &gfx_def.subs[State::IDLE];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_idle_anim_strip_4.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-
-    sub_def = &gfx_def.subs[State::MOVE];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_run_anim_strip_6.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-
-    sub_def = &gfx_def.subs[State::JUMP_UP];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_jump_up_anim_strip_3.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-
-    sub_def = &gfx_def.subs[State::JUMP_DOWN];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_jump_down_anim_strip_3.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-
-    sub_def = &gfx_def.subs[State::PUSH];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_pushing_foward_anim_strip_6.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-
-    sub_def = &gfx_def.subs[State::PULL];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_idle_anim_strip_4.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-
-    sub_def = &gfx_def.subs[State::DYING];
-    sub_def->type = GraphicsType::ANIM;
-    sub_def->path = String("img/hero/herochar_death_anim_strip_8.png");
-    sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
-    sub_def->loop = false;
-
-    auto gfx = GraphicsComponent(gfx_def, graphics_factory);
-    entity.set_graphics(MV(gfx));
-
-    entity.set_state(StateComponent());
-
+    auto entity = Entity(*def, graphics_factory, physics_system);
     entity.set_position(tilemap.initial_position);
+    entity.transform.node->setParent(&*tilemap.node);
 
     return entity;
 }
@@ -116,6 +66,7 @@ Game::~Game()
     save(config, PATH("config.json"));
     save(tileset, PATH("tileset.json"));
     save(tilemap, PATH("tilemap.json"));
+    save(entity.def, "player.json");
 }
 
 /// @todo Move this handling somewhere else?

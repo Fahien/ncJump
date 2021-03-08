@@ -7,7 +7,8 @@ namespace nctl
 {
 void to_json(nl::json& j, const String& v)
 {
-    to_json(j, v.data());
+    auto s = std::string(v.data(), v.length());
+    j = s;
 }
 
 void from_json(const nl::json& j, String& v)

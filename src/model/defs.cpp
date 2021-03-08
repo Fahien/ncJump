@@ -19,8 +19,29 @@ VECTOR<Recti> rects_from_stripe(const nc::Texture& texture)
     return rects;
 }
 
+/// @return A default vector of rects for a `nc::RectAnimation`
+inline VECTOR<Recti> default_rects()
+{
+    auto ret = VECTOR<Recti>();
+    ret.pushBack(Recti(0, 0, 16, 16));
+    return ret;
+}
+
+SubGraphicsDef SubGraphicsDef::dummy() {
+    SubGraphicsDef def = {};
+    def.rects = default_rects();
+    return def;
+}
+
+EntityDef EntityDef::dummy()
+{
+    auto ret = EntityDef(EntityType::TILE);
+    ret.graphics.subs.emplaceBack(SubGraphicsDef::dummy());
+    return ret;
+}
+
 EntityDef::EntityDef(EntityType type)
-: type {type}
+    : type {type}
 {
 }
 
