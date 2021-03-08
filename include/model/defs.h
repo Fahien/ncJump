@@ -67,11 +67,12 @@ struct PhysicsDef {
 
 /// @brief Definition of a state component
 struct StateDef {
+    bool dummy;
 };
 
 /// @brief Definition of a script component
 struct ScriptDef {
-    inline ScriptDef(ScriptType type);
+    inline ScriptDef(ScriptType type = ScriptType::WANDERING);
 
     ScriptType type = ScriptType::WANDERING;
 };
@@ -85,7 +86,7 @@ inline ScriptDef::ScriptDef(ScriptType type)
 /// This is also useful for serialization as it would be easier than trying to serialize
 /// an entity with all its components.
 struct EntityDef {
-    EntityDef(EntityType type);
+    EntityDef(EntityType type = EntityType::TILE);
 
     EntityType type = EntityType::TILE;
 

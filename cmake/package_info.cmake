@@ -26,6 +26,7 @@ set(PACKAGE_SOURCES
 	include/component/physics.h
 	include/component/state.h
 	include/component/script.h
+	include/serialization/defs_serialization.h
 	include/serialization/file.h
 	include/serialization/config.h
 	include/serialization/tileset.h
@@ -49,6 +50,7 @@ set(PACKAGE_SOURCES
 	src/component/physics.cpp
 	src/component/state.cpp
 	src/component/script.cpp
+	src/serialization/defs_serialization.cpp
 	src/serialization/file.cpp
 	src/serialization/config.cpp
 	src/serialization/tileset.cpp

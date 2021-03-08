@@ -12,18 +12,6 @@ namespace jmp
 void to_json(nl::json& j, const Tile& t);
 void from_json(const nl::json& j, Tile& t);
 
-void to_json(nl::json& j, const nc::Vector2<f32>& v)
-{
-    j["x"] = v.x;
-    j["y"] = v.y;
-}
-
-void from_json(const nl::json& j, nc::Vector2<f32>& v)
-{
-    j["x"].get_to(v.x);
-    j["y"].get_to(v.y);
-}
-
 void to_json(nl::json& j, const Tilemap& t)
 {
     j["width"] = t.get_width();

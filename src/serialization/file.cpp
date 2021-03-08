@@ -3,6 +3,43 @@
 #include <ncine/FileSystem.h>
 #include <ncine/IFile.h>
 
+namespace nctl
+{
+void to_json(nl::json& j, const String& v)
+{
+    to_json(j, v.data());
+}
+
+void from_json(const nl::json& j, String& v)
+{
+    ASSERT(j.is_string());
+    std::string s;
+    j.get_to(s);
+    v = String(s.c_str());
+}
+
+} // namespace nctl
+
+namespace ncine
+{
+void to_json(nl::json& j, const Recti& v)
+{
+    j["x"] = v.x;
+    j["y"] = v.y;
+    j["w"] = v.h;
+    j["h"] = v.w;
+}
+
+void from_json(const nl::json& j, Recti& v)
+{
+    j["x"].get_to(v.x);
+    j["y"].get_to(v.y);
+    j["w"].get_to(v.w);
+    j["h"].get_to(v.h);
+}
+
+} // namespace ncine
+
 namespace jmp
 {
 nctl::Array<char> read_file(const char* file_path)
