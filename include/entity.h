@@ -42,6 +42,9 @@ public:
 
     Entity(nc::SceneNode& scene);
 
+    /// @brief Resets the state of the entity to its definition
+    void reset();
+
     UNIQUE<Entity> clone();
 
     /// @return Whether this entity is enabled or not

@@ -441,7 +441,7 @@ void Editor::update_collisions(Tilemap& tilemap)
     draw_list->PushClipRect(p0, p1);
 
     // Draw debug shapes for physics objects
-    for (auto& entity : tilemap.entities) {
+    for (auto& entity : tilemap.get_entities()) {
         if (auto& physics = entity->get_physics()) {
             auto fixture_list = physics->body->GetFixtureList();
             for (auto fixture = fixture_list; fixture; fixture = fixture->GetNext()) {
@@ -540,18 +540,23 @@ void Editor::update_tilemap(Tilemap& tilemap)
 
     if (ImGui::TreeNode("entities:")) {
         OPTION<usize> to_delete = None;
-        for (usize i = 0; i < tilemap.entities.size(); ++i) {
-            if (auto del = update_entity(i, *tilemap.entities[i])) {
+        auto& entities = tilemap.get_entities();
+        for (usize i = 0; i < entities.size(); ++i) {
+            if (auto del = update_entity(i, *entities[i])) {
                 to_delete = del;
             }
         }
         if (to_delete) {
-            tilemap.entities.erase(std::begin(tilemap.entities) + *to_delete);
+            tilemap.delete_entity(*to_delete);
         }
         ImGui::TreePop();
     }
 
     ImGui::Checkbox("Show bodies", &show_bodies);
+
+    if (ImGui::Button("Reset")) {
+        tilemap.reset();
+    }
 
     ImGui::End();
 

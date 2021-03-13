@@ -21,8 +21,16 @@ public:
     /// @brief Creates and initializes a tilemap
     Tilemap(Game& game);
 
+    /// @brief Resets the state of the tilemap
+    void reset();
+
     u32 get_width() const noexcept;
     u32 get_height() const noexcept;
+
+    inline const VECTOR<EntityDef>& get_entity_defs() const;
+    inline VECTOR<EntityDef>& get_entity_defs_mut();
+
+    inline std::vector<UNIQUE<Entity>>& get_entities();
 
     /// @brief Resizes the tilemap. If new dimensions are greater than old ones, it populates new
     /// tiles and entities with default ones. If tilemap is half-initialized, entities will be half
@@ -45,6 +53,9 @@ public:
 
     void add_entity(UNIQUE<Entity> entity);
 
+    /// @param entity_index Vector position of the entity to remove
+    void delete_entity(u32 entity_index);
+
     Game* game = nullptr;
 
     Vec2f initial_position = Vec2f(0.0f, 0.0f);
@@ -64,17 +75,35 @@ public:
     /// Grid of concrete tiles where each position corresponds to a cell of the grid
     std::vector<std::vector<UNIQUE<Entity>>> tiles;
 
+private:
+    UNIQUE<Entity> create_entity(const Vec2f& pos, const Tileset& ts, const Tile& t, bool dynamic);
+
+    /// @brief Create entities from entity definitions
+    void create_entities();
+
+    u32 width = 0;
+    u32 height = 0;
+
     /// List of entity definitions used to populate the entities vector
     VECTOR<EntityDef> entity_defs;
 
     /// Other entities which position is not fixed to cells
     std::vector<UNIQUE<Entity>> entities;
-
-private:
-    UNIQUE<Entity> create_entity(const Vec2f& pos, const Tileset& ts, const Tile& t, bool dynamic);
-
-    u32 width = 0;
-    u32 height = 0;
 };
+
+inline const VECTOR<EntityDef>& Tilemap::get_entity_defs() const
+{
+    return entity_defs;
+}
+
+inline VECTOR<EntityDef>& Tilemap::get_entity_defs_mut()
+{
+    return entity_defs;
+}
+
+inline std::vector<UNIQUE<Entity>>& Tilemap::get_entities()
+{
+    return entities;
+}
 
 } // namespace jmp

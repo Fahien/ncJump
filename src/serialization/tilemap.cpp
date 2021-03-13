@@ -19,7 +19,7 @@ void to_json(nl::json& j, const Tilemap& t)
     j["height"] = t.get_height();
     to_json(j["initial_position"], t.initial_position);
     j["tiles"] = t.tile_descs;
-    j["entities"] = t.entity_defs;
+    j["entities"] = t.get_entity_defs();
 }
 
 void from_json(const nl::json& j, Tilemap& t)
@@ -34,7 +34,7 @@ void from_json(const nl::json& j, Tilemap& t)
     }
     j["tiles"].get_to(t.tile_descs);
     if (j.contains("entities")) {
-        j["entities"].get_to(t.entity_defs);
+        j["entities"].get_to(t.get_entity_defs_mut());
     }
 
     t.set_dimensions(width, height);

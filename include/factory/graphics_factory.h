@@ -30,8 +30,7 @@ public:
 
     nc::AnimatedSprite create_anim(const SubGraphicsDef& def);
 private:
-    // Hashing string
-    nctl::StringHashMap<UNIQUE<nc::Texture>> textures = nctl::StringHashMap<UNIQUE<nc::Texture>>(128);
+    HASHMAP<String, UNIQUE<nc::Texture>> textures = HASHMAP<String, UNIQUE<nc::Texture>>(128);
 };
 
 } // namespace jmp

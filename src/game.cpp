@@ -108,7 +108,7 @@ void Game::update(const f32 dt)
     }
 
     // Update tilemap entities from their bodies
-    for (auto& entity : tilemap.entities) {
+    for (auto& entity : tilemap.get_entities()) {
         if (!entity->is_enabled()) {
             continue;
         }

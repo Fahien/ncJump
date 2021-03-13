@@ -159,12 +159,13 @@ void DestructionListener::update(Tilemap& tilemap)
         }
 
         // Look within free entities
-        auto it = std::find_if(std::begin(tilemap.entities),
-            std::end(tilemap.entities),
+        auto& entities = tilemap.get_entities();
+        auto it = std::find_if(std::begin(entities),
+            std::end(entities),
             [entity](UNIQUE<Entity>& e) { return e.get() == entity; });
-        if (it != std::end(tilemap.entities)) {
+        if (it != std::end(entities)) {
             emit_particles(*entity);
-            tilemap.entities.erase(it);
+            entities.erase(it);
         }
     }
     to_destroy.clear();

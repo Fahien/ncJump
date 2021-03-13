@@ -11,6 +11,11 @@ Tilemap::Tilemap(Game& g)
     set_game(g);
 }
 
+void Tilemap::reset()
+{
+    create_entities();
+}
+
 u32 Tilemap::get_width() const noexcept
 {
     return width;
@@ -106,12 +111,9 @@ void Tilemap::set_game(Game& g)
         }
     }
 
-    // Create entities from entity definitions
-    entities.resize(entity_defs.size());
-    for (u32 i = 0; i < entity_defs.size(); ++i) {
-        auto& def = entity_defs[i];
-        entities[i] = g.entity_factory.create(def, g.graphics_factory, g.physics);
-        entities[i]->transform.node->setParent(entities_root.get());
+    // Create tiles from tile prototypes
+    if (entities.empty()) {
+        create_entities();
     }
 }
 
@@ -150,6 +152,23 @@ void Tilemap::add_entity(UNIQUE<Entity> entity)
     entity_defs.emplaceBack(entity->def);
     entity->transform.node->setParent(entities_root.get());
     entities.emplace_back(MV(entity));
+}
+
+void Tilemap::delete_entity(u32 entity_index)
+{
+    entity_defs.erase(nctl::begin(entity_defs) + entity_index);
+    entities.erase(std::begin(entities) + entity_index);
+}
+
+void Tilemap::create_entities()
+{
+    // Create entities from entity definitions
+    entities.resize(entity_defs.size());
+    for (u32 i = 0; i < entity_defs.size(); ++i) {
+        auto& def = entity_defs[i];
+        entities[i] = game->entity_factory.create(def, game->graphics_factory, game->physics);
+        entities[i]->transform.node->setParent(entities_root.get());
+    }
 }
 
 } // namespace jmp

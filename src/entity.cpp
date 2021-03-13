@@ -21,6 +21,12 @@ Entity::Entity(nc::SceneNode& scene)
 {
 }
 
+void Entity::reset()
+{
+    transform.node->setPosition(def.pos);
+    set_enabled(true);
+}
+
 UNIQUE<Entity> Entity::clone()
 {
     auto ret = MK<Entity>();
