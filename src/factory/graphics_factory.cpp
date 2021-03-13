@@ -72,7 +72,7 @@ nc::AnimatedSprite GraphicsFactory::create_anim(const SubGraphicsDef& def)
     auto sprite = nc::AnimatedSprite(&texture);
     sprite.addAnimation(MV(anim));
     sprite.setPaused(false);
-    sprite.setLayer(2);
+    sprite.setLayer(def.layer);
 
     return sprite;
 }

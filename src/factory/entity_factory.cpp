@@ -59,36 +59,43 @@ EntityDef create_mushroom_def(const Config& config, GraphicsFactory& gf)
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &def.graphics.subs[State::MOVE];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_walk_anim_strip_8.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &def.graphics.subs[State::JUMP_UP];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &def.graphics.subs[State::JUMP_DOWN];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &def.graphics.subs[State::PUSH];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &def.graphics.subs[State::PULL];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_crushed_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &def.graphics.subs[State::DYING];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/enemy/mushroom/mushroom_death_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(gf.get_or_create(sub_def->path));
+    sub_def->layer = 2;
     sub_def->loop = false;
 
     auto phy_def = PhysicsDef();
@@ -123,36 +130,43 @@ EntityDef EntityFactory::create_player_def(const Config& config, GraphicsFactory
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_idle_anim_strip_4.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &gfx_def.subs[State::MOVE];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_run_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &gfx_def.subs[State::JUMP_UP];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_jump_up_anim_strip_3.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &gfx_def.subs[State::JUMP_DOWN];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_jump_down_anim_strip_3.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &gfx_def.subs[State::PUSH];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_pushing_foward_anim_strip_6.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &gfx_def.subs[State::PULL];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_idle_anim_strip_4.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
 
     sub_def = &gfx_def.subs[State::DYING];
     sub_def->type = GraphicsType::ANIM;
     sub_def->path = String("img/hero/herochar_death_anim_strip_8.png");
     sub_def->rects = rects_from_stripe(graphics_factory.get_or_create(sub_def->path));
+    sub_def->layer = 2;
     sub_def->loop = false;
 
     def.state = StateDef();

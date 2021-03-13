@@ -105,6 +105,14 @@ void Tilemap::set_game(Game& g)
             set_tile(index, game->tileset, tile_descs[i][j]);
         }
     }
+
+    // Create entities from entity definitions
+    entities.resize(entity_defs.size());
+    for (u32 i = 0; i < entity_defs.size(); ++i) {
+        auto& def = entity_defs[i];
+        entities[i] = g.entity_factory.create(def, g.graphics_factory, g.physics);
+        entities[i]->transform.node->setParent(entities_root.get());
+    }
 }
 
 UNIQUE<Entity> Tilemap::create_entity(const Vec2f& pos,
@@ -139,6 +147,7 @@ void Tilemap::add_entity_from_tile(const Vec2f& pos, const Tileset& tileset, con
 
 void Tilemap::add_entity(UNIQUE<Entity> entity)
 {
+    entity_defs.emplaceBack(entity->def);
     entity->transform.node->setParent(entities_root.get());
     entities.emplace_back(MV(entity));
 }

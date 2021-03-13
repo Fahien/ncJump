@@ -64,6 +64,9 @@ public:
     /// Grid of concrete tiles where each position corresponds to a cell of the grid
     std::vector<std::vector<UNIQUE<Entity>>> tiles;
 
+    /// List of entity definitions used to populate the entities vector
+    VECTOR<EntityDef> entity_defs;
+
     /// Other entities which position is not fixed to cells
     std::vector<UNIQUE<Entity>> entities;
 

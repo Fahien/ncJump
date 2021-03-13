@@ -73,7 +73,7 @@ OPTION<PhysicsComponent>& Entity::get_physics()
 
 void Entity::set_graphics(OPTION<GraphicsComponent> gfx)
 {
-    graphics = gfx;
+    graphics = MV(gfx);
     if (graphics) {
         graphics->set(*this);
     }
@@ -95,7 +95,7 @@ void Entity::set_physics(OPTION<PhysicsComponent> ph)
 
 void Entity::set_state(OPTION<StateComponent> st)
 {
-    state = st;
+    state = MV(st);
 }
 
 void Entity::update(const f32 dt)

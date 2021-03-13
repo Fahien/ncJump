@@ -10,7 +10,6 @@
 
 namespace jmp
 {
-
 void SubGraphics::set(Entity& entity)
 {
     get_sprite_mut().setParent(entity.transform.node.get());
@@ -40,7 +39,7 @@ StaticSubGraphics& StaticSubGraphics::into(SubGraphics& g)
 StaticSubGraphics::StaticSubGraphics(const SubGraphicsDef& def, GraphicsFactory& factory)
     : sprite {&factory.get_or_create(def.path)}
 {
-    sprite.setLayer(1);
+    sprite.setLayer(def.layer);
     ASSERT(def.rects.size() > 0);
     sprite.setTexRect(def.rects[0]);
 }

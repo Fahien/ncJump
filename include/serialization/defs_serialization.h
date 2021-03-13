@@ -5,7 +5,7 @@
 
 namespace jmp
 {
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SubGraphicsDef, type, path, rects, loop);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SubGraphicsDef, type, path, rects, layer, loop);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(GraphicsDef, subs);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PhysicsDef, type, scale, dynamic);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StateDef, dummy);

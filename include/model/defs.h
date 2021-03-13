@@ -34,15 +34,9 @@ struct SubGraphicsDef {
     GraphicsType type = GraphicsType::TILE;
     String path = "img/tile/placeholder.png";
     VECTOR<Recti> rects = {};
+    u32 layer = 0;
     bool loop = true;
 };
-
-inline VECTOR<SubGraphicsDef> default_subgraphics()
-{
-    auto ret = VECTOR<SubGraphicsDef>();
-    ret.pushBack(SubGraphicsDef());
-    return ret;
-}
 
 /// @brief Definition of a graphics component
 struct GraphicsDef {

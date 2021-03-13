@@ -27,9 +27,11 @@ inline VECTOR<Recti> default_rects()
     return ret;
 }
 
-SubGraphicsDef SubGraphicsDef::dummy() {
+SubGraphicsDef SubGraphicsDef::dummy()
+{
     SubGraphicsDef def = {};
     def.rects = default_rects();
+    def.layer = 2;
     return def;
 }
 

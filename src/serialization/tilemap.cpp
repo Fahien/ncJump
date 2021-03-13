@@ -2,6 +2,7 @@
 
 #include "tilemap.h"
 
+#include "serialization/defs_serialization.h"
 #include "serialization/file.h"
 #include "serialization/tileset.h"
 
@@ -18,6 +19,7 @@ void to_json(nl::json& j, const Tilemap& t)
     j["height"] = t.get_height();
     to_json(j["initial_position"], t.initial_position);
     j["tiles"] = t.tile_descs;
+    j["entities"] = t.entity_defs;
 }
 
 void from_json(const nl::json& j, Tilemap& t)
@@ -31,6 +33,9 @@ void from_json(const nl::json& j, Tilemap& t)
         from_json(j["initial_position"], t.initial_position);
     }
     j["tiles"].get_to(t.tile_descs);
+    if (j.contains("entities")) {
+        j["entities"].get_to(t.entity_defs);
+    }
 
     t.set_dimensions(width, height);
 }

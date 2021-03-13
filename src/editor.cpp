@@ -421,9 +421,8 @@ void Editor::place_selected_tile()
 void Editor::place_selected_entity()
 {
     auto& entity_def = game.entity_factory.entities[*selected_entity];
+    entity_def.pos = game.config.screen_to_scene(game.input.mouse.pos) + game.camera.get_position();
     auto entity = game.entity_factory.create(entity_def, game.graphics_factory, game.physics);
-    auto pos = game.config.screen_to_scene(game.input.mouse.pos) + game.camera.get_position();
-    entity->set_position(pos);
     game.tilemap.add_entity(MV(entity));
 }
 
@@ -518,6 +517,7 @@ OPTION<usize> Editor::update_entity(usize i, Entity& entity)
 
     auto name = nctl::String().format("%zu", i);
     if (ImGui::TreeNode(name.data())) {
+        ImGui::Text("layer: %u", entity.get_graphics()->get_current()->get_sprite().layer());
         if (ImGui::Button("Delete")) {
             ret = i;
         }
