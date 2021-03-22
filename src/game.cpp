@@ -105,6 +105,8 @@ void Game::update(const f32 dt)
         // @todo Move this somewhere else? Possibly PhysicsSystem?
         // Update entity from body
         entity.transform.node->setPosition(entity.get_physics()->get_position());
+
+        entity.get_physics()->reset();
     }
 
     // Update tilemap entities from their bodies
@@ -117,6 +119,7 @@ void Game::update(const f32 dt)
 
         if (auto& physics = entity->get_physics()) {
             entity->transform.node->setPosition(physics->get_position());
+            physics->reset();
         }
     }
 

@@ -28,7 +28,15 @@ public:
 
     void set_enabled(bool e);
 
+    /// @brief Called by a physics listener, it is used to update
+    /// the current obstacle flags and list of obstacle bodies
+    void update(b2Contact& contact);
+
     void update();
+
+    /// @brief Resets some variables of the physics component
+    /// Needs to be called at the end of every game update
+    void reset();
 
     /// @return The normal of this contact relative to itself,
     /// which means that this vector will point towards this body.

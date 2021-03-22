@@ -156,43 +156,49 @@ inline b2WorldManifold get_world_manifold(const b2Contact& contact)
     return wm;
 }
 
-void PhysicsComponent::update()
+void PhysicsComponent::update(b2Contact& contact)
 {
-    assert(body && "Physics component has no body");
+    b2Body* other = contact.GetFixtureA()->GetBody();
+    if (other == body) {
+        other = contact.GetFixtureB()->GetBody();
+    }
 
-    // Clear list of obstacles from previous frame
+    auto normal = get_normal(contact);
+
+    if (normal.x < -0.99f) {
+        obstacle |= DirectionFlags::RIGHT;
+        obstacles_dir[Direction::RIGHT].emplace_back(other);
+    }
+
+    if (normal.x > 0.99f) {
+        obstacle |= DirectionFlags::LEFT;
+        obstacles_dir[Direction::LEFT].emplace_back(other);
+    }
+
+    if (normal.y > 0.99f) {
+        obstacle |= DirectionFlags::DOWN;
+        obstacles_dir[Direction::DOWN].emplace_back(other);
+    }
+
+    if (normal.y < -0.99f) {
+        obstacle |= DirectionFlags::UP;
+        obstacles_dir[Direction::UP].emplace_back(other);
+    }
+}
+
+void PhysicsComponent::reset()
+{
+    // Update some variables
     for (auto& obstacles : obstacles_dir) {
         obstacles.clear();
     }
 
-    // Update some variables
     obstacle = DirectionFlags::NONE;
-    for (auto edge = body->GetContactList(); edge && edge->contact; edge = edge->next) {
-        b2Body* other = edge->other;
+}
 
-        auto normal = get_normal(*edge->contact);
-
-        if (normal.x < -0.99f) {
-            obstacle |= DirectionFlags::RIGHT;
-            obstacles_dir[Direction::RIGHT].emplace_back(other);
-        }
-
-        if (normal.x > 0.99f) {
-            obstacle |= DirectionFlags::LEFT;
-            obstacles_dir[Direction::LEFT].emplace_back(other);
-        }
-
-        if (normal.y > 0.99f) {
-            obstacle |= DirectionFlags::DOWN;
-            obstacles_dir[Direction::DOWN].emplace_back(other);
-        }
-
-        if (normal.y < -0.99f) {
-            obstacle |= DirectionFlags::UP;
-            obstacles_dir[Direction::UP].emplace_back(other);
-        }
-    }
-
+void PhysicsComponent::update()
+{
+    // Clear list of obstacles from previous frame
     // Apply air resistance
     auto vel = -body->GetLinearVelocity();
     auto vel_len = vel.LengthSquared();
@@ -203,7 +209,7 @@ void PhysicsComponent::update()
 
 b2Vec2 PhysicsComponent::get_normal(const b2Contact& contact) const
 {
-    auto normal = contact.GetManifold()->localNormal;
+    auto normal = get_world_manifold(contact).normal;
 
     // Box2D specific check needed to get the correct normal
     if (contact.GetFixtureA() == body->GetFixtureList()) {
