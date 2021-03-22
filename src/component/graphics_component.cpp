@@ -130,7 +130,9 @@ void GraphicsComponent::set_current(const OPTION<u32> index)
     current_index = index;
     if (index) {
         ASSERT(*index < subs.size());
-        get_current_mut()->get_sprite_mut().setParent(parent);
+        auto& sprite = get_current_mut()->get_sprite_mut();
+        sprite.setParent(parent);
+        sprite.setFlippedX(flipped_x);
     }
 }
 
@@ -176,7 +178,7 @@ void GraphicsComponent::update(const PhysicsComponent& physics, const Input* inp
     f32 movement_x = input ? input->joystick.move.x : physics.body->GetLinearVelocity().x;
 
     if (!closef(movement_x, 0.0f)) {
-        bool flipped_x = movement_x < 0.0;
+        flipped_x = movement_x < 0.0;
         direction = flipped_x ? Direction::LEFT : Direction::RIGHT;
         if (auto current = get_current_mut()) {
             current->get_sprite_mut().setFlippedX(flipped_x);

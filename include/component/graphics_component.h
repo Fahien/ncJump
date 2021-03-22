@@ -141,6 +141,8 @@ public:
 private:
     /// Index of the current sub-graphics
     OPTION<u32> current_index = 0;
+
+    bool flipped_x = false;
 };
 
 } // namespace jmp
