@@ -221,7 +221,7 @@ void Editor::update_physics(PhysicsComponent& physics)
     }
 
     ImGui::DragFloat("Air factor", &physics.air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
-    ImGui::DragFloat("Velocity factor", &physics.velocity_factor, 0.125f);
+    ImGui::DragFloat("Speed", &physics.speed, 0.125f);
     ImGui::DragFloat("Jump Y factor", &physics.jump_y_factor);
     ImGui::DragFloat("Jump X factor", &physics.jump_x_factor, 0.125f);
     ImGui::DragFloat("Max X speed", &physics.max_x_speed, 0.125f);

@@ -61,6 +61,7 @@ b2Body* create_body(const PhysicsDef& def, b2World& world)
 PhysicsComponent::PhysicsComponent(const PhysicsDef& def, PhysicsSystem& system)
     : def {def}
     , body {create_body(def, system.world)}
+    , speed {def.speed}
 {
 }
 
@@ -68,7 +69,7 @@ PhysicsComponent::PhysicsComponent(const PhysicsComponent& o)
     : def {o.def}
     , body {create_body(def, *o.body->GetWorld())}
     , air_factor {o.air_factor}
-    , velocity_factor {o.velocity_factor}
+    , speed {o.speed}
     , jump_y_factor {o.jump_y_factor}
     , jump_x_factor {o.jump_x_factor}
     , max_x_speed {o.max_x_speed}
@@ -81,7 +82,7 @@ PhysicsComponent& PhysicsComponent::operator=(const PhysicsComponent& o)
     def = o.def;
     body = create_body(def, *o.body->GetWorld());
     air_factor = o.air_factor;
-    velocity_factor = o.velocity_factor;
+    speed = o.speed;
     jump_y_factor = o.jump_y_factor;
     jump_x_factor = o.jump_x_factor;
     max_x_speed = o.max_x_speed;
@@ -95,7 +96,7 @@ PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
     , body {o.body}
     , obstacle {o.obstacle}
     , air_factor {o.air_factor}
-    , velocity_factor {o.velocity_factor}
+    , speed {o.speed}
     , jump_y_factor {o.jump_y_factor}
     , jump_x_factor {o.jump_x_factor}
     , max_x_speed {o.max_x_speed}
@@ -110,7 +111,7 @@ PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
     std::swap(body, o.body);
     std::swap(obstacle, o.obstacle);
     std::swap(air_factor, o.air_factor);
-    std::swap(velocity_factor, o.velocity_factor);
+    std::swap(speed, o.speed);
     std::swap(jump_y_factor, o.jump_y_factor);
     std::swap(jump_x_factor, o.jump_x_factor);
     std::swap(max_x_speed, o.max_x_speed);

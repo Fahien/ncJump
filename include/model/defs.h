@@ -52,6 +52,7 @@ struct PhysicsDef {
     /// The physics body may use a different scale for its calculations
     float scale = 1.0f;
     bool dynamic = false;
+    float speed = 32.0f;
 };
 
 /// @brief Definition of a state component

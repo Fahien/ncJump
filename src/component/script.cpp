@@ -56,9 +56,8 @@ void WanderingScript::update(Entity& entity)
     }
 
     // Move entity
-    const f32 speed = 0.3f;
-    float x =
-        float(direction == Direction::LEFT) * -speed + float(direction == Direction::RIGHT) * speed;
+    ASSERT(direction == Direction::LEFT || direction == Direction::RIGHT);
+    f32 x = -f32(direction == Direction::LEFT) + f32(direction == Direction::RIGHT);
     MoveCommand(x, 0.0f).execute(entity);
 }
 

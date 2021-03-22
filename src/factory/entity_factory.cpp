@@ -102,6 +102,7 @@ EntityDef create_mushroom_def(const Config& config, GraphicsFactory& gf)
     phy_def.type = PhysicsType::CHAR;
     phy_def.scale = 1.0f / config.size.tile;
     phy_def.dynamic = true;
+    phy_def.speed = 10.0f;
 
     def.physics = phy_def;
 

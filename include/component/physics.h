@@ -46,7 +46,7 @@ public:
     std::vector<b2Body*> obstacles_dir[4];
 
     f32 air_factor = 1.0f / 16.0f;
-    f32 velocity_factor = 32.0f;
+    f32 speed = 32.0f;
     f32 jump_y_factor = 160.0f;
     f32 jump_x_factor = 3.0f;
     f32 max_x_speed = 6.0f;

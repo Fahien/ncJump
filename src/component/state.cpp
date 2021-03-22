@@ -256,7 +256,7 @@ void can_move_on_x(const f32 move_x, Entity& entity, f32 x_factor)
 
 void MoveState::handle(Entity& entity, const MoveCommand& move)
 {
-    can_move_on_x(move.x, entity, entity.get_physics()->velocity_factor);
+    can_move_on_x(move.x, entity, entity.get_physics()->speed);
     can_jump(move, entity);
     can_push(move, entity);
 }
@@ -394,7 +394,7 @@ void can_stop_pushing(Entity& entity)
 
 void PushState::handle(Entity& entity, const MoveCommand& move)
 {
-    can_move_on_x(move.x, entity, entity.get_physics()->velocity_factor);
+    can_move_on_x(move.x, entity, entity.get_physics()->speed);
     can_jump(move, entity);
     can_pull(move, entity);
 }
@@ -446,7 +446,7 @@ void can_stop_pulling(const bool pulling, Entity& entity)
 
 void PullState::handle(Entity& entity, const MoveCommand& move)
 {
-    can_move_on_x(move.x, entity, entity.get_physics()->velocity_factor);
+    can_move_on_x(move.x, entity, entity.get_physics()->speed);
     can_jump(move, entity);
 
     if (move.pull) {
