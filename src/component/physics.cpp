@@ -148,6 +148,13 @@ void PhysicsComponent::set_enabled(const bool e)
 #endif
 }
 
+inline b2WorldManifold get_world_manifold(const b2Contact& contact)
+{
+    b2WorldManifold wm;
+    contact.GetWorldManifold(&wm);
+    return wm;
+}
+
 void PhysicsComponent::update()
 {
     assert(body && "Physics component has no body");
@@ -159,33 +166,27 @@ void PhysicsComponent::update()
 
     // Update some variables
     obstacle = DirectionFlags::NONE;
-    for (auto edge = body->GetContactList(); edge; edge = edge->next) {
-        // Suppose the other body is A
-        b2Body* other = edge->contact->GetFixtureA()->GetBody();
-        auto normal = edge->contact->GetManifold()->localNormal;
+    for (auto edge = body->GetContactList(); edge && edge->contact; edge = edge->next) {
+        b2Body* other = edge->other;
 
-        if (other == body) {
-            other = edge->contact->GetFixtureB()->GetBody();
-            // Weird normal adjustment
-            normal = -normal;
-        }
+        auto normal = get_normal(*edge->contact);
 
-        if (normal.x < -0.9f) {
+        if (normal.x < -0.99f) {
             obstacle |= DirectionFlags::RIGHT;
             obstacles_dir[Direction::RIGHT].emplace_back(other);
         }
 
-        if (normal.x > 0.9f) {
+        if (normal.x > 0.99f) {
             obstacle |= DirectionFlags::LEFT;
             obstacles_dir[Direction::LEFT].emplace_back(other);
         }
 
-        if (normal.y > 0.9f) {
+        if (normal.y > 0.99f) {
             obstacle |= DirectionFlags::DOWN;
             obstacles_dir[Direction::DOWN].emplace_back(other);
         }
 
-        if (normal.y < -0.9f) {
+        if (normal.y < -0.99f) {
             obstacle |= DirectionFlags::UP;
             obstacles_dir[Direction::UP].emplace_back(other);
         }
@@ -197,6 +198,18 @@ void PhysicsComponent::update()
     vel.x *= air_factor * vel_len;
     vel.y *= air_factor * vel_len;
     body->ApplyForceToCenter(vel, false);
+}
+
+b2Vec2 PhysicsComponent::get_normal(const b2Contact& contact) const
+{
+    auto normal = contact.GetManifold()->localNormal;
+
+    // Box2D specific check needed to get the correct normal
+    if (contact.GetFixtureA() == body->GetFixtureList()) {
+        return -normal;
+    }
+
+    return normal;
 }
 
 } // namespace jmp

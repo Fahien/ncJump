@@ -208,10 +208,7 @@ void Editor::update_physics(PhysicsComponent& physics)
 
     if (ImGui::TreeNode("Contacts")) {
         for (auto edge = physics.body->GetContactList(); edge; edge = edge->next) {
-            auto normal = edge->contact->GetManifold()->localNormal;
-            if (edge->contact->GetFixtureA() == physics.body->GetFixtureList()) {
-                normal = -normal;
-            }
+            auto normal = physics.get_normal(*edge->contact);
             ImGui::Text("normal: { %.2f, %.2f }", normal.x, normal.y);
         }
         ImGui::TreePop();
@@ -518,6 +515,9 @@ OPTION<usize> Editor::update_entity(usize i, Entity& entity)
     auto name = nctl::String().format("%zu", i);
     if (ImGui::TreeNode(name.data())) {
         ImGui::Text("layer: %u", entity.get_graphics()->get_current()->get_sprite().layer());
+        if (auto& state = entity.get_state()) {
+            ImGui::Text("state: %s", state->get_state().name.data());
+        }
         if (ImGui::Button("Delete")) {
             ret = i;
         }

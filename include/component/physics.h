@@ -30,13 +30,17 @@ public:
 
     void update();
 
+    /// @return The normal of this contact relative to itself,
+    /// which means that this vector will point towards this body.
+    b2Vec2 get_normal(const b2Contact& contact) const;
+
     PhysicsDef def = {};
 
     b2Body* body = nullptr;
 
     bool enabled = true;
 
-    DirectionFlags obstacle;
+    DirectionFlags obstacle = DirectionFlags::NONE;
 
     /// A list of obstacles for each Direction
     std::vector<b2Body*> obstacles_dir[4];
