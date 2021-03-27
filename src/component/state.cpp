@@ -58,7 +58,7 @@ public:
     void update(Entity& entity) override;
     void exit(Entity& entity) override;
 
-    bool moving = true;
+    DirectionFlags moving_direction = DirectionFlags::NONE;
 };
 
 class PullState : public State
@@ -143,7 +143,7 @@ void can_fall(Entity& entity)
 {
     // Can fall if there is no platform below
     bool no_obstacle_down = !any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
-    bool falling = entity.get_physics()->body->GetLinearVelocity().y < -0.125f;
+    bool falling = entity.get_physics()->body->GetLinearVelocity().y < -1.0f;
     bool should_fall = no_obstacle_down && falling;
 
     if (should_fall) {
@@ -256,6 +256,10 @@ void can_move_on_x(const f32 move_x, Entity& entity, f32 x_factor)
 
 void MoveState::handle(Entity& entity, const MoveCommand& move)
 {
+    if (move.x) {
+        moving = true;
+    }
+
     can_move_on_x(move.x, entity, entity.get_physics()->speed);
     can_jump(move, entity);
     can_push(move, entity);
@@ -379,21 +383,38 @@ PushState::PushState()
     value = Value::PUSH;
 }
 
+/// @param move_x Velocity along the x axis
+/// @return The direction of movement
+DirectionFlags get_direction(const f32 move_x)
+{
+    if (move_x > 0.0f) {
+        return DirectionFlags::RIGHT;
+    }
+    if (move_x < 0.0f) {
+        return DirectionFlags::LEFT;
+    }
+    return DirectionFlags::NONE;
+}
+
 void PushState::enter(Entity& entity, const MoveCommand* move)
 {
-    moving = true;
+    if (move) {
+        moving_direction = get_direction(move->x);
+    }
     entity.get_graphics()->set_current(State::PUSH);
 }
 
-void can_stop_pushing(Entity& entity)
+void can_stop_pushing(Entity& entity, const DirectionFlags direction)
 {
-    if (!any(entity.get_physics()->obstacle & (DirectionFlags::LEFT | DirectionFlags::RIGHT))) {
+    if (!any(entity.get_physics()->obstacle & direction)) {
         entity.get_state()->set_state(State::MOVE, entity);
     }
 }
 
 void PushState::handle(Entity& entity, const MoveCommand& move)
 {
+    moving_direction = get_direction(move.x);
+
     can_move_on_x(move.x, entity, entity.get_physics()->speed);
     can_jump(move, entity);
     can_pull(move, entity);
@@ -401,9 +422,12 @@ void PushState::handle(Entity& entity, const MoveCommand& move)
 
 void PushState::update(Entity& entity)
 {
-    moving = can_stop(moving, entity);
-    can_stop_pushing(entity);
+    can_stop(moving_direction != DirectionFlags::NONE, entity);
+    can_stop_pushing(entity, moving_direction);
     can_fall(entity);
+
+    // Reset for next frame
+    moving_direction = DirectionFlags::NONE;
 }
 
 void PushState::exit(Entity& entity)
