@@ -40,6 +40,7 @@ bool active_button(const char* name, bool active)
 
 void Editor::reset()
 {
+    current_entity = None;
     selected_tile = None;
     selected_entity = None;
     set_mode(Mode::NONE);
@@ -227,9 +228,9 @@ void Editor::update_physics(PhysicsComponent& physics)
     ImGui::DragFloat("Max X speed", &physics.max_x_speed, 0.125f);
 }
 
-void Editor::update_player(Entity& entity)
+void Editor::update_entity(Entity& entity)
 {
-    ImGui::Begin("Player");
+    ImGui::Begin("Entity");
 
     bool enabled = entity.is_enabled();
     if (ImGui::Checkbox("enabled:", &enabled)) {
@@ -508,25 +509,6 @@ void update_size(Tilemap& tilemap)
     }
 }
 
-OPTION<usize> Editor::update_entity(usize i, Entity& entity)
-{
-    OPTION<usize> ret = None;
-
-    auto name = nctl::String().format("%zu", i);
-    if (ImGui::TreeNode(name.data())) {
-        ImGui::Text("layer: %u", entity.get_graphics()->get_current()->get_sprite().layer());
-        if (auto& state = entity.get_state()) {
-            ImGui::Text("state: %s", state->get_state().name.data());
-        }
-        if (ImGui::Button("Delete")) {
-            ret = i;
-        }
-        ImGui::TreePop();
-    }
-
-    return ret;
-}
-
 void Editor::update_tilemap(Tilemap& tilemap)
 {
     ImGui::Begin("Tilemap");
@@ -538,17 +520,51 @@ void Editor::update_tilemap(Tilemap& tilemap)
 
     update_size(tilemap);
 
+    ImGui::Text("Selected: %s", current_entity ? std::to_string(*current_entity).c_str() : "none");
+
     if (ImGui::TreeNode("entities:")) {
         OPTION<usize> to_delete = None;
+        OPTION<usize> clicked = None;
+
         auto& entities = tilemap.get_entities();
+
         for (usize i = 0; i < entities.size(); ++i) {
-            if (auto del = update_entity(i, *entities[i])) {
-                to_delete = del;
+            auto& entity = entities[i];
+
+            auto name = nctl::String().format("%zu", i);
+
+            ImGuiTreeNodeFlags flags = 0;
+            if (current_entity && *current_entity == i) {
+                flags = ImGuiTreeNodeFlags_Selected;
+            }
+
+            bool is_open = ImGui::TreeNodeEx(name.data(), flags);
+
+            if (ImGui::IsItemClicked()) {
+                clicked = i;
+            }
+
+            if (is_open) {
+                if (auto& state = entity->get_state()) {
+                    ImGui::Text("state: %s", state->get_state().name.data());
+                }
+
+                if (ImGui::Button("Delete")) {
+                    to_delete = i;
+                }
+
+                ImGui::TreePop();
             }
         }
+
+        if (clicked) {
+            current_entity = clicked;
+        }
+
         if (to_delete) {
             tilemap.delete_entity(*to_delete);
         }
+
         ImGui::TreePop();
     }
 
@@ -595,7 +611,15 @@ void Editor::update()
 
         update_config(game.config);
         update_camera(game.camera, game.config);
-        update_player(game.entity);
+
+        auto& entities = game.tilemap.get_entities();
+        if (current_entity && *current_entity < entities.size()) {
+            update_entity(*entities[*current_entity]);
+        } else {
+            current_entity = None;
+            update_entity(game.entity);
+        }
+
         update_input(game.input);
         update_tileset(game.tileset);
         update_selected_tile(game.tileset);

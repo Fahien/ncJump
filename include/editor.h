@@ -40,13 +40,12 @@ private:
     void update_camera(Camera& camera, Config& config);
     void update_state(StateComponent& state);
     void update_physics(PhysicsComponent& physics);
-    void update_player(Entity& entity);
+    void update_entity(Entity& entity);
     void update_input(Input& input);
     void update_tileset(Tileset& tileset);
     void update_selected_tile(Tileset& tileset);
     void update_entities(EntityFactory& factory);
     void update_tilemap(Tilemap& tilemap);
-    OPTION<usize> update_entity(usize i, Entity& entity);
     void update_collisions(Tilemap& tilemap);
 
     void place_selected_tile();
@@ -57,7 +56,12 @@ private:
     /// Tilemap place mode
     Mode mode = Mode::NONE;
 
+    /// Current selected entity among the ones in the scene
+    OPTION<u32> current_entity = None;
+
+    /// Tile to be placed in the scene
     OPTION<u32> selected_tile = None;
+    /// Entity to be placed in the scene
     OPTION<u32> selected_entity = None;
 
     /// Whether to draw debug shapes for physics bodies
