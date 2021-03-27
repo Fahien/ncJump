@@ -86,14 +86,6 @@ b2Fixture* get_enemy_or_null(b2Contact& contact)
 
 void DestructionListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
 {
-    // TODO move this into a generic contact listener
-    {
-        auto& a = Entity::from(*contact->GetFixtureA());
-        auto& b = Entity::from(*contact->GetFixtureB());
-        a.get_physics()->update(*contact);
-        b.get_physics()->update(*contact);
-    }
-
     float impulse_factor = 1.0f;
 
     if (auto player_fixture = get_player_or_null(*contact)) {

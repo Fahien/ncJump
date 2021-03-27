@@ -156,31 +156,36 @@ inline b2WorldManifold get_world_manifold(const b2Contact& contact)
     return wm;
 }
 
-void PhysicsComponent::update(b2Contact& contact)
+void PhysicsComponent::update(b2ContactEdge& contact)
 {
-    b2Body* other = contact.GetFixtureA()->GetBody();
-    if (other == body) {
-        other = contact.GetFixtureB()->GetBody();
+    b2Body* other = contact.other;
+    ASSERT(other);
+
+    auto normal = get_normal(*contact.contact);
+
+    // Skip abnormal values
+    if (normal.x > 1.0 || normal.y > 1.0 || normal.x < -1.0 || normal.y < -1.0) {
+        return;
     }
 
-    auto normal = get_normal(contact);
+    const f32 threshold = 0.80f;
 
-    if (normal.x < -0.99f) {
+    if (normal.x < -threshold) {
         obstacle |= DirectionFlags::RIGHT;
         obstacles_dir[Direction::RIGHT].emplace_back(other);
     }
 
-    if (normal.x > 0.99f) {
+    if (normal.x > threshold) {
         obstacle |= DirectionFlags::LEFT;
         obstacles_dir[Direction::LEFT].emplace_back(other);
     }
 
-    if (normal.y > 0.99f) {
+    if (normal.y > threshold) {
         obstacle |= DirectionFlags::DOWN;
         obstacles_dir[Direction::DOWN].emplace_back(other);
     }
 
-    if (normal.y < -0.99f) {
+    if (normal.y < -threshold) {
         obstacle |= DirectionFlags::UP;
         obstacles_dir[Direction::UP].emplace_back(other);
     }
@@ -188,17 +193,21 @@ void PhysicsComponent::update(b2Contact& contact)
 
 void PhysicsComponent::reset()
 {
-    // Update some variables
+    // Clear list of obstacles from previous frame
     for (auto& obstacles : obstacles_dir) {
         obstacles.clear();
     }
-
     obstacle = DirectionFlags::NONE;
 }
 
 void PhysicsComponent::update()
 {
-    // Clear list of obstacles from previous frame
+    reset();
+
+    for (auto contact = body->GetContactList(); contact; contact = contact->next) {
+        update(*contact);
+    }
+
     // Apply air resistance
     auto vel = -body->GetLinearVelocity();
     auto vel_len = vel.LengthSquared();

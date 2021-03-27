@@ -28,9 +28,8 @@ public:
 
     void set_enabled(bool e);
 
-    /// @brief Called by a physics listener, it is used to update
-    /// the current obstacle flags and list of obstacle bodies
-    void update(b2Contact& contact);
+    /// @brief Updates current obstacle flags and list of obstacle bodies
+    void update(b2ContactEdge& contact);
 
     void update();
 

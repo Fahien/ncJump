@@ -108,6 +108,10 @@ void Entity::update(const f32 dt)
 {
     assert(enabled);
 
+    if (physics) {
+        physics->update();
+    }
+
     for (auto& command : commands) {
         command->execute(*this);
     }
@@ -123,10 +127,6 @@ void Entity::update(const f32 dt)
 
     if (state) {
         state->update(*this);
-    }
-
-    if (physics) {
-        physics->update();
     }
 }
 
