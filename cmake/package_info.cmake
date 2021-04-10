@@ -146,6 +146,10 @@ function(callback_after_target)
 				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_jump_up_anim_strip_3.png"
 				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_jump_down_anim_strip_3.png"
 				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_pushing_foward_anim_strip_6.png"
+				"${PACKAGE_DATA_DIR}/data/img/hero/herochar_death_anim_strip_8.png"
+				"${PACKAGE_DATA_DIR}/data/img/enemy/mushroom/mushroom_crushed_anim_strip_6.png"
+				"${PACKAGE_DATA_DIR}/data/img/enemy/mushroom/mushroom_death_anim_strip_6.png"
+				"${PACKAGE_DATA_DIR}/data/img/enemy/mushroom/mushroom_walk_anim_strip_8.png"
 				"${PACKAGE_DATA_DIR}/data/img/tile/tileset.png"
 				"${PACKAGE_DATA_DIR}/data/img/tile/background.png"
 			)
