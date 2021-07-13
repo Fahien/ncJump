@@ -6,8 +6,8 @@ env:
   DEPLOY_MESSAGE:
     "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
 
-     - PACKAGE_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
-  DEPLOY_BRANCH: PACKAGE_NAME-BRANCH_NAME-OS-COMPILER
+     - PROJECT_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  DEPLOY_BRANCH: PROJECT_NAME-BRANCH_NAME-OS-COMPILER
 
 on: [push, workflow_dispatch]
 
@@ -31,7 +31,7 @@ jobs:
         $env:GIT_REDIRECT_STDERR = '2>&1'
         git fetch --unshallow; if (-not $?) { return }
 
-    - name: 'Download nCine-libraries and package data'
+    - name: 'Download nCine-libraries and project data'
       run: |
         $env:GIT_REDIRECT_STDERR = '2>&1'
         $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
@@ -46,7 +46,7 @@ jobs:
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
 
-        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -creplace "OS","windows" -creplace "COMPILER",$env:vsversion
         git checkout $env:LIBRARIES_BRANCH
         $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
         7z x $env:LIBRARIES_FILE
@@ -68,7 +68,7 @@ jobs:
     - name: 'Download nCine source and data'
       run: |
         $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
-        $env:NCINE_SOURCE_BRANCH = $env:NCINE_SOURCE_BRANCH -replace "BRANCH_NAME","$env:branch_name"
+        $env:NCINE_SOURCE_BRANCH = $env:NCINE_SOURCE_BRANCH -creplace "BRANCH_NAME","$env:branch_name"
 
         cd ..
         git clone https://github.com/nCine/nCine-data.git
@@ -95,7 +95,7 @@ jobs:
 
     - name: 'CMake Configuration'
       run: |
-        $env:package_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
+        $env:project_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
 
         $env:generator = switch ("${{ matrix.os }}")
         {
@@ -104,24 +104,24 @@ jobs:
         }
 
         if ("${{ matrix.BuildType }}" -eq "BinDist")
-          { cmake -G "$env:generator" -A x64 -B ../$env:package_name-build-${{ matrix.BuildType }} -D PACKAGE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-Release -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external }
+          { cmake -G "$env:generator" -A x64 -B ../$env:project_name-build-${{ matrix.BuildType }} -D NCPROJECT_OPTIONS_PRESETS=${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-Release -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external }
         else
-          { cmake -G "$env:generator" -A x64 -B ../$env:package_name-build-${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-${{ matrix.BuildType }} -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external }
+          { cmake -G "$env:generator" -A x64 -B ../$env:project_name-build-${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-${{ matrix.BuildType }} -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external }
 
     - name: 'CMake Build'
       run: |
-        $env:package_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
+        $env:project_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
 
         if ("${{ matrix.BuildType }}" -eq "BinDist")
-          { cmake --build ../$env:package_name-build-${{ matrix.BuildType }} --config Release }
+          { cmake --build ../$env:project_name-build-${{ matrix.BuildType }} --config Release }
         else
-          { cmake --build ../$env:package_name-build-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} }
+          { cmake --build ../$env:project_name-build-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} }
 
     - name: 'Package'
       if: matrix.BuildType == 'BinDist'
       run: |
-        $env:package_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
-        cmake --build ../$env:package_name-build-${{ matrix.BuildType }} --config Release --target package
+        $env:project_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
+        cmake --build ../$env:project_name-build-${{ matrix.BuildType }} --config Release --target package
 
     - name: 'Push Artifacts'
       if: matrix.BuildType == 'BinDist'
@@ -132,10 +132,10 @@ jobs:
         git config --global user.name "GitHub Actions"
         $env:GIT_REDIRECT_STDERR = '2>&1'
 
-        $env:package_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
+        $env:project_name = Split-Path -Path "$env:GITHUB_REPOSITORY" -leaf
         $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
-        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "PACKAGE_NAME",$env:package_name
-        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "BRANCH_NAME",$env:branch_name
+        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -creplace "PROJECT_NAME",$env:project_name
+        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -creplace "BRANCH_NAME",$env:branch_name
 
         $env:vsversion = switch ("${{ matrix.os }}")
         {
@@ -143,20 +143,20 @@ jobs:
           "windows-2016" {"vs2017"}
         }
 
-        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "PACKAGE_NAME",$env:package_name
-        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
-        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -creplace "PROJECT_NAME",$env:project_name
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -creplace "BRANCH_NAME",$env:branch_name
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -creplace "OS","windows" -creplace "COMPILER",$env:vsversion
 
         cd ..
         git clone https://$env:PUBLIC_REPO_TOKEN@github.com/$env:GITHUB_REPOSITORY-artifacts.git 2>&1>$null
-        cd $env:package_name-artifacts
+        cd $env:project_name-artifacts
         git checkout $env:DEPLOY_BRANCH; if (-not $?) { git checkout --orphan $env:DEPLOY_BRANCH }
         git reset
         git clean -f
         git rm *
 
-        Move-Item -Path ..\$env:package_name-build-${{ matrix.BuildType }}\*.exe -Destination .
-        Move-Item -Path ..\$env:package_name-build-${{ matrix.BuildType }}\*.zip -Destination .
+        Move-Item -Path ..\$env:project_name-build-${{ matrix.BuildType }}\*.exe -Destination .
+        Move-Item -Path ..\$env:project_name-build-${{ matrix.BuildType }}\*.zip -Destination .
         git add *.exe *.zip
 
         git commit --amend -m "$env:DEPLOY_MESSAGE"; if (-not $?) { git commit -m "$env:DEPLOY_MESSAGE" }

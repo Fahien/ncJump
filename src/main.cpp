@@ -19,8 +19,8 @@ void JumpHandler::onPreInit(nc::AppConfiguration& ncfg)
 #elif defined(__EMSCRIPTEN__)
     ncfg.dataPath() = "/";
 #else
-#ifdef PACKAGE_DEFAULT_DATA_DIR
-    ncfg.dataPath() = PACKAGE_DEFAULT_DATA_DIR;
+#ifdef NCPROJECT_DEFAULT_DATA_DIR
+    ncfg.dataPath() = NCPROJECT_DEFAULT_DATA_DIR;
 #else
     ncfg.dataPath() = "data/";
 #endif

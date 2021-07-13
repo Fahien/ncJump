@@ -6,8 +6,8 @@ env:
   DEPLOY_MESSAGE:
     "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
 
-     - PACKAGE_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
-  DEPLOY_BRANCH: PACKAGE_NAME-BRANCH_NAME-OS-COMPILER
+     - PROJECT_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  DEPLOY_BRANCH: PROJECT_NAME-BRANCH_NAME-OS-COMPILER
 
 on: [push, workflow_dispatch]
 
@@ -39,7 +39,7 @@ jobs:
       run: |
         git fetch --unshallow || true
 
-    - name: 'Download nCine-libraries and package data'
+    - name: 'Download nCine-libraries and project data'
       run: |
         export OS=emscripten
         export CC=emcc
@@ -90,26 +90,26 @@ jobs:
 
     - name: 'CMake Configuration'
       run: |
-        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        export PROJECT_NAME=${GITHUB_REPOSITORY##*/}
 
         source ../emsdk/emsdk_env.sh
 
         if [[ "${{ matrix.BuildType }}" == "BinDist" ]]; then
-          emcmake cmake -B ../$PACKAGE_NAME-build-${{ matrix.BuildType }} -D PACKAGE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-Release
+          emcmake cmake -B ../$PROJECT_NAME-build-${{ matrix.BuildType }} -D NCPROJECT_OPTIONS_PRESETS=${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-Release
         else
-          emcmake cmake -B ../$PACKAGE_NAME-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-${{ matrix.BuildType }}
+          emcmake cmake -B ../$PROJECT_NAME-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D nCine_DIR=$(pwd)/../nCine-build-${{ matrix.BuildType }}
         fi
 
     - name: 'Make'
       run: |
-        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
-        make -j2 -C ../$PACKAGE_NAME-build-${{ matrix.BuildType }}
+        export PROJECT_NAME=${GITHUB_REPOSITORY##*/}
+        make -j2 -C ../$PROJECT_NAME-build-${{ matrix.BuildType }}
 
     - name: 'Package'
       if: matrix.BuildType == 'BinDist'
       run: |
-        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
-        make package -C ../$PACKAGE_NAME-build-${{ matrix.BuildType }}
+        export PROJECT_NAME=${GITHUB_REPOSITORY##*/}
+        make package -C ../$PROJECT_NAME-build-${{ matrix.BuildType }}
 
     - name: 'Push Artifacts'
       if: matrix.BuildType == 'BinDist'
@@ -119,27 +119,27 @@ jobs:
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
 
-        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
+        export PROJECT_NAME=${GITHUB_REPOSITORY##*/}
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
-        export DEPLOY_MESSAGE=`sed 's/PACKAGE_NAME/'"$PACKAGE_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+        export DEPLOY_MESSAGE=`sed 's/PROJECT_NAME/'"$PROJECT_NAME"'/' <<< "$DEPLOY_MESSAGE"`
         export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
 
         export OS=emscripten
         export CC=emcc
 
         cd ..
-        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/PACKAGE_NAME/'"$PACKAGE_NAME"'/'`
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/PROJECT_NAME/'"$PROJECT_NAME"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
         git clone https://$PUBLIC_REPO_TOKEN@github.com/$GITHUB_REPOSITORY-artifacts.git >/dev/null 2>&1
-        cd $PACKAGE_NAME-artifacts
+        cd $PROJECT_NAME-artifacts
 
         git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
         git reset
         git clean -f
         git rm * || true
-        mv -f ../$PACKAGE_NAME-build-${{ matrix.BuildType }}/*.tar.gz .
+        mv -f ../$PROJECT_NAME-build-${{ matrix.BuildType }}/*.tar.gz .
         git add *.tar.gz
         git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
         git push --force || git push --set-upstream origin $DEPLOY_BRANCH
@@ -152,8 +152,8 @@ jobs:
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
 
-        export PACKAGE_NAME=${GITHUB_REPOSITORY##*/}
-        export DEPLOY_MESSAGE=`sed 's/PACKAGE_NAME/'"$PACKAGE_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+        export PROJECT_NAME=${GITHUB_REPOSITORY##*/}
+        export DEPLOY_MESSAGE=`sed 's/PROJECT_NAME/'"$PROJECT_NAME"'/' <<< "$DEPLOY_MESSAGE"`
         export DEPLOY_BRANCH=pages
 
         export COMMIT_DATE=`git log -1 --format=%ad --date=short`
@@ -166,16 +166,16 @@ jobs:
         export PATCH=r${REV_COUNT}-${SHORT_HASH}
 
         export PACKAGE_VERSION=${MAJOR}.${MINOR}.${PATCH}
-        export TAR_NAME=${PACKAGE_NAME}-${PACKAGE_VERSION}-Emscripten
+        export TAR_NAME=${PROJECT_NAME}-${PACKAGE_VERSION}-Emscripten
         echo ${TAR_NAME}
 
         cd ..
         echo Moving..
-        mv $PACKAGE_NAME-artifacts/${TAR_NAME}.tar.gz .
+        mv $PROJECT_NAME-artifacts/${TAR_NAME}.tar.gz .
         echo Extracting..
         tar -zxvf ${TAR_NAME}.tar.gz
 
-        cd $PACKAGE_NAME-artifacts
+        cd $PROJECT_NAME-artifacts
         git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
         git reset
         git clean -f
