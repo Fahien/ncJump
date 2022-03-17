@@ -92,8 +92,8 @@ void Tilemap::set_game(Game& g)
     background_node->setTexRect(background_rect);
 
     // Little offset so to anchor the map to bottom-left corner of the first tile
-    node->x += game->config.size.tile / 2.0f;
-    node->y += game->config.size.tile / 2.0f;
+    node->moveX(game->config.size.tile / 2.0f);
+    node->moveY(game->config.size.tile / 2.0f);
 
     // Unless already loaded from somewhere else
     if (tile_descs.empty()) {

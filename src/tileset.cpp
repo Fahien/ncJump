@@ -62,8 +62,8 @@ UNIQUE<Entity> Tileset::create_entity(const Tile& tile, Game& game, bool dynamic
     u32 row = tile.id / width;
     u32 col = tile.id % width;
 
-    entity->transform.node->x = f32(col * tile_size);
-    entity->transform.node->y = f32(row * tile_size);
+    entity->transform.node->setPositionX(f32(col * tile_size));
+    entity->transform.node->setPositionY(f32(row * tile_size));
 
     nc::Recti tex_rect;
     tex_rect.x = i32(col * tile_size);

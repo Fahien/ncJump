@@ -18,7 +18,7 @@ Camera::Camera(Game& game, nc::SceneNode* follow)
 Vec2f Camera::get_position() const
 {
     // Need to scale cause the scene node position is already scaled. Do not know why.
-    return Vec2f(-node.x / game->config.scale.scene, -node.y / game->config.scale.scene);
+    return Vec2f(-node.position().x / game->config.scale.scene, -node.position().y / game->config.scale.scene);
 }
 
 void Camera::set_follow(nc::SceneNode* f)
@@ -43,13 +43,13 @@ void Camera::update()
     auto window = game->config.get_real_window_size();
 
     // Target needs to be in game space as well
-    auto hard_target = Vec2f(-follow->x * game->config.scale.scene + window.width / 2.0f,
-        -follow->y * game->config.scale.scene + window.height / 2.0f);
+    auto hard_target = Vec2f(-follow->position().x * game->config.scale.scene + window.width / 2.0f,
+        -follow->position().y * game->config.scale.scene + window.height / 2.0f);
     hard_target += offset;
 
     // The real target is smoothed
-    target.x = lerp(node.x, hard_target.x, smooth_factor);
-    target.y = lerp(node.y, hard_target.y, smooth_factor);
+    target.x = lerp(node.position().x, hard_target.x, smooth_factor);
+    target.y = lerp(node.position().y, hard_target.y, smooth_factor);
 
     // Clamp to tilemap borders
     Vec2f max = {0.0f, 0.0f};
@@ -65,8 +65,8 @@ void Camera::update()
     min.x = std::min(min.x, max.x);
     min.y = std::min(min.y, max.y);
 
-    node.x = std::clamp(target.x, min.x, max.x);
-    node.y = std::clamp(target.y, min.y, max.y);
+    node.setPositionX(std::clamp(target.x, min.x, max.x));
+    node.setPositionY(std::clamp(target.y, min.y, max.y));
 }
 
 } // namespace jmp

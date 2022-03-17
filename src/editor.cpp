@@ -152,7 +152,7 @@ void Editor::update_config(Config& config)
     }
 
     if (ImGui::CollapsingHeader("Scene")) {
-        ImGui::Text("x: %.0f, y: %.0f", game.scene.x, game.scene.y);
+        ImGui::Text("x: %.0f, y: %.0f", game.scene.position().x, game.scene.position().y);
         ImGui::PushID(&config.scale.scene);
         if (ImGui::SliderFloat("Scale", &config.scale.scene, 1.0f, 4.0f, "%.0f")) {
             game.scene.setScale(config.scale.scene);
@@ -516,7 +516,7 @@ void Editor::update_tilemap(Tilemap& tilemap)
     f32 max = f32(tilemap.get_width() * game.config.size.tile);
     ImGui::DragFloat2("initial pos: ", tilemap.initial_position.data(), 1.0f, 0.0f, max, "%.0f");
 
-    ImGui::Text("pos { x: %.0f, y: %.0f }", tilemap.node->x, tilemap.node->y);
+    ImGui::Text("pos { x: %.0f, y: %.0f }", tilemap.node->position().x, tilemap.node->position().y);
 
     update_size(tilemap);
 
