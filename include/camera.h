@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ncine/Camera.h>
+
 #include "types.h"
 
 namespace ncine
@@ -16,9 +18,11 @@ class Camera
 public:
     Camera(Game& game, nc::SceneNode* follow = nullptr);
 
+    ~Camera();
+
     void update();
 
-    /// @return Basically an inverted position of the scene
+    /// @return The current camera position
     Vec2f get_position() const;
 
     /// @param follow Sets the node to follow or stops following if `nullptr` is passed
@@ -31,8 +35,8 @@ public:
 private:
     Game* game = nullptr;
 
-    /// Node to move to the opposite direction of the camera
-    nc::SceneNode& node;
+    /// The nCine camera object
+    nc::Camera camera;
 
     /// Node the camera needs to follow
     nc::SceneNode* follow;
