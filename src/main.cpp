@@ -86,6 +86,10 @@ void JumpHandler::onMouseButtonReleased(const nc::MouseEvent& event)
 
 void JumpHandler::onKeyPressed(const nc::KeyboardEvent& event)
 {
+    if (event.mod == nc::KeyMod::CTRL && event.sym == nc::KeySym::Q) {
+        nc::theApplication().quit();
+    }
+
     switch (event.sym) {
     case nc::KeySym::W:
         game->input.joystick.move.y += 1.0f;
@@ -150,15 +154,12 @@ void JumpHandler::onKeyReleased(const nc::KeyboardEvent& event)
     game->input.joystick.move.y = nctl::clamp(game->input.joystick.move.y, -1.0f, 1.0f);
 }
 
-void JumpHandler::onJoyAxisMoved(const nc::JoyAxisEvent& event)
+void JumpHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent& event)
 {
-    constexpr int X_AXIS = 0;
-    constexpr int Y_AXIS = 1;
-
-    if (event.axisId == X_AXIS) {
-        game->input.joystick.move.x = event.normValue;
-    } else if (event.axisId == Y_AXIS) {
-        game->input.joystick.move.y = -event.normValue;
+    if (event.axisName == nc::AxisName::LX) {
+        game->input.joystick.move.x = event.value;
+    } else if (event.axisName == nc::AxisName::LY) {
+        game->input.joystick.move.y = -event.value;
     }
 
     // Process input
@@ -177,6 +178,10 @@ void JumpHandler::onJoyAxisMoved(const nc::JoyAxisEvent& event)
 
 void JumpHandler::onJoyMappedButtonPressed(const nc::JoyMappedButtonEvent& event)
 {
+    if (event.buttonName == nc::ButtonName::BACK) {
+        nc::theApplication().quit();
+    }
+
     if (event.buttonName == nc::ButtonName::A) {
         game->input.joystick.a.down = true;
         game->input.joystick.a.just_down = true;

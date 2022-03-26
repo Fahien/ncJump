@@ -31,7 +31,7 @@ public:
     void onKeyPressed(const nc::KeyboardEvent& event) override;
     void onKeyReleased(const nc::KeyboardEvent& event) override;
 
-    void onJoyAxisMoved(const nc::JoyAxisEvent& event) override;
+    void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent& event) override;
 
     void onJoyMappedButtonPressed(const nc::JoyMappedButtonEvent& event) override;
     void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent& event) override;

@@ -180,6 +180,11 @@ void Editor::update_config(Config& config)
         ImGui::PopID();
     }
 
+    ImGui::Separator();
+    if (ImGui::Button("Quit")) {
+        nc::theApplication().quit();
+    }
+
     ImGui::End();
 }
 
