@@ -21,6 +21,7 @@ public:
     Editor(Game& g);
 
     void update();
+    void postUpdate();
 
 private:
     enum class Mode {

@@ -22,6 +22,7 @@ public:
     ~Game();
 
     void update(f32 dt);
+    void postUpdate();
 
     Config config;
 

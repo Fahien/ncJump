@@ -23,6 +23,7 @@ public:
     void onInit() override;
 
     void onFrameStart() override;
+    void onPostUpdate() override;
 
     void onMouseMoved(const nc::MouseState& state) override;
     void onMouseButtonPressed(const nc::MouseEvent& event) override;

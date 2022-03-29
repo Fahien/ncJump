@@ -61,6 +61,11 @@ void JumpHandler::onFrameStart()
     game->update(nc::theApplication().interval());
 }
 
+void JumpHandler::onPostUpdate()
+{
+	game->postUpdate();
+}
+
 void JumpHandler::onMouseMoved(const nc::MouseState& state)
 {
     game->input.mouse.pos.x = state.x;

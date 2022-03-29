@@ -125,4 +125,9 @@ void Game::update(const f32 dt)
     camera.update();
 }
 
+void Game::postUpdate()
+{
+    editor.postUpdate();
+}
+
 } // namespace jmp

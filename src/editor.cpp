@@ -581,10 +581,6 @@ void Editor::update_tilemap(Tilemap& tilemap)
 
     ImGui::End();
 
-    if (show_bodies) {
-        update_collisions(tilemap);
-    }
-
     // Do not place any tile if mouse is hovering ImGui
     bool gui_hovered =
         ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered();
@@ -630,6 +626,15 @@ void Editor::update()
         update_selected_tile(game.tileset);
         update_entities(game.entity_factory);
         update_tilemap(game.tilemap);
+    }
+}
+
+void Editor::postUpdate()
+{
+    if (game.config.toggle.editor) {
+        if (show_bodies) {
+            update_collisions(game.tilemap);
+        }
     }
 }
 
