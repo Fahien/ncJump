@@ -70,7 +70,7 @@ jobs:
         else
           export NCINE_BUILD_TYPE=${{ matrix.BuildType }}
         fi
-        export CMAKE_ARGS="-B ../nCine-build-$NCINE_BUILD_TYPE -D CMAKE_BUILD_TYPE=$NCINE_BUILD_TYPE -D IMGUI_VERSION_TAG=docking -D NCINE_BUILD_TESTS=OFF"
+        export CMAKE_ARGS="-B ../nCine-build-$NCINE_BUILD_TYPE -D CMAKE_BUILD_TYPE=$NCINE_BUILD_TYPE -D IMGUI_VERSION_TAG=docking -D NCINE_BUILD_TESTS=OFF -D CMAKE_BUILD_RPATH='@loader_path/../../Frameworks'"
 
         cmake $CMAKE_ARGS
         cd ..

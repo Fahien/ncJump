@@ -112,13 +112,14 @@ function(callback_before_target)
 				IMPORTED_IMPLIB ${MSVC_LIBDIR}/box2d.lib
 				IMPORTED_LOCATION ${MSVC_BINDIR_EXT}/box2d.dll
 				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
-			set(BOX2D_FOUND 1)
+			set(BOX2D_FOUND 1 PARENT_SCOPE)
 		endif()
 	else()
 		find_package(box2d REQUIRED)
 	endif()
 
 	if(APPLE)
+		set(CMAKE_FRAMEWORK_PATH ${FRAMEWORKS_DIR} PARENT_SCOPE)
 		set(CMAKE_MACOSX_RPATH ON)
 
 		if(BOX2D_FOUND)
@@ -126,6 +127,7 @@ function(callback_before_target)
 				IMPORTED_LOCATION ${BOX2D_LIBRARY}/box2d
 				IMPORTED_LOCATION_RELEASE ${BOX2D_LIBRARY}/box2d
 				IMPORTED_LOCATION_DEBUG ${BOX2D_LIBRARY}/box2d)
+			set(BOX2D_FOUND 1 PARENT_SCOPE)
 		endif()
 	endif()
 endfunction()
@@ -133,10 +135,6 @@ endfunction()
 function(callback_after_target)
 	target_compile_features(${NCPROJECT_EXE_NAME} PUBLIC cxx_std_17)
 	target_link_libraries(${NCPROJECT_EXE_NAME} PRIVATE box2d::box2d)
-	if(MINGW)
-		# MinGW and MSYS haven't yet updated Box2D to a version >=2.4.1
-		target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "BOX2D_PRE241")
-	endif()
 
 	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 		include(custom_nlohmannjson)
@@ -161,6 +159,26 @@ function(callback_after_target)
 		set(NCPROJECT_ANDROID_ASSETS ${IMAGES_FILES} ${JSON_FILES} ${INI_FILES} CACHE STRING "" FORCE)
 	else()
 		target_include_directories(${NCPROJECT_EXE_NAME} PRIVATE ${NCPROJECT_BINARY_DIR}/nlohmannjson-src/include)
+	endif()
+endfunction()
+
+function(callback_end)
+	if(MSVC)
+		if(BOX2D_FOUND)
+			get_target_property(BOX2D_IMPORTED_LOCATION box2d::box2d IMPORTED_LOCATION)
+			install(FILES ${BOX2D_IMPORTED_LOCATION} DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT libraries)
+
+			add_custom_target(copy_box2d_dll ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BOX2D_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+				COMMENT "Copying Box2D DLL...")
+			add_dependencies(copy_box2d_dll create_target_dir)
+			set_target_properties(copy_box2d_dll PROPERTIES FOLDER "CustomCopyTargets")
+		endif()
+	elseif(APPLE)
+		if(BOX2D_FOUND)
+			# Box2D should be installed alongside the nCine library as it is directly linked to the executable
+			install(DIRECTORY ${CMAKE_FRAMEWORK_PATH}/box2d.framework DESTINATION ${LIBRARY_INSTALL_DESTINATION} COMPONENT libraries)
+		endif()
 	endif()
 endfunction()
 
