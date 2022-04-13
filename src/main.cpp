@@ -53,6 +53,8 @@ void JumpHandler::onInit()
     config.size.window.height = u32(ncfg.resolution.y);
 #endif
 
+    nc::theApplication().rootNode().setVisitOrderState(nc::SceneNode::VisitOrderState::DISABLED);
+
     game = MK<jmp::Game>(config);
 }
 
