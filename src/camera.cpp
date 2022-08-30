@@ -14,12 +14,12 @@ Camera::Camera(Game& game, nc::SceneNode* follow)
     : game {&game}
     , follow {follow}
 {
-    ncine::theApplication().rootViewport().setCamera(&camera);
+    ncine::theApplication().screenViewport().setCamera(&camera);
 }
 
 Camera::~Camera()
 {
-    ncine::theApplication().rootViewport().setCamera(nullptr);
+    ncine::theApplication().screenViewport().setCamera(nullptr);
 }
 
 Vec2f Camera::get_position() const

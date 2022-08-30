@@ -324,7 +324,7 @@ void Editor::update_tileset(Tileset& tileset)
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_WHITE);
         }
         auto& texture = game.graphics_factory.get_or_create(tileset.path);
-        if (ImGui::ImageButton(texture.guiTexId(), tile_size, uvs[0], uvs[1])) {
+        if (ImGui::ImageButton("", texture.guiTexId(), tile_size, uvs[0], uvs[1])) {
             set_selected_tile(i);
         }
         if (selected) {
@@ -378,7 +378,7 @@ void Editor::update_entities(EntityFactory& factory)
         }
 
         ImGui::PushID(i);
-        if (ImGui::ImageButton(guitex.id, guitex.size, guitex.uvs[0], guitex.uvs[1])) {
+        if (ImGui::ImageButton("", guitex.id, guitex.size, guitex.uvs[0], guitex.uvs[1])) {
             set_selected_entity(i);
             set_mode(Mode::ENTITY);
         }
