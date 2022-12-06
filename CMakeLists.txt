@@ -169,9 +169,8 @@ function(callback_end)
 			install(FILES ${BOX2D_IMPORTED_LOCATION} DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT libraries)
 
 			add_custom_target(copy_box2d_dll ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BOX2D_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BOX2D_IMPORTED_LOCATION} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}
 				COMMENT "Copying Box2D DLL...")
-			add_dependencies(copy_box2d_dll create_target_dir)
 			set_target_properties(copy_box2d_dll PROPERTIES FOLDER "CustomCopyTargets")
 		endif()
 	elseif(APPLE)

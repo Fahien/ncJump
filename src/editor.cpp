@@ -125,7 +125,7 @@ void Editor::update_menu()
 
 void update_resolution(Config& config)
 {
-    nc::theApplication().gfxDevice().setResolution(
+    nc::theApplication().gfxDevice().setWindowSize(
         int(config.size.window.width * config.scale.window),
         int(config.size.window.height * config.scale.window));
 }
