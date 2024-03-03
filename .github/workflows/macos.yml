@@ -17,8 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         BuildType: [Debug, Release, BinDist]
+        os: [macOS-12, macOS-14]
 
-    runs-on: 'macOS-11'
+    runs-on: ${{ matrix.os }}
 
     steps:
     - name: 'Checkout Code'
@@ -31,7 +32,11 @@ jobs:
 
     - name: 'Download nCine-libraries and project data'
       run: |
-        export OS=darwin
+        if [[ "${{ matrix.os }}" == "macOS-14" ]]; then
+          export OS=macos14
+        else
+          export OS=macos12
+        fi
         export CC=appleclang
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
 
@@ -107,11 +112,14 @@ jobs:
 
         export PROJECT_NAME=${GITHUB_REPOSITORY##*/}
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
-        export BRANCH_NAME=${GITHUB_REF#refs/heads/}
         export DEPLOY_MESSAGE=`sed 's/PROJECT_NAME/'"$PROJECT_NAME"'/' <<< "$DEPLOY_MESSAGE"`
         export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
 
-        export OS=darwin
+        if [[ "${{ matrix.os }}" == "macOS-14" ]]; then
+          export OS=macos14
+        else
+          export OS=macos12
+        fi
         export CC=appleclang
         export PROJECT_EXT=dmg
 
