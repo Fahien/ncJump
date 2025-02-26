@@ -220,8 +220,7 @@ void Editor::update_physics(PhysicsComponent& physics)
         ImGui::TreePop();
     }
 
-    b2MassData mass;
-    physics.body->GetMassData(&mass);
+    b2MassData mass = physics.body->GetMassData();
     if (ImGui::DragFloat("Mass", &mass.mass, 0.125f)) {
         physics.body->SetMassData(&mass);
     }
@@ -369,7 +368,7 @@ void Editor::update_entities(EntityFactory& factory)
 
     for (u32 i = 0; i < factory.entities.size(); ++i) {
         auto& gfx = factory.graphics[i];
-        gfx->update_sprite(ncine::theApplication().interval());
+        gfx->update_sprite(ncine::theApplication().frameTime());
         auto guitex = gfx->get_guitex(game.config);
 
         bool selected = selected_entity == i;

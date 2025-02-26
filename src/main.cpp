@@ -60,7 +60,7 @@ void JumpHandler::onInit()
 
 void JumpHandler::onFrameStart()
 {
-    game->update(nc::theApplication().interval());
+    game->update(nc::theApplication().frameTime());
 }
 
 void JumpHandler::onPostUpdate()
@@ -76,7 +76,7 @@ void JumpHandler::onMouseMoved(const nc::MouseState& state)
 
 void JumpHandler::onMouseButtonPressed(const nc::MouseEvent& event)
 {
-    if (event.isLeftButton()) {
+    if (event.button == nc::MouseButton::LEFT) {
         game->input.mouse.left.down = true;
         game->input.mouse.left.just_down = true;
         game->input.mouse.pos.x = event.x;
@@ -86,7 +86,7 @@ void JumpHandler::onMouseButtonPressed(const nc::MouseEvent& event)
 
 void JumpHandler::onMouseButtonReleased(const nc::MouseEvent& event)
 {
-    if (event.isLeftButton()) {
+    if (event.button == nc::MouseButton::LEFT) {
         game->input.mouse.left.down = false;
     }
 }
