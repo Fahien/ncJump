@@ -175,7 +175,7 @@ GuiTexture SubGraphics::get_guitex(const Config& config) const
 void GraphicsComponent::update(const PhysicsComponent& physics, const Input* input)
 {
     // Set direction of the sprite
-    f32 movement_x = input ? input->joystick.move.x : physics.body->GetLinearVelocity().x;
+    f32 movement_x = input ? input->joystick.move.x : b2Body_GetLinearVelocity(physics.body).x;
 
     if (!closef(movement_x, 0.0f)) {
         flipped_x = movement_x < 0.0;

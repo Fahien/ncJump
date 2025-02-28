@@ -12,22 +12,27 @@ class Config;
 class Tilemap;
 class Entity;
 
-class DestructionListener : public b2ContactListener
+class DestructionListener
 {
 public:
     DestructionListener(Config& config, nc::SceneNode& scene, nc::Texture& texture);
 
-    void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override;
+    void setWorld(b2WorldId worldId);
+
+	void PostSolve();
 
     void emit_particles(Entity& entity);
 
     /// @brief Checks whether one has been killed by the other
-    void check_kill(const b2Contact& contact, b2Fixture& a, b2Fixture& b);
+    void check_kill(const b2ContactData& contact, b2ShapeId a, b2ShapeId b);
     void check_destruction(Entity& entity);
 
     /// @brief To be called after physics update
     /// @param tilemap This is responsible for destroying tiles
     void update(Tilemap& tilemap);
+
+private:
+    b2WorldId world = b2_nullWorldId;
 
     Config& config;
 

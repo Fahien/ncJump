@@ -19,19 +19,17 @@ DestructionListener::DestructionListener(Config& config, nc::SceneNode& scene, n
     particles.setInLocalSpace(true);
 }
 
-inline b2WorldManifold get_world_manifold(const b2Contact& contact)
+void DestructionListener::setWorld(b2WorldId worldId)
 {
-    b2WorldManifold wm;
-    contact.GetWorldManifold(&wm);
-    return wm;
+    world = worldId;
 }
 
-void DestructionListener::check_kill(const b2Contact& contact, b2Fixture& a, b2Fixture& b)
+void DestructionListener::check_kill(const b2ContactData& contact, b2ShapeId a, b2ShapeId b)
 {
     Entity* player = nullptr;
     Entity* enemy = nullptr;
 
-    auto normal = get_world_manifold(contact).normal;
+    b2Vec2 normal = contact.manifold.normal;
 
     if (Entity::is_player(Entity::from(a))) {
         normal = -normal;
@@ -59,56 +57,70 @@ void DestructionListener::check_destruction(Entity& entity)
     }
 }
 
-b2Fixture* get_entity_or_null_if(b2Contact& contact, bool (*check)(const Entity&))
+b2ShapeId get_entity_or_null_if(const b2ContactHitEvent& contact, bool (*check)(const Entity&))
 {
-    auto a = contact.GetFixtureA();
-    if (check(Entity::from(*a))) {
+    b2ShapeId a = contact.shapeIdA;
+    if (check(Entity::from(a))) {
         return a;
     }
 
-    auto b = contact.GetFixtureB();
-    if (check(Entity::from(*b))) {
+    b2ShapeId b = contact.shapeIdB;
+    if (check(Entity::from(b))) {
         return b;
     }
 
-    return nullptr;
+    return b2_nullShapeId;
 }
 
-b2Fixture* get_player_or_null(b2Contact& contact)
+b2ShapeId get_player_or_null(const b2ContactHitEvent& contact)
 {
     return get_entity_or_null_if(contact, Entity::is_player);
 }
 
-b2Fixture* get_enemy_or_null(b2Contact& contact)
+b2ShapeId get_enemy_or_null(const b2ContactHitEvent& contact)
 {
     return get_entity_or_null_if(contact, Entity::is_enemy);
 }
 
-void DestructionListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
+void DestructionListener::PostSolve()
 {
-    float impulse_factor = 1.0f;
+    ASSERT(B2_IS_NON_NULL(world));
+    b2ContactEvents contactEvents = b2World_GetContactEvents(world);
 
-    if (auto player_fixture = get_player_or_null(*contact)) {
-        auto& player = Entity::from(*player_fixture);
+    for (i32 i = 0; i < contactEvents.hitCount; i++)
+    {
+        const b2ContactHitEvent& hitEvent = contactEvents.hitEvents[i];
+        float impulse_factor = 1.0f;
 
-        if (auto enemy_fixture = get_enemy_or_null(*contact)) {
-            // Check if we need to kill the enemy or the player
-            auto& enemy = Entity::from(*enemy_fixture);
-            check_kill(*contact, *contact->GetFixtureA(), *contact->GetFixtureB());
-            return;
+        const b2ShapeId player_shape = get_player_or_null(hitEvent);
+        if (B2_IS_NON_NULL(player_shape)) {
+           auto& player = Entity::from(player_shape);
+
+            // If the player is jumping, impulse is scaled up!
+            if (player.get_state()->get_state().value == State::JUMP_UP) {
+                impulse_factor = 3.0f;
+            }
+
+            const b2ShapeId enemy_shape = get_enemy_or_null(hitEvent);
+            if (B2_IS_NON_NULL(enemy_shape)) {
+                // Check if we need to kill the enemy or the player
+                auto& enemy = Entity::from(enemy_shape);
+
+                b2ContactData contactData;
+                b2Shape_GetContactData(enemy_shape, &contactData, 1);
+
+                check_kill(contactData, contactData.shapeIdA, contactData.shapeIdB);
+
+                if (contactData.manifold.points[0].normalImpulse * impulse_factor > 200.0f) {
+                    auto& entity_a = Entity::from(contactData.shapeIdA);
+                    check_destruction(entity_a);
+                    auto& entity_b = Entity::from(contactData.shapeIdB);
+                    check_destruction(entity_b);
+                }
+
+                return;
+            }
         }
-
-        // If the player is jumping, impulse is scaled up!
-        if (player.get_state()->get_state().value == State::JUMP_UP) {
-            impulse_factor = 3.0f;
-        }
-    }
-
-    if (impulse->normalImpulses[0] * impulse_factor > 200.0f) {
-        auto& entity_a = Entity::from(*contact->GetFixtureA());
-        check_destruction(entity_a);
-        auto& entity_b = Entity::from(*contact->GetFixtureB());
-        check_destruction(entity_b);
     }
 }
 
@@ -136,6 +148,8 @@ void DestructionListener::emit_particles(Entity& entity)
 
 void DestructionListener::update(Tilemap& tilemap)
 {
+    PostSolve();
+
     for (auto entity : to_destroy) {
         // Look within tiles grid
         for (i32 i = 0; i < tilemap.tiles.size(); ++i) {

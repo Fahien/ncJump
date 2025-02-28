@@ -5,47 +5,46 @@
 
 namespace jmp
 {
-b2Body* tile_body(b2World& world, const bool dynamic)
+b2BodyId tile_body(b2WorldId world, const bool dynamic)
 {
-    auto def = b2BodyDef();
+    b2BodyDef def = b2DefaultBodyDef();
     def.type = dynamic ? b2_dynamicBody : b2_staticBody;
     def.fixedRotation = true;
 
-    auto body = world.CreateBody(&def);
+    b2BodyId body = b2CreateBody(world, &def);
 
-    auto box = b2PolygonShape();
-    box.SetAsBox(0.5f, 0.5f);
+    b2Polygon box = b2MakeBox(0.5f, 0.5f);
 
-    auto fixture_def = b2FixtureDef();
-    fixture_def.shape = &box;
-    fixture_def.density = dynamic ? 16.0f : 0.0f;
-    fixture_def.friction = 2.0f;
-    body->CreateFixture(&fixture_def);
+    b2ShapeDef shape = b2DefaultShapeDef();
+    shape.density = dynamic ? 16.0f : 0.0f;
+    shape.friction = 2.0f;
+
+    b2ShapeId shapeId = b2CreatePolygonShape(body, &shape, &box);
 
     return body;
 }
 
-b2Body* character_body(b2World& world, const bool dynamic)
+b2BodyId character_body(b2WorldId world, const bool dynamic)
 {
-    auto hero_def = b2BodyDef();
+    b2BodyDef hero_def = b2DefaultBodyDef();
     hero_def.type = dynamic ? b2_dynamicBody : b2_staticBody;
     hero_def.angularDamping = 1024.0f;
 
-    auto body = world.CreateBody(&hero_def);
+    b2BodyId body = b2CreateBody(world, &hero_def);
 
-    auto hero_box = b2CircleShape();
-    hero_box.m_radius = 0.48f;
+    b2Circle hero_box = b2Circle();
+    hero_box.radius = 0.48f;
 
-    auto hero_fixture_def = b2FixtureDef();
-    hero_fixture_def.shape = &hero_box;
-    hero_fixture_def.density = 16.0f;
-    hero_fixture_def.friction = 30.0f;
+    b2ShapeDef hero_shape_def = b2DefaultShapeDef();
+    hero_shape_def.density = 16.0f;
+    hero_shape_def.friction = 30.0f;
 
-    body->CreateFixture(&hero_fixture_def);
+    b2ShapeId shapeId = b2CreateCircleShape(body, &hero_shape_def, &hero_box);
+
     return body;
 }
 
-b2Body* create_body(const PhysicsDef& def, b2World& world)
+b2BodyId create_body(const PhysicsDef& def, b2WorldId world)
 {
     switch (def.type) {
     case PhysicsType::TILE:
@@ -54,12 +53,13 @@ b2Body* create_body(const PhysicsDef& def, b2World& world)
         return character_body(world, def.dynamic);
     default:
         ASSERT_MSG(false, "Unknown body type");
-        return nullptr;
+        return b2_nullBodyId;
     }
 }
 
 PhysicsComponent::PhysicsComponent(const PhysicsDef& def, PhysicsSystem& system)
     : def {def}
+    , world(system.world)
     , body {create_body(def, system.world)}
     , speed {def.speed}
 {
@@ -67,7 +67,8 @@ PhysicsComponent::PhysicsComponent(const PhysicsDef& def, PhysicsSystem& system)
 
 PhysicsComponent::PhysicsComponent(const PhysicsComponent& o)
     : def {o.def}
-    , body {create_body(def, *o.body->GetWorld())}
+    , world {o.world}
+    , body {create_body(def, o.world)}
     , air_factor {o.air_factor}
     , speed {o.speed}
     , jump_y_factor {o.jump_y_factor}
@@ -80,7 +81,8 @@ PhysicsComponent::PhysicsComponent(const PhysicsComponent& o)
 PhysicsComponent& PhysicsComponent::operator=(const PhysicsComponent& o)
 {
     def = o.def;
-    body = create_body(def, *o.body->GetWorld());
+    world = o.world;
+    body = create_body(def, o.world);
     air_factor = o.air_factor;
     speed = o.speed;
     jump_y_factor = o.jump_y_factor;
@@ -93,6 +95,7 @@ PhysicsComponent& PhysicsComponent::operator=(const PhysicsComponent& o)
 
 PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
     : def {o.def}
+    , world {o.world}
     , body {o.body}
     , obstacle {o.obstacle}
     , air_factor {o.air_factor}
@@ -102,12 +105,14 @@ PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
     , max_x_speed {o.max_x_speed}
     , destructible {o.destructible}
 {
-    o.body = nullptr;
+    o.world = b2_nullWorldId;
+    o.body = b2_nullBodyId;
 }
 
 PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
 {
     std::swap(def, o.def);
+    std::swap(world, o.world);
     std::swap(body, o.body);
     std::swap(obstacle, o.obstacle);
     std::swap(air_factor, o.air_factor);
@@ -122,46 +127,44 @@ PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
 
 PhysicsComponent::~PhysicsComponent()
 {
-    if (body) {
-        body->GetWorld()->DestroyBody(body);
+    if (B2_IS_NON_NULL(body)) {
+        b2DestroyBody(body);
+        body = b2_nullBodyId;
     }
 }
 
 Vec2f PhysicsComponent::get_position() const
 {
-    auto bpos = body->GetPosition();
+    const b2Vec2 bpos = b2Body_GetPosition(body);
     return Vec2f(bpos.x / def.scale, bpos.y / def.scale);
 }
 
 void PhysicsComponent::set_position(const Vec2f& pos)
 {
-    auto bpos = b2Vec2(pos.x * def.scale, pos.y * def.scale);
-    body->SetTransform(bpos, 0);
+    const b2Vec2 bpos = {pos.x * def.scale, pos.y * def.scale};
+    b2Body_SetTransform(body, bpos, b2Rot_identity);
+}
+
+void PhysicsComponent::set_friction(float friction)
+{
+    b2ShapeId shape = b2_nullShapeId;
+    const int numShapes = b2Body_GetShapes(body, &shape, 1);
+    ASSERT(numShapes == 1);
+    b2Shape_SetFriction(shape, friction);
 }
 
 void PhysicsComponent::set_enabled(const bool e)
 {
     enabled = e;
-#ifdef BOX2D_PRE241
-    body->SetActive(enabled);
-#else
-    body->SetEnabled(enabled);
-#endif
+    enabled ? b2Body_Enable(body) : b2Body_Disable(body);
 }
 
-inline b2WorldManifold get_world_manifold(const b2Contact& contact)
+void PhysicsComponent::update(const b2ContactData &contact)
 {
-    b2WorldManifold wm;
-    contact.GetWorldManifold(&wm);
-    return wm;
-}
+    b2BodyId other = b2Shape_GetBody(contact.shapeIdB);
+    ASSERT(B2_IS_NON_NULL(body));
 
-void PhysicsComponent::update(b2ContactEdge& contact)
-{
-    b2Body* other = contact.other;
-    ASSERT(other);
-
-    auto normal = get_normal(*contact.contact);
+    const b2Vec2 normal = get_normal(contact);
 
     // Skip abnormal values
     if (normal.x > 1.0 || normal.y > 1.0 || normal.x < -1.0 || normal.y < -1.0) {
@@ -204,24 +207,28 @@ void PhysicsComponent::update()
 {
     reset();
 
-    for (auto contact = body->GetContactList(); contact; contact = contact->next) {
-        update(*contact);
+    b2ContactData contacts[16];
+    const int numContacts = b2Body_GetContactData(body, contacts, 16);
+    for (i32 i = 0; i < numContacts; i++) {
+        update(contacts[i]);
     }
 
     // Apply air resistance
-    auto vel = -body->GetLinearVelocity();
-    auto vel_len = vel.LengthSquared();
+    b2Vec2 vel = -b2Body_GetLinearVelocity(body);
+    const float vel_len = b2LengthSquared(vel);
     vel.x *= air_factor * vel_len;
     vel.y *= air_factor * vel_len;
-    body->ApplyForceToCenter(vel, false);
+    b2Body_ApplyForceToCenter(body, vel, false);
 }
 
-b2Vec2 PhysicsComponent::get_normal(const b2Contact& contact) const
+b2Vec2 PhysicsComponent::get_normal(const b2ContactData& contact) const
 {
-    auto normal = get_world_manifold(contact).normal;
+    const b2Vec2 normal = contact.manifold.normal;
 
     // Box2D specific check needed to get the correct normal
-    if (contact.GetFixtureA() == body->GetFixtureList()) {
+    b2ShapeId shape = b2_nullShapeId;
+    b2Body_GetShapes(body, &shape, 1);
+    if (B2_ID_EQUALS(contact.shapeIdA, shape)) {
         return -normal;
     }
 

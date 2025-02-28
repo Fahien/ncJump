@@ -6,20 +6,31 @@
 
 namespace jmp
 {
+
 PhysicsSystem::PhysicsSystem(Game& game)
     : gravity {0.0, -30.0f}
-    , world {gravity}
+    , world {b2_nullWorldId}
     , destruction {game.config, game.scene, game.resource}
 {
-    world.SetContactListener(&destruction);
+    b2WorldDef worldDef = b2DefaultWorldDef();
+    worldDef.gravity = gravity;
+    world = b2CreateWorld(&worldDef);
+
+    destruction.setWorld(world);
+}
+
+PhysicsSystem::~PhysicsSystem()
+{
+    b2DestroyWorld(world);
+    world = b2_nullWorldId;
 }
 
 void PhysicsSystem::update(const f32 delta, Tilemap& tilemap)
 {
-    world.Step(delta, velocity_iterations, position_iterations);
+    b2World_Step(world, delta, 4);
 
     // @todo Process destruction after all updates
     destruction.update(tilemap);
 }
 
-} // namespace spot::gfx
+} // namespace jmp

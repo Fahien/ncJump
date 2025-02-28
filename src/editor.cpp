@@ -207,22 +207,25 @@ void Editor::update_state(StateComponent& state)
 
 void Editor::update_physics(PhysicsComponent& physics)
 {
-    auto vel = physics.body->GetLinearVelocity();
+    const b2Vec2 vel = b2Body_GetLinearVelocity(physics.body);
     ImGui::Text("vel: { x: %.2f, y: %.2f }", vel.x, vel.y);
 
     ImGui::Text("obstacle: { %s }", to_str(physics.obstacle).c_str());
 
     if (ImGui::TreeNode("Contacts")) {
-        for (auto edge = physics.body->GetContactList(); edge; edge = edge->next) {
-            auto normal = physics.get_normal(*edge->contact);
+        b2ContactData contacts[16];
+        const i32 numContacts = b2Body_GetContactData(physics.body, contacts, 16);
+        for (i32 i = 0; i < numContacts; i++) {
+            const b2ContactData& contact = contacts[i];
+            const b2Vec2 normal = physics.get_normal(contact);
             ImGui::Text("normal: { %.2f, %.2f }", normal.x, normal.y);
         }
         ImGui::TreePop();
     }
 
-    b2MassData mass = physics.body->GetMassData();
+    b2MassData mass = b2Body_GetMassData(physics.body);
     if (ImGui::DragFloat("Mass", &mass.mass, 0.125f)) {
-        physics.body->SetMassData(&mass);
+        b2Body_SetMassData(physics.body, mass);
     }
 
     ImGui::DragFloat("Air factor", &physics.air_factor, 1 / 16.0f, 0.0f, 0.0f, "%.4f");
@@ -445,10 +448,11 @@ void Editor::update_collisions(Tilemap& tilemap)
     // Draw debug shapes for physics objects
     for (auto& entity : tilemap.get_entities()) {
         if (auto& physics = entity->get_physics()) {
-            auto fixture_list = physics->body->GetFixtureList();
-            for (auto fixture = fixture_list; fixture; fixture = fixture->GetNext()) {
-                auto shape = fixture->GetShape();
-                assert(shape);
+            b2ShapeId shapes[16];
+            const i32 numShapes = b2Body_GetShapes(physics->body, shapes, 16);
+            for (i32 i = 0; i < numShapes; i++) {
+                b2ShapeId shape = shapes[i];
+                assert(B2_IS_NON_NULL(shape));
                 auto entity_pos = entity->get_position();
                 auto pos = game.config.scene_to_gui(entity_pos);
                 auto scene_pos = game.config.scene_to_screen(game.camera.get_position());
@@ -457,7 +461,7 @@ void Editor::update_collisions(Tilemap& tilemap)
                 pos.y += scene_pos.y - htile;
 
                 // Draw a circle at entity position
-                if (shape->GetType() == shape->e_circle) {
+                if (b2Shape_GetType(shape) == b2ShapeType::b2_circleShape) {
                     draw_list->AddCircle(pos, htile, IM_COL32_WHITE);
                 } else {
                     auto p2 = ImVec2(pos.x + htile, pos.y - htile);

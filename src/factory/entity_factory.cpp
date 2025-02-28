@@ -10,7 +10,7 @@
 
 namespace jmp
 {
-UNIQUE<Entity> make_mushroom(b2World& world, GraphicsFactory& factory)
+UNIQUE<Entity> make_mushroom(b2WorldId world, GraphicsFactory& factory)
 {
     auto mushroom = MK<Entity>();
     mushroom->add_script(MK<WanderingScript>());
