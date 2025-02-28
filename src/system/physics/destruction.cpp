@@ -57,7 +57,7 @@ void DestructionListener::check_destruction(Entity& entity)
     }
 }
 
-b2ShapeId get_entity_or_null_if(const b2ContactHitEvent& contact, bool (*check)(const Entity&))
+b2ShapeId get_entity_or_null_if(const b2ContactBeginTouchEvent& contact, bool (*check)(const Entity&))
 {
     b2ShapeId a = contact.shapeIdA;
     if (check(Entity::from(a))) {
@@ -72,12 +72,12 @@ b2ShapeId get_entity_or_null_if(const b2ContactHitEvent& contact, bool (*check)(
     return b2_nullShapeId;
 }
 
-b2ShapeId get_player_or_null(const b2ContactHitEvent& contact)
+b2ShapeId get_player_or_null(const b2ContactBeginTouchEvent& contact)
 {
     return get_entity_or_null_if(contact, Entity::is_player);
 }
 
-b2ShapeId get_enemy_or_null(const b2ContactHitEvent& contact)
+b2ShapeId get_enemy_or_null(const b2ContactBeginTouchEvent& contact)
 {
     return get_entity_or_null_if(contact, Entity::is_enemy);
 }
@@ -87,9 +87,9 @@ void DestructionListener::PostSolve()
     ASSERT(B2_IS_NON_NULL(world));
     b2ContactEvents contactEvents = b2World_GetContactEvents(world);
 
-    for (i32 i = 0; i < contactEvents.hitCount; i++)
+    for (i32 i = 0; i < contactEvents.beginCount; i++)
     {
-        const b2ContactHitEvent& hitEvent = contactEvents.hitEvents[i];
+        const b2ContactBeginTouchEvent& hitEvent = contactEvents.beginEvents[i];
         float impulse_factor = 1.0f;
 
         const b2ShapeId player_shape = get_player_or_null(hitEvent);
