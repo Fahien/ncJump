@@ -12,6 +12,8 @@ class MoveCommand;
 class State
 {
 public:
+    virtual ~State() = default;
+
     enum Value { IDLE = 0, MOVE, JUMP_UP, JUMP_DOWN, PUSH, PULL, DYING, MAX };
 
     static UNIQUE<State> create(State::Value state);

@@ -30,8 +30,8 @@ public:
     Entity() = default;
     Entity(const EntityDef& def, GraphicsFactory& graphics_factory, PhysicsSystem& physics_system);
 
-    Entity(const Entity&) = default;
-    Entity& operator=(const Entity&) = default;
+    Entity(const Entity&) = delete;
+    Entity& operator=(const Entity&) = delete;
 
     Entity(Entity&&) = default;
     Entity& operator=(Entity&&) = default;
