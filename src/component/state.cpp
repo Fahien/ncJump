@@ -302,8 +302,6 @@ void JumpUpState::handle(Entity& entity, const MoveCommand& move)
 
 void JumpUpState::enter(Entity& entity, const MoveCommand* move)
 {
-    entity.get_physics()->set_friction(0.0f);
-
     entity.get_graphics()->set_current(State::JUMP_UP);
 
     const b2Vec2 force = b2Vec2{0.0f, entity.get_physics()->jump_y_factor};
@@ -326,7 +324,6 @@ void JumpUpState::update(Entity& entity)
 
 void JumpUpState::exit(Entity& entity)
 {
-    entity.get_physics()->set_friction(3.0f);
 }
 
 JumpDownState::JumpDownState()
@@ -338,7 +335,6 @@ JumpDownState::JumpDownState()
 void JumpDownState::enter(Entity& entity, const MoveCommand* move)
 {
     landed = false;
-    entity.get_physics()->set_friction(0.0f);
     entity.get_graphics()->set_current(State::JUMP_DOWN);
 }
 
@@ -369,16 +365,6 @@ void JumpDownState::update(Entity& entity)
 
 void JumpDownState::exit(Entity& entity)
 {
-    entity.get_physics()->set_friction(3.0f);
-
-    b2ContactData contactData[10];
-    const int numContacts = b2Body_GetContactData(entity.get_physics()->body, contactData, 10);
-
-    for (i32 i = 0; i < numContacts; i++) {
-        const b2ContactData& contact = contactData[i];
-        b2Shape_SetFriction(contact.shapeIdA, 0.0f);
-        b2Shape_SetFriction(contact.shapeIdB, 0.0f);
-    }
 }
 
 PushState::PushState()

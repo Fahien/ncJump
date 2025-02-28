@@ -17,7 +17,7 @@ b2BodyId tile_body(b2WorldId world, const bool dynamic)
 
     b2ShapeDef shape = b2DefaultShapeDef();
     shape.density = dynamic ? 16.0f : 0.0f;
-    shape.friction = 2.0f;
+    shape.friction = 0.9f;
 
     b2ShapeId shapeId = b2CreatePolygonShape(body, &shape, &box);
 
@@ -28,7 +28,7 @@ b2BodyId character_body(b2WorldId world, const bool dynamic)
 {
     b2BodyDef hero_def = b2DefaultBodyDef();
     hero_def.type = dynamic ? b2_dynamicBody : b2_staticBody;
-    hero_def.angularDamping = 1024.0f;
+    hero_def.fixedRotation = true;
 
     b2BodyId body = b2CreateBody(world, &hero_def);
 
@@ -37,7 +37,7 @@ b2BodyId character_body(b2WorldId world, const bool dynamic)
 
     b2ShapeDef hero_shape_def = b2DefaultShapeDef();
     hero_shape_def.density = 16.0f;
-    hero_shape_def.friction = 30.0f;
+    hero_shape_def.friction = 0.9f;
 
     b2ShapeId shapeId = b2CreateCircleShape(body, &hero_shape_def, &hero_box);
 
@@ -74,6 +74,7 @@ PhysicsComponent::PhysicsComponent(const PhysicsComponent& o)
     , jump_y_factor {o.jump_y_factor}
     , jump_x_factor {o.jump_x_factor}
     , max_x_speed {o.max_x_speed}
+    , friction {o.friction}
     , destructible {o.destructible}
 {
 }
@@ -88,6 +89,7 @@ PhysicsComponent& PhysicsComponent::operator=(const PhysicsComponent& o)
     jump_y_factor = o.jump_y_factor;
     jump_x_factor = o.jump_x_factor;
     max_x_speed = o.max_x_speed;
+    friction = o.friction;
     destructible = o.destructible;
 
     return *this;
@@ -103,6 +105,7 @@ PhysicsComponent::PhysicsComponent(PhysicsComponent&& o)
     , jump_y_factor {o.jump_y_factor}
     , jump_x_factor {o.jump_x_factor}
     , max_x_speed {o.max_x_speed}
+    , friction {o.friction}
     , destructible {o.destructible}
 {
     o.world = b2_nullWorldId;
@@ -120,6 +123,7 @@ PhysicsComponent& PhysicsComponent::operator=(PhysicsComponent&& o) noexcept
     std::swap(jump_y_factor, o.jump_y_factor);
     std::swap(jump_x_factor, o.jump_x_factor);
     std::swap(max_x_speed, o.max_x_speed);
+    std::swap(friction, o.friction);
     std::swap(destructible, o.destructible);
 
     return *this;
@@ -145,8 +149,9 @@ void PhysicsComponent::set_position(const Vec2f& pos)
     b2Body_SetTransform(body, bpos, b2Rot_identity);
 }
 
-void PhysicsComponent::set_friction(float friction)
+void PhysicsComponent::set_friction(float f)
 {
+    friction = f;
     b2ShapeId shape = b2_nullShapeId;
     const int numShapes = b2Body_GetShapes(body, &shape, 1);
     ASSERT(numShapes == 1);

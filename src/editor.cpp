@@ -233,6 +233,11 @@ void Editor::update_physics(PhysicsComponent& physics)
     ImGui::DragFloat("Jump Y factor", &physics.jump_y_factor);
     ImGui::DragFloat("Jump X factor", &physics.jump_x_factor, 0.125f);
     ImGui::DragFloat("Max X speed", &physics.max_x_speed, 0.125f);
+    
+    float friction = physics.friction;
+    if (ImGui::DragFloat("Friction", &friction, 0.125f, 0.0, 1.0)) {
+        physics.set_friction(friction);
+    }
 }
 
 void Editor::update_entity(Entity& entity)
