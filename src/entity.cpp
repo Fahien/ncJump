@@ -91,11 +91,7 @@ void Entity::set_physics(OPTION<PhysicsComponent> ph)
     if (physics) {
         physics->set_position(transform.node->position());
 
-#ifdef BOX2D_PRE241
-        physics->body->SetUserData(this);
-#else
-        physics->body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
-#endif
+        b2Body_SetUserData(physics->body, this);
     }
 }
 

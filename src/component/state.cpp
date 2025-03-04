@@ -70,10 +70,10 @@ public:
     void update(Entity& entity) override;
     void exit(Entity& entity) override;
 
-    void destroy_joint(b2World& world);
+    void destroy_joint();
 
     bool pulling = true;
-    b2Joint* joint = nullptr;
+    b2JointId joint = b2_nullJointId;
 };
 
 class DyingState : public State
@@ -117,8 +117,7 @@ bool close(const b2Vec2& a, const b2Vec2& b)
 /// @return Wether the entity is moving now or not
 bool can_stop(const bool moving, Entity& entity)
 {
-    const auto zero = b2Vec2(0.0f, 0.0f);
-    bool moving_now = !close(entity.get_physics()->body->GetLinearVelocity(), zero);
+    const bool moving_now = !close(b2Body_GetLinearVelocity(entity.get_physics()->body), b2Vec2_zero);
     if (!moving && !moving_now) {
         entity.get_state()->set_state(State::IDLE, entity);
     }
@@ -142,32 +141,35 @@ void can_jump(const MoveCommand& move, Entity& entity)
 void can_fall(Entity& entity)
 {
     // Can fall if there is no platform below
-    bool no_obstacle_down = !any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
-    bool falling = entity.get_physics()->body->GetLinearVelocity().y < -1.0f;
-    bool should_fall = no_obstacle_down && falling;
+    const bool no_obstacle_down = !any(entity.get_physics()->obstacle & DirectionFlags::DOWN);
+    const bool falling = b2Body_GetLinearVelocity(entity.get_physics()->body).y < -1.0f;
+    const bool should_fall = no_obstacle_down && falling;
 
     if (should_fall) {
         entity.get_state()->set_state(State::JUMP_DOWN, entity);
     }
 }
 
-bool check_pull(Entity& entity, const std::vector<b2Body*>& obstacles)
+bool check_pull(Entity& entity, const std::vector<b2BodyId>& obstacles)
 {
-    for (auto other : obstacles) {
-        if (other->GetType() != b2_dynamicBody) {
+    for (b2BodyId other : obstacles) {
+        if (b2Body_GetType(other) != b2_dynamicBody) {
             continue;
         }
 
-        b2DistanceJointDef joint;
-        auto body = entity.get_physics()->body;
-        joint.Initialize(body, other, body->GetPosition(), other->GetPosition());
+        b2DistanceJointDef joint = b2DefaultDistanceJointDef();
+        b2BodyId body = entity.get_physics()->body;
+        joint.bodyIdA = body;
+        joint.bodyIdB = other;
+        joint.localAnchorA = b2Body_GetLocalPoint(joint.bodyIdA, b2Body_GetPosition(joint.bodyIdA));
+        joint.localAnchorB = b2Body_GetLocalPoint(joint.bodyIdB, b2Body_GetPosition(joint.bodyIdB));
         joint.collideConnected = true;
 
         entity.get_state()->set_state(State::PULL, entity);
-        auto pull_state = reinterpret_cast<PullState&>(entity.get_state()->get_state());
+        PullState& pull_state = reinterpret_cast<PullState&>(entity.get_state()->get_state());
 
-        pull_state.destroy_joint(*body->GetWorld());
-        pull_state.joint = other->GetWorld()->CreateJoint(&joint);
+        pull_state.destroy_joint();
+        pull_state.joint = b2CreateDistanceJoint(entity.get_physics()->world, &joint);
 
         return true;
     }
@@ -238,19 +240,18 @@ void can_push(const MoveCommand& move, Entity& entity)
 
 void can_move_on_x(const f32 move_x, Entity& entity, f32 x_factor)
 {
-    f32 x_velocity = entity.get_physics()->body->GetLinearVelocity().x;
+    const f32 x_velocity = b2Body_GetLinearVelocity(entity.get_physics()->body).x;
 
     // Applying a force to move in the opposite direction of current velocity is always allowed
-    bool opposite_move = (move_x < 0 && x_velocity >= 0) || (move_x >= 0 && x_velocity < 0);
+    const bool opposite_move = (move_x < 0 && x_velocity >= 0) || (move_x >= 0 && x_velocity < 0);
 
     // Make sure current velocity is within limits, otherwise do not apply further force
-    bool within_limit =
-        fabs(entity.get_physics()->body->GetLinearVelocity().x) < entity.get_physics()->max_x_speed;
+    const bool within_limit =
+        fabs(b2Body_GetLinearVelocity(entity.get_physics()->body).x) < entity.get_physics()->max_x_speed;
 
     if (opposite_move || within_limit) {
-        auto force = b2Vec2(x_factor * move_x, 0.0f);
-        entity.get_physics()->body->ApplyLinearImpulse(
-            force, entity.get_physics()->body->GetWorldCenter(), true);
+        const b2Vec2 force = b2Vec2{x_factor * move_x, 0.0f};
+        b2Body_ApplyLinearImpulse(entity.get_physics()->body, force, b2Body_GetWorldCenterOfMass(entity.get_physics()->body), true);
     }
 }
 
@@ -285,8 +286,8 @@ JumpUpState::JumpUpState()
 void can_jump_higher(const bool jump, Entity& entity)
 {
     if (jump) {
-        auto force = b2Vec2(0.0f, entity.get_physics()->jump_y_factor / 2.0);
-        entity.get_physics()->body->ApplyForceToCenter(force, true);
+        const b2Vec2 force = b2Vec2{0.0f, entity.get_physics()->jump_y_factor / 2.0f};
+        b2Body_ApplyForceToCenter(entity.get_physics()->body, force, true);
     }
 }
 
@@ -301,18 +302,15 @@ void JumpUpState::handle(Entity& entity, const MoveCommand& move)
 
 void JumpUpState::enter(Entity& entity, const MoveCommand* move)
 {
-    entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
-
     entity.get_graphics()->set_current(State::JUMP_UP);
 
-    auto force = b2Vec2(0.0f, entity.get_physics()->jump_y_factor);
-    entity.get_physics()->body->ApplyLinearImpulse(
-        force, entity.get_physics()->body->GetWorldCenter(), true);
+    const b2Vec2 force = b2Vec2{0.0f, entity.get_physics()->jump_y_factor};
+    b2Body_ApplyLinearImpulse(entity.get_physics()->body, force, b2Body_GetWorldCenterOfMass(entity.get_physics()->body), true);
 }
 
 void can_stop_jumping(Entity& entity)
 {
-    bool going_down = entity.get_physics()->body->GetLinearVelocity().y <= 0.0f;
+    const bool going_down = b2Body_GetLinearVelocity(entity.get_physics()->body).y <= 0.0f;
     if (going_down) {
         entity.get_state()->set_state(State::JUMP_DOWN, entity);
     }
@@ -326,7 +324,6 @@ void JumpUpState::update(Entity& entity)
 
 void JumpUpState::exit(Entity& entity)
 {
-    entity.get_physics()->body->GetFixtureList()->SetFriction(3.0f);
 }
 
 JumpDownState::JumpDownState()
@@ -338,7 +335,6 @@ JumpDownState::JumpDownState()
 void JumpDownState::enter(Entity& entity, const MoveCommand* move)
 {
     landed = false;
-    entity.get_physics()->body->GetFixtureList()->SetFriction(0.0f);
     entity.get_graphics()->set_current(State::JUMP_DOWN);
 }
 
@@ -351,8 +347,8 @@ void JumpDownState::handle(Entity& entity, const MoveCommand& move)
 void JumpDownState::update(Entity& entity)
 {
     // Wait one frame before stopping falling as it may happen that it just started falling down
-    bool landed_now = (entity.get_physics()->body->GetLinearVelocity().y >= -0.001f);
-    bool still_landed = landed && landed_now;
+    const bool landed_now = (b2Body_GetLinearVelocity(entity.get_physics()->body).y >= -0.001f);
+    const bool still_landed = landed && landed_now;
 
     if (still_landed) {
         entity.get_state()->set_state(State::MOVE, entity);
@@ -360,8 +356,8 @@ void JumpDownState::update(Entity& entity)
     }
 
     // Make sure it goes down
-    if (entity.get_physics()->body->GetLinearVelocity().y > -1.0) {
-        entity.get_physics()->body->ApplyForceToCenter({0.0, -100.0f}, true);
+    if (b2Body_GetLinearVelocity(entity.get_physics()->body).y > -1.0f) {
+        b2Body_ApplyForceToCenter(entity.get_physics()->body, b2Vec2{0.0f, -100.0f}, true);
     }
 
     landed = landed_now;
@@ -369,12 +365,6 @@ void JumpDownState::update(Entity& entity)
 
 void JumpDownState::exit(Entity& entity)
 {
-    auto fixture = entity.get_physics()->body->GetFixtureList();
-    fixture->SetFriction(3.0f);
-
-    for (auto edge = entity.get_physics()->body->GetContactList(); edge; edge = edge->next) {
-        edge->contact->ResetFriction();
-    }
 }
 
 PushState::PushState()
@@ -440,11 +430,11 @@ PullState::PullState()
     value = Value::PULL;
 }
 
-void PullState::destroy_joint(b2World& world)
+void PullState::destroy_joint()
 {
-    if (joint) {
-        world.DestroyJoint(joint);
-        joint = nullptr;
+    if (B2_IS_NON_NULL(joint)) {
+        b2DestroyJoint(joint);
+        joint = b2_nullJointId;
     }
 }
 
@@ -489,7 +479,7 @@ void PullState::update(Entity& entity)
 
 void PullState::exit(Entity& entity)
 {
-    destroy_joint(*entity.get_physics()->body->GetWorld());
+    destroy_joint();
 }
 
 DyingState::DyingState()

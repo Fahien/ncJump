@@ -16,7 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, windows-2022]
+        # VS 2019 does not support C11 atomics, that are needed to build Box2D v3.x (windows-2019)
+        os: [windows-2022]
         BuildType: [Debug, Release, BinDist]
 
     runs-on: ${{ matrix.os }}

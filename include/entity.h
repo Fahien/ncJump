@@ -25,13 +25,13 @@ class Entity
 public:
     static inline bool is_player(const Entity& e);
     static inline bool is_enemy(const Entity& e);
-    static inline Entity& from(b2Fixture& fixture);
+    static inline Entity& from(b2ShapeId shape);
 
     Entity() = default;
     Entity(const EntityDef& def, GraphicsFactory& graphics_factory, PhysicsSystem& physics_system);
 
-    Entity(const Entity&) = default;
-    Entity& operator=(const Entity&) = default;
+    Entity(const Entity&) = delete;
+    Entity& operator=(const Entity&) = delete;
 
     Entity(Entity&&) = default;
     Entity& operator=(Entity&&) = default;
@@ -89,13 +89,10 @@ private:
     VECTOR<UNIQUE<Script>> scripts;
 };
 
-Entity& Entity::from(b2Fixture& fixture)
+Entity& Entity::from(b2ShapeId shape)
 {
-#ifdef BOX2D_PRE241
-    return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData());
-#else
-    return *reinterpret_cast<Entity*>(fixture.GetBody()->GetUserData().pointer);
-#endif
+    b2BodyId body = b2Shape_GetBody(shape);
+    return *reinterpret_cast<Entity*>(b2Body_GetUserData(body));
 }
 
 bool Entity::is_player(const Entity& e)

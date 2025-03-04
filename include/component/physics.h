@@ -26,10 +26,12 @@ public:
     Vec2f get_position() const;
     void set_position(const Vec2f& pos);
 
+    void set_friction(float friction);
+
     void set_enabled(bool e);
 
     /// @brief Updates current obstacle flags and list of obstacle bodies
-    void update(b2ContactEdge& contact);
+    void update(const b2ContactData& contact);
 
     void update();
 
@@ -39,24 +41,26 @@ public:
 
     /// @return The normal of this contact relative to itself,
     /// which means that this vector will point towards this body.
-    b2Vec2 get_normal(const b2Contact& contact) const;
+    b2Vec2 get_normal(const b2ContactData& contact) const;
 
     PhysicsDef def = {};
 
-    b2Body* body = nullptr;
+    b2WorldId world = b2_nullWorldId;
+    b2BodyId body = b2_nullBodyId;
 
     bool enabled = true;
 
     DirectionFlags obstacle = DirectionFlags::NONE;
 
     /// A list of obstacles for each Direction
-    std::vector<b2Body*> obstacles_dir[4];
+    std::vector<b2BodyId> obstacles_dir[4];
 
     f32 air_factor = 1.0f / 16.0f;
     f32 speed = 32.0f;
     f32 jump_y_factor = 160.0f;
     f32 jump_x_factor = 3.0f;
     f32 max_x_speed = 6.0f;
+    f32 friction = 0.9f;
 
     /// A destructible object must have a physics component to
     /// be able to detect collisions that can destroy it
