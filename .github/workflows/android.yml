@@ -15,8 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Box2D v3.x does not support 32-bit platforms (armeabi-v7a)
-        ARCH: [arm64-v8a, x86_64]
+        ARCH: [armeabi-v7a, arm64-v8a, x86_64]
         BuildType: [Debug, Release]
 
     runs-on: 'ubuntu-22.04'
