@@ -15,9 +15,9 @@ Editor::Editor(Game& g)
 {
     auto& style = ImGui::GetStyle();
     style.WindowRounding = 0.0f;
+    style.FontScaleMain = game.config.scale.gui;
     style.ScaleAllSizes(game.config.scale.gui);
     auto& io = ImGui::GetIO();
-    io.FontGlobalScale = game.config.scale.gui;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
 }
 
@@ -173,9 +173,9 @@ void Editor::update_config(Config& config)
         if (ImGui::SliderInt("Scale", &new_scale, 1, 4)) {
             game.config.scale.gui = float(new_scale);
             auto new_style = ImGuiStyle();
+            new_style.FontScaleMain = game.config.scale.gui;
             new_style.ScaleAllSizes(game.config.scale.gui);
             ImGui::GetStyle() = new_style;
-            ImGui::GetIO().FontGlobalScale = game.config.scale.gui;
         }
         ImGui::PopID();
     }
@@ -233,7 +233,7 @@ void Editor::update_physics(PhysicsComponent& physics)
     ImGui::DragFloat("Jump Y factor", &physics.jump_y_factor);
     ImGui::DragFloat("Jump X factor", &physics.jump_x_factor, 0.125f);
     ImGui::DragFloat("Max X speed", &physics.max_x_speed, 0.125f);
-    
+
     float friction = physics.friction;
     if (ImGui::DragFloat("Friction", &friction, 0.125f, 0.0, 1.0)) {
         physics.set_friction(friction);

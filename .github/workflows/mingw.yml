@@ -8,6 +8,7 @@ env:
 
      - PROJECT_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: PROJECT_NAME-BRANCH_NAME-OS-COMPILER
+  IMGUI_VERSION_TAG: v1.92.4-docking
 
 on: [push, workflow_dispatch]
 
@@ -113,12 +114,12 @@ jobs:
         cd ../nCine
         if ("${{ matrix.BuildType }}" -eq "BinDist")
         {
-          C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-Release -D CMAKE_BUILD_TYPE=Release -D IMGUI_VERSION_TAG=v1.91.9b-docking -D NCINE_BUILD_TESTS=OFF"
+          C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-Release -D CMAKE_BUILD_TYPE=Release -D IMGUI_VERSION_TAG=$env:IMGUI_VERSION_TAG -D NCINE_BUILD_TESTS=OFF"
           C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-build-Release'
         }
         else
         {
-          C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D IMGUI_VERSION_TAG=v1.91.9b-docking -D NCINE_BUILD_TESTS=OFF"
+          C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D IMGUI_VERSION_TAG=$env:IMGUI_VERSION_TAG -D NCINE_BUILD_TESTS=OFF"
           C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-build-${{ matrix.BuildType }}'
         }
 

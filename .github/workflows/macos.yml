@@ -8,6 +8,7 @@ env:
 
      - PROJECT_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: PROJECT_NAME-BRANCH_NAME-OS-COMPILER
+  IMGUI_VERSION_TAG: v1.92.4-docking
 
 on: [push, workflow_dispatch]
 
@@ -17,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         BuildType: [Debug, Release, BinDist]
-        os: [macOS-13, macOS-15]
+        os: [macOS-15, macOS-15-intel]
 
     runs-on: ${{ matrix.os }}
 
@@ -35,7 +36,7 @@ jobs:
         if [[ "${{ matrix.os }}" == "macOS-15" ]]; then
           export OS=macos15
         else
-          export OS=macos13
+          export OS=macos15-intel
         fi
         export CC=appleclang
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
@@ -75,7 +76,7 @@ jobs:
         else
           export NCINE_BUILD_TYPE=${{ matrix.BuildType }}
         fi
-        export CMAKE_ARGS="-B ../nCine-build-$NCINE_BUILD_TYPE -D CMAKE_BUILD_TYPE=$NCINE_BUILD_TYPE -D IMGUI_VERSION_TAG=v1.91.9b-docking -D NCINE_BUILD_TESTS=OFF -D CMAKE_BUILD_RPATH='@loader_path/../../Frameworks'"
+        export CMAKE_ARGS="-B ../nCine-build-$NCINE_BUILD_TYPE -D CMAKE_BUILD_TYPE=$NCINE_BUILD_TYPE -D IMGUI_VERSION_TAG=$IMGUI_VERSION_TAG -D NCINE_BUILD_TESTS=OFF -D CMAKE_BUILD_RPATH='@loader_path/../../Frameworks'"
 
         cmake $CMAKE_ARGS
         cd ..
@@ -118,7 +119,7 @@ jobs:
         if [[ "${{ matrix.os }}" == "macOS-15" ]]; then
           export OS=macos15
         else
-          export OS=macos13
+          export OS=macos15-intel
         fi
         export CC=appleclang
         export PROJECT_EXT=dmg
