@@ -8,7 +8,7 @@ env:
 
     - PROJECT_NAME artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}
   DEPLOY_BRANCH: PROJECT_NAME-BRANCH_NAME-OS-COMPILER
-  IMGUI_VERSION_TAG: v1.92.5-docking
+  IMGUI_VERSION_TAG: v1.92.7-docking
 
 on: [push, workflow_dispatch]
 
@@ -23,7 +23,7 @@ jobs:
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: 'Download nCine-libraries and project data'
       run: |
@@ -159,7 +159,7 @@ jobs:
 
     - name: 'Upload GitHub Actions Artifact'
       if: matrix.BuildType == 'BinDist'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ github.event.repository.name }}-job-artifacts-${{ matrix.BuildType }}
         path: ${{ github.event.repository.name }}-job-artifacts/*
@@ -179,7 +179,7 @@ jobs:
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: 'Unshallow Git Repository for Versioning'
       run: |
@@ -187,7 +187,7 @@ jobs:
         git fetch --unshallow; if (-not $?) { return }
 
     - name: 'Download GitHub Actions Artifact'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: ${{ github.event.repository.name }}-job-artifacts-${{ matrix.BuildType }}
         path: ${{ github.event.repository.name }}-job-artifacts
