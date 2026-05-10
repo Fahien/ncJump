@@ -1,6 +1,6 @@
 # Download Niels Lohmann's JSON single header at configure time
 file(DOWNLOAD
-	https://raw.githubusercontent.com/nlohmann/json/v3.9.1/single_include/nlohmann/json.hpp
+	https://raw.githubusercontent.com/nlohmann/json/v3.12.0/single_include/nlohmann/json.hpp
 	${CMAKE_BINARY_DIR}/nlohmannjson-src/include/nlohmann/json.hpp
 	STATUS result)
 

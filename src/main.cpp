@@ -26,16 +26,16 @@ void JumpHandler::onPreInit(nc::AppConfiguration& ncfg)
 #endif
 #endif
 
-    ncfg.consoleLogLevel = nc::ILogger::LogLevel::INFO;
+    ncfg.logging.consoleLevel = nc::ILogger::LogLevel::INFO;
 
-    ncfg.windowTitle = "ncJump";
-    ncfg.windowIconFilename = "jump48.png";
+    ncfg.window.title = "ncJump";
+    ncfg.window.iconFilename = "jump48.png";
 
 #ifndef __EMSCRIPTEN__
     // Try setting resolution from config
     auto config = jmp::Config::from_json(PATH("config.json"));
-    ncfg.resolution.x = i32(config.scale.window) * i32(config.size.window.width);
-    ncfg.resolution.y = i32(config.scale.window) * i32(config.size.window.height);
+    ncfg.window.resolution.x = i32(config.scale.window) * i32(config.size.window.width);
+    ncfg.window.resolution.y = i32(config.scale.window) * i32(config.size.window.height);
 #endif
 }
 
@@ -49,8 +49,8 @@ void JumpHandler::onInit()
     // Override config window if resolution failed to set
     auto ncfg = nc::theApplication().appConfiguration();
     config.scale.window = 1.0f;
-    config.size.window.width = u32(ncfg.resolution.x);
-    config.size.window.height = u32(ncfg.resolution.y);
+    config.size.window.width = u32(ncfg.window.resolution.x);
+    config.size.window.height = u32(ncfg.window.resolution.y);
 #endif
 
     nc::theApplication().rootNode().setVisitOrderState(nc::SceneNode::VisitOrderState::DISABLED);
