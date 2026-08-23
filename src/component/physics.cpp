@@ -17,6 +17,8 @@ b2BodyId tile_body(b2WorldId world, const bool dynamic)
 
     b2ShapeDef shape = b2DefaultShapeDef();
     shape.density = dynamic ? 16.0f : 0.0f;
+    // Needed for DestructionListener::PostSolve() to see this shape's contacts
+    shape.enableContactEvents = true;
 
     b2ShapeId shapeId = b2CreatePolygonShape(body, &shape, &box);
     b2Shape_SetFriction(shapeId, 0.9f);
@@ -37,6 +39,8 @@ b2BodyId character_body(b2WorldId world, const bool dynamic)
 
     b2ShapeDef hero_shape_def = b2DefaultShapeDef();
     hero_shape_def.density = 16.0f;
+    // Needed for DestructionListener::PostSolve() to see this shape's contacts
+    hero_shape_def.enableContactEvents = true;
 
     b2ShapeId shapeId = b2CreateCircleShape(body, &hero_shape_def, &hero_box);
     b2Shape_SetFriction(shapeId, 0.9f);

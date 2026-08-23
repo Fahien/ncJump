@@ -46,11 +46,10 @@ void JumpHandler::onInit()
 
     auto config = jmp::Config::from_json(PATH("config.json"));
 #ifdef __EMSCRIPTEN__
-    // Override config window if resolution failed to set
-    auto ncfg = nc::theApplication().appConfiguration();
+    // Override config window with the actual live canvas size
     config.scale.window = 1.0f;
-    config.size.window.width = u32(ncfg.window.resolution.x);
-    config.size.window.height = u32(ncfg.window.resolution.y);
+    config.size.window.width = u32(nc::theApplication().width());
+    config.size.window.height = u32(nc::theApplication().height());
 #endif
 
     nc::theApplication().rootNode().setVisitOrderState(nc::SceneNode::VisitOrderState::DISABLED);
